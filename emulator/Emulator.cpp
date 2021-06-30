@@ -4,8 +4,8 @@
 
 #include "Emulator.h"
 
-Emulator::Emulator(uint8_t *rom, long size) {
-    memcpy(&this->rom, rom, size);
+void Emulator::load(uint8_t *romData, long size) {
+    memcpy(&rom, romData, size);
 }
 
 void Emulator::run() {
@@ -40,6 +40,7 @@ void Emulator::run() {
             break;
         case 0b000111: // IN imm8,reg
             getReg(instruction) = readPort(ingestUint8());
+            setFlag(FLAG_Z, !getReg(instruction));
             break;
         case 0b001000: // OUT imm8,reg
             writePort(ingestUint8(), getReg(instruction));
@@ -47,8 +48,10 @@ void Emulator::run() {
         case 0b001001: // INC reg
             getReg(instruction)++;
             setFlag(FLAG_Z, !getReg(instruction));
+            setFlag(FLAG_C, !getReg(instruction));
             break;
         case 0b001010: // DEC reg
+            setFlag(FLAG_C, !getReg(instruction));
             getReg(instruction)--;
             setFlag(FLAG_Z, !getReg(instruction));
             break;
@@ -127,9 +130,86 @@ void Emulator::run() {
             else
                 pc += 1;
             break;
+        case 0b100010: // IN reg
+            getReg(instruction) = readPort(regA);
+            setFlag(FLAG_Z, !getReg(instruction));
+            break;
+        case 0b100011: // OUT reg
+            writePort(regA, getReg(instruction));
+            break;
         case 0b111111: // HALT
-            exit(0);
+            throw HaltException();
     }
+}
+
+void Emulator::reset() {
+    regA = 0;
+    regB = 0;
+    regHL.hl = 0;
+    pc = 0;
+    status = 0;
+    fillScreen(RGB888{0, 0, 0});
+    memset(ram, 0, 0x8000);
+    memset(lights, 0, 10);
+    memset(sevenSegmentDisplays, 0, 6);
+    graphicsX = 0;
+    graphicsY = 0;
+}
+
+uint8_t *Emulator::getDisplayBuffer() {
+    return displayBuffer;
+}
+
+std::string &Emulator::getPrintBuffer() {
+    return printBuffer;
+}
+
+void Emulator::setSwitch(int id, bool value) {
+    switches[id] = value;
+}
+
+void Emulator::setButton(int id, bool value) {
+    buttons[id] = value;
+}
+
+bool Emulator::getLight(int id) {
+    return lights[id];
+}
+
+uint8_t Emulator::getSevenSegmentDisplay(int id) {
+    return sevenSegmentDisplays[id];
+}
+
+uint8_t *Emulator::getMemory() {
+    return ram;
+}
+
+uint8_t *Emulator::getROM() {
+    return rom;
+}
+
+uint8_t Emulator::getRegA() const {
+    return regA;
+}
+
+uint8_t Emulator::getRegB() const {
+    return regB;
+}
+
+uint8_t Emulator::getRegH() const {
+    return regHL.values.h;
+}
+
+uint8_t Emulator::getRegL() const {
+    return regHL.values.l;
+}
+
+uint16_t Emulator::getPC() const {
+    return pc;
+}
+
+uint8_t Emulator::getStatus() const {
+    return status;
 }
 
 uint8_t Emulator::readUint8(uint16_t address) {
@@ -188,16 +268,58 @@ bool Emulator::checkCondition(uint8_t instruction) const {
 }
 
 uint8_t Emulator::readPort(uint8_t port) {
-    return 0;
+    switch (port) {
+        case 2 ... 7: // Seven Segment Displays
+            return sevenSegmentDisplays[port - 2];
+        case 8 ... 9: // I/O Panel Buttons
+            return buttons[port - 8];
+        case 10 ... 19: // LEDs
+            return lights[port - 10];
+        case 20 ... 29: // I/O Panel Switches
+            return switches[port - 20];
+        case 30: // Graphics X
+            return graphicsX;
+        case 31: // Graphics Y
+            return graphicsY;
+        default:
+            return 0;
+    }
 }
 
 void Emulator::writePort(uint8_t port, uint8_t value) {
     switch (port) {
-        case 0:
+        case 0: // Print Char
             std::cout << value << std::flush;
+            printBuffer.push_back(*(char*)&value);
+            if (printBuffer.length() > PRINT_BUFFER)
+                printBuffer.erase(0, 1);
             break;
-        case 1:
+        case 1: // Print String
             std::cout << (char*)&rom[value] << std::flush;
+            printBuffer.append((char*)&rom[value]);
+            if (printBuffer.length() > PRINT_BUFFER)
+                printBuffer.erase(0, printBuffer.length() - PRINT_BUFFER);
+            break;
+        case 2 ... 7: // Seven Segment Displays
+            sevenSegmentDisplays[port - 2] = value;
+            break;
+        case 10 ... 19: // LEDs
+            lights[port - 10] = value;
+            break;
+        case 30: // Graphics X
+            graphicsX = value;
+            break;
+        case 31: // Graphics Y
+            graphicsY = value;
+            break;
+        case 32: // Draw Pixel
+            drawPixel(graphicsX, graphicsY, rgb332To888(value));
+            break;
+        case 33: // Draw Sprite
+            drawSprite(value);
+            break;
+        case 34: // Clear Screen
+            fillScreen(rgb332To888(value));
             break;
         default:
             break;
@@ -251,4 +373,28 @@ uint8_t Emulator::setSubFlags(uint8_t value) {
     setFlag(FLAG_N, newValue & 0x80);
     setFlag(FLAG_V, (regA & 0x80) == (value & 0x80) and (regA & 0x80) != (newValue & 0x80));
     return newValue;
+}
+
+RGB888 Emulator::rgb332To888(uint8_t color) {
+    return RGB888{
+        static_cast<uint8_t>(((color & 0xE0) >> 5) / 0x7 * 0xFF),
+        static_cast<uint8_t>(((color & 0x1C) >> 2) / 0x7 * 0xFF),
+        static_cast<uint8_t>((color & 0x03) / 0x3 * 0xFF)
+    };
+}
+
+void Emulator::drawPixel(uint8_t x, uint8_t y, RGB888 color) {
+    memcpy(displayBuffer + (DISPLAY_WIDTH * (graphicsY + y) + graphicsX + x) * 3, &color, 3);
+}
+
+void Emulator::drawSprite(uint8_t id) {
+    for (int y = 0; y < 8; y++)
+        for (int x = 0; x < 8; x++)
+            drawPixel(x, y, rgb332To888(readUint8(64 * id + 8 * y + x)));
+}
+
+void Emulator::fillScreen(RGB888 color) {
+    for (int y = 0; y < DISPLAY_HEIGHT; y++)
+        for (int x = 0; x < DISPLAY_WIDTH; x++)
+            drawPixel(x, y, color);
 }

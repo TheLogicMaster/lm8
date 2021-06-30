@@ -4,9 +4,26 @@ import sys
 import os
 import re
 
+# Constants to be substituted during assembly
+constants = {
+    "print_char": 0,
+    "print_string": 1,
+    "button_0": 8,
+    "button_1": 9,
+    "graphics_x": 30,
+    "graphics_y": 31,
+    "draw_pixel": 32,
+    "draw_sprite": 33,
+    "clear_screen": 34
+}
+constants.update({"seven_segment_" + str(i): i + 2 for i in range(6)})
+constants.update({"led_" + str(i): i + 10 for i in range(10)})
+constants.update({"switch_" + str(i): i + 20 for i in range(10)})
+
 line_number = 0
 output = bytearray()
 address = 0
+data_section = False
 labels = {}
 label_addresses = {}
 label_jumps = {}
@@ -115,6 +132,13 @@ def constrain_byte(byte):
 # Parse an immediate byte and append it to the output, error on failure
 def output_immediate(param):
     global address
+    match = re.search(r"^'(.+)'$", param)
+    if match:
+        char = match[1].encode().decode("unicode-escape").encode()
+        if len(char) != 1:
+            error("Invalid char")
+        output_byte(char[0])
+        return
     match = re.search(r"^\$([0-9a-f]+)$", param)
     if match:
         if len(match[1]) > 2:
@@ -161,7 +185,7 @@ def output_implicit_instr(params, instr):
 # Output an instruction that takes either an immediate or a register
 def output_imm_or_reg_instr(params, instr_imm, instr_reg):
     ensure_params(params, 1)
-    if re.search(r"[abhl]", params[0]):
+    if re.search(r"^[abhl]$", params[0]):
         output_reg_instr(params, instr_reg)
     else:
         output_imm_instr(params, instr_imm)
@@ -190,6 +214,7 @@ def main():
 
     global line_number
     global address
+    global data_section
 
     for line in lines:
         line_number += 1
@@ -217,19 +242,35 @@ def main():
         if re.sub(r"\s+", "", params[0]) == "":
             params = []
 
-        # Make everything except strings lowercase and remove surrounding whitespace
+        # Make everything except strings lowercase, remove surrounding whitespace, and substitute constants
         for i in range(len(params)):
-            if "\"" not in params[i]:
+            if "\"" not in params[i] and "'" not in params[i]:
                 params[i] = params[i].lower()
+                for constant in constants:
+                    params[i] = params[i].replace("{" + constant + "}", "#" + str(constants[constant]))
             params[i] = re.sub(r"^\s+|\s+$", "", params[i])
+
+        if data_section and instr != "var" and instr != "org":
+            error("Only VAR and ORG are permitted in the data section")
 
         if instr == "org":
             ensure_params(params, 1)
             address = parse_address(params[0])
             if address is None:
                 error("Failed to parse origin address")
+            if data_section and address < 0x8000:
+                error("Only addresses at or above 0x8000 are allowed in the data section")
+
+        elif instr == "data":
+            data_section = True
+            address = 0x8000
+
+        elif instr == "var":
+            address += 1
 
         elif instr == "db":
+            if len(params) == 0:
+                error("Parameters are required")
             for param in params:
                 if param.startswith("#"):
                     output_byte(constrain_byte(int(param[1:])))
@@ -242,6 +283,15 @@ def main():
                         output_byte(byte)
                 else:
                     error("Invalid byte data")
+
+        elif instr == "incbin":
+            ensure_params(params, 1)
+            match = re.search(r"^\"(.+)\"$", params[0])
+            if not match:
+                error("Invalid binary file")
+            with open(match[1], "rb") as f:
+                while byte := f.read(1):
+                    output_byte(ord(byte))
 
         elif instr == "nop":
             output_implicit_instr(params, 0b00000000)
@@ -273,10 +323,16 @@ def main():
             output_location(params[0])
 
         elif instr == "in":
-            output_imm_reg_instr(params, 0b00011100)
+            if len(params) == 1:
+                output_reg_instr(params, 0b10001000)
+            else:
+                output_imm_reg_instr(params, 0b00011100)
 
         elif instr == "out":
-            output_imm_reg_instr(params, 0b00100000)
+            if len(params) == 1:
+                output_reg_instr(params, 0b10001100)
+            else:
+                output_imm_reg_instr(params, 0b00100000)
 
         elif instr == "inc":
             output_reg_instr(params, 0b00100100)
@@ -327,7 +383,7 @@ def main():
                 output_byte(0b01111100)
             else:
                 ensure_params(params, 2)
-                code = 0b10000100 if re.search(r"n[zcnv]", params[1]) else 0b10000000
+                code = 0b10000100 if re.search(r"^n[zcnv]$", params[1]) else 0b10000000
                 output_byte(code | parse_condition(params[1][-1:]))
             output_relative_jump(params[0])
 
