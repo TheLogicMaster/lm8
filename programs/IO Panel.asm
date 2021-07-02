@@ -33,8 +33,10 @@ set_leds:
     ; Print which buttons are just pressed
     ldr {button_1},a        ; A = {button_1}
     inc a                   ; A++
-    lda btn0                ; HL = btn0
+    lda btn1                ; HL = btn1
+    ina                     ; HL++
 check_buttons:
+    dea                     ; HL--
     dec a                   ; A--
     in b                    ; B = btn
     jr not_btn,z            ; If Zero GOTO not_btn
@@ -54,7 +56,6 @@ check_buttons:
 not_btn:
     in b                    ; B = btn
     str [hl],b              ; [hl] = B
-    ina                     ; HL++
     cmp {button_0}          ; Compare A with {button_0}
     jr check_buttons,nz     ; If not Zero GOTO check_buttons
 
@@ -63,18 +64,18 @@ not_btn:
 counter:
     str [temp],a            ; [temp] = A
     in a                    ; A = port[A]
-    inc a                   ; A = A + 1
+    inc a                   ; A++
     str [temp2],a           ; [temp2] = A
-    cmp $a                  ; Compare A with $A
+    cmp $A                  ; Compare A with $A
     ldr [temp],a            ; A = [temp]
     ldr [temp2],b           ; B = [temp2]
     jr counter_done,c       ; GOTO counter_done if Carry
     ldr #0,b                ; B = 0
     out b                   ; port[A] = B
-    dec a                   ; A = A - 1
+    dec a                   ; A--
     cmp {seven_segment_0}   ; Compare A with {seven_segment_0}
     jr counter,nc           ; GOTO counter if not Carry
-    inc a                   ; A = A + 1
+    inc a                   ; A++
 counter_done:
     out b                   ; port[A] = B
 

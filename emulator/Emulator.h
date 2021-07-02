@@ -31,10 +31,13 @@ public:
 
     uint8_t* getDisplayBuffer();
     std::string &getPrintBuffer();
-    void setSwitch(int id, bool value);
-    void setButton(int id, bool value);
+    bool& getSwitch(int id);
+    bool& getButton(int id);
     bool getLight(int id);
     uint8_t getSevenSegmentDisplay(int id);
+    bool& getGPIO(int id);
+    bool& getArduinoIO(int id);
+    uint8_t& getADC(int id);
 
     uint8_t* getMemory();
     uint8_t* getROM();
@@ -43,6 +46,7 @@ public:
     uint8_t getRegH() const;
     uint8_t getRegL() const;
     uint16_t getPC() const;
+    uint8_t getSP() const;
     uint8_t getStatus() const;
 
 private:
@@ -51,6 +55,9 @@ private:
     bool lights[10]{};
     bool buttons[2]{};
     uint8_t sevenSegmentDisplays[6]{};
+    bool gpio[36]{};
+    bool arduinoIO[16]{};
+    uint8_t analogDigitalConverters[6]{};
     uint8_t graphicsX = 0;
     uint8_t graphicsY = 0;
     std::string printBuffer{};
@@ -69,10 +76,12 @@ private:
     } regHL{};
     uint8_t status = 0;
     uint16_t pc = 0;
+    uint8_t sp = 0;
 
     uint8_t readUint8(uint16_t address);
     void writeUint8(uint16_t address, uint8_t value);
     uint16_t readUint16(uint16_t address);
+    void writeUint16(uint16_t address, uint16_t value);
 
     uint8_t ingestUint8();
     int8_t ingestInt8();

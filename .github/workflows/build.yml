@@ -1,0 +1,41 @@
+# Builds a Windows release on every commit push
+# Todo: Add Linux building and tagged releases
+name: Build
+
+on: [push]
+jobs:
+  job:
+    name: ${{ matrix.os }}-cmake-build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        include:
+          - os: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Set up MinGW
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
+      - uses: lukka/get-cmake@latest
+      - name: Run CMake
+        uses: lukka/run-cmake@v3
+        with:
+          buildDirectory: '${{ runner.workspace }}/emulator/build'
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: '${{ github.workspace }}/emulator/CMakeLists.txt'
+          cmakeAppendedArgs: '-G "CodeBlocks - MinGW Makefiles"'
+          useVcpkgToolchainFile: false
+          buildWithCMake: true
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Emulator
+          path: |
+            ${{ runner.workspace }}/emulator/build/*.exe
+            ${{ runner.workspace }}/emulator/build/*.dll

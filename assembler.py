@@ -6,19 +6,26 @@ import re
 
 # Constants to be substituted during assembly
 constants = {
-    "print_char": 0,
-    "print_string": 1,
-    "button_0": 8,
-    "button_1": 9,
-    "graphics_x": 30,
-    "graphics_y": 31,
-    "draw_pixel": 32,
-    "draw_sprite": 33,
-    "clear_screen": 34
+    "print_char":        0,
+    "print_string":      1,
+    "button_0":          8,
+    "button_1":          9,
+    "graphics_x":        30,
+    "graphics_y":        31,
+    "draw_pixel":        32,
+    "draw_sprite":       33,
+    "clear_screen":      34,
+    "controller_up":     35,  # GPIO 0
+    "controller_down":   36,  # GPIO 1
+    "controller_left":   37,  # GPIO 2
+    "controller_right":  38,  # GPIO 3
 }
 constants.update({"seven_segment_" + str(i): i + 2 for i in range(6)})
 constants.update({"led_" + str(i): i + 10 for i in range(10)})
 constants.update({"switch_" + str(i): i + 20 for i in range(10)})
+constants.update({"gpio_" + str(i): i + 35 for i in range(36)})
+constants.update({"arduino_" + str(i): i + 71 for i in range(16)})
+constants.update({"adc_" + str(i): i + 87 for i in range(6)})
 
 line_number = 0
 output = bytearray()
@@ -138,6 +145,12 @@ def output_immediate(param):
         if len(char) != 1:
             error("Invalid char")
         output_byte(char[0])
+        return
+    match = re.search(r"^%([01]+)$", param)
+    if match:
+        if len(match[1]) > 8:
+            error("Invalid byte")
+        output_byte(int(match[1], 2))
         return
     match = re.search(r"^\$([0-9a-f]+)$", param)
     if match:
@@ -262,11 +275,20 @@ def main():
                 error("Only addresses at or above 0x8000 are allowed in the data section")
 
         elif instr == "data":
+            ensure_params(params, 0)
             data_section = True
             address = 0x8000
 
         elif instr == "var":
-            address += 1
+            if len(params) == 0:
+                address += 1
+            elif len(params) == 1:
+                match = re.search(r"^\[([0-9]+)]$", params[0])
+                if not match:
+                    error("Invalid var array")
+                address += int(match[1])
+            else:
+                error("Invalid parameters")
 
         elif instr == "db":
             if len(params) == 0:
@@ -289,7 +311,7 @@ def main():
             match = re.search(r"^\"(.+)\"$", params[0])
             if not match:
                 error("Invalid binary file")
-            with open(match[1], "rb") as f:
+            with open(os.path.join(os.path.dirname(sys.argv[1]), match[1]), "rb") as f:
                 while byte := f.read(1):
                     output_byte(ord(byte))
 
@@ -386,6 +408,20 @@ def main():
                 code = 0b10000100 if re.search(r"^n[zcnv]$", params[1]) else 0b10000000
                 output_byte(code | parse_condition(params[1][-1:]))
             output_relative_jump(params[0])
+
+        elif instr == "push":
+            output_reg_instr(params, 0b10010000)
+
+        elif instr == "pop":
+            output_reg_instr(params, 0b10010100)
+
+        elif instr == "jsr":
+            ensure_params(params, 1)
+            output_byte(0b10011000)
+            output_location(params[0])
+
+        elif instr == "ret":
+            output_byte(0b10011100)
 
         elif instr == "halt":
             output_implicit_instr(params, 0b11111100)

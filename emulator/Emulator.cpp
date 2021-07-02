@@ -137,6 +137,21 @@ void Emulator::run() {
         case 0b100011: // OUT reg
             writePort(regA, getReg(instruction));
             break;
+        case 0b100100: // PUSH reg
+            writeUint8(0xFF00 + --sp, getReg(instruction));
+            break;
+        case 0b100101: // POP reg
+            getReg(instruction) = readUint8(0xFF00 + sp++);
+            break;
+        case 0b100110: // JSR imm16
+            sp -= 2;
+            writeUint16(0xFF00 + sp, pc + 2); // Add two to account for yet to be ingested address
+            pc = ingestUint16();
+            break;
+        case 0b100111: // RET
+            pc = readUint16(0xFF00 + sp);
+            sp += 2;
+            break;
         case 0b111111: // HALT
             throw HaltException();
     }
@@ -147,6 +162,7 @@ void Emulator::reset() {
     regB = 0;
     regHL.hl = 0;
     pc = 0;
+    sp = 0;
     status = 0;
     fillScreen(RGB888{0, 0, 0});
     memset(ram, 0, 0x8000);
@@ -164,12 +180,12 @@ std::string &Emulator::getPrintBuffer() {
     return printBuffer;
 }
 
-void Emulator::setSwitch(int id, bool value) {
-    switches[id] = value;
+bool &Emulator::getSwitch(int id) {
+    return switches[id];
 }
 
-void Emulator::setButton(int id, bool value) {
-    buttons[id] = value;
+bool &Emulator::getButton(int id) {
+    return buttons[id];
 }
 
 bool Emulator::getLight(int id) {
@@ -178,6 +194,18 @@ bool Emulator::getLight(int id) {
 
 uint8_t Emulator::getSevenSegmentDisplay(int id) {
     return sevenSegmentDisplays[id];
+}
+
+bool &Emulator::getGPIO(int id) {
+    return gpio[id];
+}
+
+bool &Emulator::getArduinoIO(int id) {
+    return arduinoIO[id];
+}
+
+uint8_t &Emulator::getADC(int id) {
+    return analogDigitalConverters[id];
 }
 
 uint8_t *Emulator::getMemory() {
@@ -208,6 +236,10 @@ uint16_t Emulator::getPC() const {
     return pc;
 }
 
+uint8_t Emulator::getSP() const {
+    return sp;
+}
+
 uint8_t Emulator::getStatus() const {
     return status;
 }
@@ -226,6 +258,11 @@ void Emulator::writeUint8(uint16_t address, uint8_t value) {
 
 uint16_t Emulator::readUint16(uint16_t address) {
     return readUint8(address) << 8 | readUint8(address + 1);
+}
+
+void Emulator::writeUint16(uint16_t address, uint16_t value) {
+    writeUint8(address, (value & 0xFF00) >> 8);
+    writeUint8(address + 1, value & 0xFF);
 }
 
 uint8_t Emulator::ingestUint8() {
@@ -281,6 +318,12 @@ uint8_t Emulator::readPort(uint8_t port) {
             return graphicsX;
         case 31: // Graphics Y
             return graphicsY;
+        case 35 ... 70:
+            return gpio[port - 35];
+        case 71 ... 86:
+            return arduinoIO[port - 72];
+        case 87 ... 92:
+            return analogDigitalConverters[port - 87];
         default:
             return 0;
     }
@@ -320,6 +363,12 @@ void Emulator::writePort(uint8_t port, uint8_t value) {
             break;
         case 34: // Clear Screen
             fillScreen(rgb332To888(value));
+            break;
+        case 35 ... 70: // GPIO
+            gpio[port - 35] = value;
+            break;
+        case 71 ... 86: // Arduino Header I/O
+            arduinoIO[port - 71] = value;
             break;
         default:
             break;
@@ -377,9 +426,9 @@ uint8_t Emulator::setSubFlags(uint8_t value) {
 
 RGB888 Emulator::rgb332To888(uint8_t color) {
     return RGB888{
-        static_cast<uint8_t>(((color & 0xE0) >> 5) / 0x7 * 0xFF),
-        static_cast<uint8_t>(((color & 0x1C) >> 2) / 0x7 * 0xFF),
-        static_cast<uint8_t>((color & 0x03) / 0x3 * 0xFF)
+        static_cast<uint8_t>(((color & 0xE0) >> 5) * 0xFF / 0x7),
+        static_cast<uint8_t>(((color & 0x1C) >> 2) * 0xFF / 0x7),
+        static_cast<uint8_t>((color & 0x03) * 0xFF / 0x3)
     };
 }
 

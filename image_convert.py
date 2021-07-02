@@ -1,5 +1,7 @@
 #!/bin/python
 
+# Converts an 8x8 pixel image into a compatible binary file
+
 import sys
 import os
 from PIL import Image
