@@ -6,19 +6,16 @@
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_sdl.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
-//#include <GLES2/gl2.h>
 #include <GL/glew.h>
-#include <SDL_opengl.h>
 #include <imgui_internal.h>
 
 #include "imgui_memory_editor.h"
 #include "imgui_toggle_button.h"
-
+#include "Disassembler.h"
 #include "Emulator.h"
 #include "ImGuiFileDialog.h"
 
 // Macros from: https://github.com/drhelius/Gearboy/blob/master/platforms/desktop-shared/gui_debug.h
-#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
 #define BYTE_TO_BINARY_PATTERN_SPACED "%c%c%c%c %c%c%c%c"
 #define BYTE_TO_BINARY(byte)  \
   (byte & 0x80 ? '1' : '0'), \
@@ -30,16 +27,20 @@
   (byte & 0x02 ? '1' : '0'), \
   (byte & 0x01 ? '1' : '0')
 
-SDL_Window* window;
-MemoryEditor *ramEditor;
-MemoryEditor *romViewer;
-bool showDisplay = true;
-int displayScale = 3;
-bool showProcessor = false;
-bool showPrintLog = true;
-bool showIO = true;
-bool showGPIO = true;
-bool controllerPeripheral = false;
+static SDL_Window* window;
+static uint8_t *rom;
+static Disassembler* disassembler;
+static MemoryEditor *ramEditor;
+static MemoryEditor *romViewer;
+static bool showDisplay = true;
+static int displayScale = 3;
+static bool showProcessor = false;
+static bool showPrintLog = true;
+static bool showIO = true;
+static bool showGPIO = true;
+static bool showDisassembly = false;
+static bool showBreakpoints = false;
+static bool controllerPeripheral = false;
 
 bool loadRom(Emulator &emulator, const std::string &path) {
     std::ifstream input(path, std::ios::binary);
@@ -49,24 +50,25 @@ bool loadRom(Emulator &emulator, const std::string &path) {
     }
     input.seekg(0, std::ios::end);
     std::streamsize len = input.tellg();
-    auto *rom = new uint8_t[len];
+    rom = new uint8_t[len];
     input.seekg(0, std::ios::beg);
     input.read(reinterpret_cast<char *>(rom), len);
     input.close();
     emulator.load(rom, len);
-    delete[] rom;
+    delete disassembler;
+    disassembler = new Disassembler(rom, len);
     return true;
 }
 
 int main(int argc, char* argv[]) {
-    // Emulation state
     Emulator emulator;
     bool halted = false;
     bool paused = false;
+    bool disassemblerJumpToPC = true;
     bool stepBreakpoint = false;
-    bool enableBreakpoints;
-    int breakpoints[10];
-    memset(&breakpoints, -1, 10);
+    bool enableBreakpoints = false;
+    std::set<uint16_t> breakpoints;
+    char breakpointText[5];
 
     // Parse program arguments
     if (argc == 1)
@@ -91,7 +93,7 @@ int main(int argc, char* argv[]) {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     auto window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    window = SDL_CreateWindow("Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1278, 729, window_flags);
+    window = SDL_CreateWindow("Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1378, 729, window_flags);
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
@@ -130,6 +132,7 @@ int main(int argc, char* argv[]) {
     auto font7Segment = io.Fonts->AddFontDefault(&config);
 
     // Custom persistent data
+    // Todo: Load and store 'show' variables and peripherals dynamically
     ImGuiContext& g = *context;
     ImGuiSettingsHandler ini_handler;
     ini_handler.TypeName = "Emulator";
@@ -157,6 +160,10 @@ int main(int argc, char* argv[]) {
             showIO = value;
         else if (sscanf(line, "ShowGPIO=%d%n", &value, &n) == 1)
             showGPIO = value;
+        else if (sscanf(line, "ShowDisassembly=%d%n", &value, &n) == 1)
+            showDisassembly = value;
+        else if (sscanf(line, "ShowBreakpoints=%d%n", &value, &n) == 1)
+            showBreakpoints = value;
         else if (sscanf(line, "WindowSize=%d,%d%n", &value, &value2, &n) == 2)
             SDL_SetWindowSize(window, value, value2);
         else if (sscanf(line, "Peripherals=%d%n", &value, &n) == 1)
@@ -173,6 +180,8 @@ int main(int argc, char* argv[]) {
         buf->appendf("ShowPrintLog=%d\n", showPrintLog);
         buf->appendf("ShowIO=%d\n", showIO);
         buf->appendf("ShowGPIO=%d\n", showGPIO);
+        buf->appendf("ShowDisassembly=%d\n", showDisassembly);
+        buf->appendf("ShowBreakpoints=%d\n", showBreakpoints);
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
         buf->appendf("WindowSize=%d,%d\n", w, h);
@@ -180,9 +189,11 @@ int main(int argc, char* argv[]) {
     };
     g.SettingsHandlers.push_back(ini_handler);
 
+    // Colors
     const auto windowColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     const auto flagColor = ImVec4(0.0f,1.0f,1.0f,1.0f);
     const auto registerColor = ImVec4(1.0f,1.0f,0.0f,1.0f);
+    const auto breakpointColor = ImVec4(1.0f,0.1f,0.1f,1.0f);
 
     auto exited = false;
     while (!exited) {
@@ -200,10 +211,23 @@ int main(int argc, char* argv[]) {
         ImGui::NewFrame();
 
         // Check for shortcuts
-        if (ImGui::IsKeyDown(SDL_SCANCODE_LCTRL));
+        if (ImGui::IsKeyDown(SDL_SCANCODE_LCTRL)) {
+            if (ImGui::IsKeyPressed(SDL_SCANCODE_P, false))
+                paused ^= 1;
+            if (ImGui::IsKeyPressed(SDL_SCANCODE_O, false))
+                ImGuiFileDialog::Instance()->OpenDialog("ChooseROM", "Choose ROM", ".bin", ".");
+            if (ImGui::IsKeyPressed(SDL_SCANCODE_B, false))
+                enableBreakpoints ^= 1;
+            if (ImGui::IsKeyPressed(SDL_SCANCODE_Z, true) and !halted and paused)
+                stepBreakpoint = true;
+            if (ImGui::IsKeyPressed(SDL_SCANCODE_R, false)) {
+                halted = false;
+                emulator.reset();
+            }
+        }
 
         // Run emulator for about a frame
-        if ((!halted and !paused) or stepBreakpoint) {
+        if (!halted and (!paused or stepBreakpoint)) {
             try {
                 for (int i = 0; i < 100; i++) { // Todo: Fix to 1MHz or something rather than ~6KHz
                     if (controllerPeripheral) {
@@ -215,10 +239,13 @@ int main(int argc, char* argv[]) {
 
                     emulator.run();
 
+                    if (disassembler)
+                        disassembler->update(emulator.getPC(), emulator.getRegH() << 8 | emulator.getRegL());
+
                     bool broken = false;
                     if (enableBreakpoints)
-                        for (int j = 0; j < 10; j++)
-                            if (emulator.getPC() == breakpoints[i]) {
+                        for (auto breakpoint: breakpoints)
+                            if (emulator.getPC() == breakpoint) {
                                 broken = true;
                                 break;
                             }
@@ -226,6 +253,7 @@ int main(int argc, char* argv[]) {
                         paused = true;
                         break;
                     }
+
                     if (stepBreakpoint)
                         break;
                 }
@@ -245,20 +273,22 @@ int main(int argc, char* argv[]) {
         // Main menu bar
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("Open ROM"))
+                if (ImGui::MenuItem("Open ROM", "ctrl+O"))
                     ImGuiFileDialog::Instance()->OpenDialog("ChooseROM", "Choose ROM", ".bin", ".");
                 if (ImGui::MenuItem("Exit"))
                     exited = true;
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Emulation")) {
-                if (ImGui::MenuItem("Reset")) {
+                if (ImGui::MenuItem("Reset", "ctrl+R")) {
                     halted = false;
                     emulator.reset();
                 }
-                if (ImGui::MenuItem("Pause", nullptr, paused))
+                if (ImGui::MenuItem("Pause", "ctrl+P", paused))
                     paused ^= 1;
-                if (ImGui::MenuItem("Step CPU"))
+                if (ImGui::MenuItem("Enable Breakpoints", "ctrl+B", enableBreakpoints))
+                    enableBreakpoints ^= 1;
+                if (ImGui::MenuItem("Step CPU", "ctrl+Z") and !halted and paused)
                     stepBreakpoint = true;
                 ImGui::EndMenu();
             }
@@ -283,17 +313,20 @@ int main(int argc, char* argv[]) {
                     ramEditor->Open ^= 1;
                 if (ImGui::MenuItem("Show Processor", nullptr, showProcessor))
                     showProcessor ^= 1;
+                if (ImGui::MenuItem("Show Disassembly", nullptr, showDisassembly))
+                    showDisassembly ^= 1;
+                if (ImGui::MenuItem("Show Breakpoints", nullptr, showBreakpoints))
+                    showBreakpoints ^= 1;
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
         }
 
         // ROM File Browser
-        if (ImGuiFileDialog::Instance()->Display("ChooseROM")) {
+        if (ImGuiFileDialog::Instance()->Display("ChooseROM", ImGuiWindowFlags_NoCollapse, ImVec2(400, 250))) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
                 halted = false;
-                paused = false;
-                memset(&breakpoints, -1, 10);
+                breakpoints.clear();
                 enableBreakpoints = false;
                 loadRom(emulator, ImGuiFileDialog::Instance()->GetCurrentPath() + "/" + ImGuiFileDialog::Instance()->GetCurrentFileName());
                 emulator.reset();
@@ -321,7 +354,6 @@ int main(int argc, char* argv[]) {
             }
 
             ImGui::Image((void *)(intptr_t)display_texture, ImVec2(DISPLAY_WIDTH * displayScale, DISPLAY_HEIGHT * displayScale));
-            //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
             // Options button
             if (ImGui::Button("Options"))
@@ -335,11 +367,67 @@ int main(int argc, char* argv[]) {
             ImGui::SetNextWindowSize(ImVec2(496, 170), ImGuiCond_FirstUseEver);
             ImGui::SetNextWindowPos(ImVec2(5, 472), ImGuiCond_FirstUseEver);
             ImGui::Begin("Print Log", &showPrintLog);
-            ImGui::BeginChild("PrintLog", ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight() - 60));
+            ImGui::BeginChild("PrintLog", ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 60), true);
             ImGui::TextUnformatted(emulator.getPrintBuffer().data());
             ImGui::EndChild();
             if (ImGui::Button("Clear"))
                 emulator.getPrintBuffer().clear();
+            ImGui::End();
+        }
+
+        // Disassembly
+        if (showDisassembly) {
+            ImGui::SetNextWindowSize(ImVec2(276, 393), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowPos(ImVec2(1063, 248), ImGuiCond_FirstUseEver);
+            ImGui::Begin("Disassembly", &showPrintLog);
+            ImGui::BeginChild("DisassemblyView", ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 60), true);
+            if (disassembler) {
+                int previousEnd = -1;
+                for (const auto &instruction: disassembler->getDisassembled()) {
+                    if (previousEnd != -1 and previousEnd < instruction.address)
+                        ImGui::TextUnformatted("----------------------------------");
+                    ImGui::PushStyleColor(ImGuiCol_Text, emulator.getPC() == instruction.address ? flagColor : windowColor);
+                    ImGui::TextUnformatted(instruction.text.c_str());
+                    ImGui::PopStyleColor();
+                    if (emulator.getPC() == instruction.address and disassemblerJumpToPC)
+                        ImGui::SetScrollHereY();
+                    previousEnd = instruction.address + instruction.size;
+                }
+            }
+            ImGui::EndChild();
+            ImGui::Checkbox("Follow PC", &disassemblerJumpToPC);
+            ImGui::End();
+        }
+
+        // Breakpoints
+        if (showBreakpoints) {
+            ImGui::SetNextWindowSize(ImVec2(145, 218), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowPos(ImVec2(1227, 25), ImGuiCond_FirstUseEver);
+            ImGui::Begin("Breakpoints", &showBreakpoints);
+            ImGui::BeginChild("BreakpointList", ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 60), true);
+            for (auto breakpoint: breakpoints) {
+                ImGui::PushID(breakpoint);
+                if (ImGui::Button("X")) {
+                    breakpoints.erase(breakpoint);
+                    ImGui::PopID();
+                    break;
+                }
+                ImGui::PopID();
+                ImGui::SameLine();
+                ImGui::TextColored(breakpointColor, "$%04x", breakpoint);
+            }
+            ImGui::EndChild();
+            ImGui::SetNextItemWidth(40);
+            ImGui::InputText("##", breakpointText, 5, ImGuiInputTextFlags_NoHorizontalScroll
+                                                           | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll);
+            ImGui::SameLine();
+            if (ImGui::Button("Add") and breakpointText[0] != 0) {
+                breakpoints.insert(strtol(breakpointText, nullptr, 16));
+                breakpointText[0] = 0; // Set first character to null to clear string
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Clear"))
+                breakpoints.clear();
             ImGui::End();
         }
 
@@ -362,7 +450,7 @@ int main(int argc, char* argv[]) {
                     sprintf(buf, "%d", emulator.getGPIO(i));
                     ImGui::SetNextItemWidth(12);
                     if (ImGui::InputText("##", buf, 2, ImGuiInputTextFlags_NoHorizontalScroll
-                        | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
+                            | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
                         emulator.getGPIO(i) = buf[0] != '0';
                     if (ImGui::IsItemHovered())
                         ImGui::SetTooltip("GPIO %d", i);
@@ -377,7 +465,7 @@ int main(int argc, char* argv[]) {
                     sprintf(buf, "%d", emulator.getArduinoIO(i));
                     ImGui::SetNextItemWidth(12);
                     if (ImGui::InputText("##", buf, 2, ImGuiInputTextFlags_NoHorizontalScroll
-                                                       | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
+                            | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
                         emulator.getArduinoIO(i) = buf[0] != '0';
                     if (ImGui::IsItemHovered())
                         ImGui::SetTooltip("Arduino I/O %d", i);
@@ -392,7 +480,7 @@ int main(int argc, char* argv[]) {
                     sprintf(buf, "%x", emulator.getADC(i));
                     ImGui::SetNextItemWidth(24);
                     if (ImGui::InputText("##", buf, 3, ImGuiInputTextFlags_NoHorizontalScroll
-                                                       | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
+                            | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
                         emulator.getADC(i) = strtol(buf, nullptr, 16);
                     if (ImGui::IsItemHovered())
                         ImGui::SetTooltip("ADC %d", i);
@@ -532,7 +620,7 @@ int main(int argc, char* argv[]) {
             // Halted or not
             ImGui::NextColumn();
             ImGui::Separator();
-            ImGui::TextColored(flagColor, "HALT");
+            ImGui::TextColored(breakpointColor, "HALT");
             ImGui::SameLine();
             ImGui::Text("= %d", halted);
 
@@ -570,6 +658,9 @@ int main(int argc, char* argv[]) {
     // Must be deleted after ImGui shutdown for INI saving
     delete ramEditor;
     delete romViewer;
+
+    delete disassembler;
+    delete[] rom;
 
     return 0;
 }

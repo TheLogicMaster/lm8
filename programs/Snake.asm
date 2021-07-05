@@ -20,6 +20,14 @@ delay:
     ldr #0,a
     out {clear_screen},a
 
+    ldr [y],a
+    inc a
+    str [y],a
+
+    ldr [x],a
+    out {graphics_x},a
+    ldr [y],a
+    out {graphics_y},a
     ldr #8,a
     out {draw_sprite},a
 
@@ -33,3 +41,5 @@ delay:
 data ; Enter data section
 score: var ; Number of apples collected
 snake: var[320] ; Array of snake body directions starting from head
+x: var ; X Coordinate of head
+y: var ; Y Coordinate of head

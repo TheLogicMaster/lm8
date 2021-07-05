@@ -152,7 +152,7 @@ void Emulator::run() {
             pc = readUint16(0xFF00 + sp);
             sp += 2;
             break;
-        case 0b111111: // HALT
+        case 0b101000: // HALT
             throw HaltException();
     }
 }
@@ -433,13 +433,15 @@ RGB888 Emulator::rgb332To888(uint8_t color) {
 }
 
 void Emulator::drawPixel(uint8_t x, uint8_t y, RGB888 color) {
-    memcpy(displayBuffer + (DISPLAY_WIDTH * (graphicsY + y) + graphicsX + x) * 3, &color, 3);
+    if (x >= DISPLAY_WIDTH or y >= DISPLAY_HEIGHT)
+        return;
+    memcpy(displayBuffer + (DISPLAY_WIDTH * y + x) * 3, &color, 3);
 }
 
 void Emulator::drawSprite(uint8_t id) {
     for (int y = 0; y < 8; y++)
         for (int x = 0; x < 8; x++)
-            drawPixel(x, y, rgb332To888(readUint8(64 * id + 8 * y + x)));
+            drawPixel(graphicsX + x, graphicsY + y, rgb332To888(readUint8(64 * id + 8 * y + x)));
 }
 
 void Emulator::fillScreen(RGB888 color) {
