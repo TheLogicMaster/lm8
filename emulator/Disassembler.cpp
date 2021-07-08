@@ -30,7 +30,6 @@ void Disassembler::disassemble(uint16_t address, uint8_t depth) {
         if (instruction.size == 0 or end >= romSize)
             return;
 
-        // Todo: Cache iterator for later loop iterations if still valid after insert?
         auto it = instructions.end();
         if (!instructions.empty()) {
             do {

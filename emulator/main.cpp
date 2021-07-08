@@ -27,11 +27,11 @@
   (byte & 0x02 ? '1' : '0'), \
   (byte & 0x01 ? '1' : '0')
 
-static SDL_Window* window;
-static uint8_t *rom;
-static Disassembler* disassembler;
-static MemoryEditor *ramEditor;
-static MemoryEditor *romViewer;
+static SDL_Window *window;
+static ImGuiIO *imguiIO;
+static GLuint displayTexture;
+static bool exited = false;
+
 static bool showDisplay = true;
 static int displayScale = 3;
 static bool showProcessor = false;
@@ -42,96 +42,26 @@ static bool showDisassembly = false;
 static bool showBreakpoints = false;
 static bool controllerPeripheral = false;
 
-bool loadRom(Emulator &emulator, const std::string &path) {
-    std::ifstream input(path, std::ios::binary);
-    if (!input.good()) {
-        std::cout << "Failed to open ROM: '" << path << "'" << std::endl;
-        return false;
-    }
-    input.seekg(0, std::ios::end);
-    std::streamsize len = input.tellg();
-    rom = new uint8_t[len];
-    input.seekg(0, std::ios::beg);
-    input.read(reinterpret_cast<char *>(rom), len);
-    input.close();
-    emulator.load(rom, len);
-    delete disassembler;
-    disassembler = new Disassembler(rom, len);
-    return true;
-}
+static Emulator *emulator;
+static Disassembler* disassembler;
+static MemoryEditor *ramEditor;
+static MemoryEditor *romViewer;
+static uint8_t *rom;
+static bool halted = false;
+static bool paused = false;
+static bool disassemblerJumpToPC = true;
+static bool stepBreakpoint = false;
+static bool enableBreakpoints = false;
+static std::set<uint16_t> breakpoints{};
+static char breakpointText[5]{};
 
-int main(int argc, char* argv[]) {
-    Emulator emulator;
-    bool halted = false;
-    bool paused = false;
-    bool disassemblerJumpToPC = true;
-    bool stepBreakpoint = false;
-    bool enableBreakpoints = false;
-    std::set<uint16_t> breakpoints;
-    char breakpointText[5];
+static ImFont *font7Segment;
+static const ImVec4 *windowColor;
+static const ImVec4 *flagColor;
+static const ImVec4 *registerColor;
+static const ImVec4 *breakpointColor;
 
-    // Parse program arguments
-    if (argc == 1)
-        paused = true;
-    else if (argc > 2) {
-        std::cout << "Usage: './emulator' or './emulator <program>.bin'" << std::endl;
-        return -1;
-    } else if (!loadRom(emulator, argv[1]))
-        return -1;
-
-    // Initialize SDL and OpenGL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER)) {
-        std::cout << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
-        return -1;
-    }
-    const char* glsl_version = "#version 130";
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    auto window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    window = SDL_CreateWindow("Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1378, 729, window_flags);
-    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-    SDL_GL_MakeCurrent(window, gl_context);
-    SDL_GL_SetSwapInterval(1); // Enable vsync
-    auto glewState = glewInit();
-    if (glewState != GLEW_OK) {
-        std::cout << "Failed to initialize OpenGL loader: " << glewState << std::endl;
-        return -1;
-    }
-
-    // Setup ImGui
-    IMGUI_CHECKVERSION();
-    auto context = ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.WantCaptureKeyboard = true;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-    ImGui::StyleColorsDark(); // Setup Dear ImGui style
-    ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
-    ImGui_ImplOpenGL3_Init(glsl_version);
-    io.Fonts->AddFontDefault(); // Load default font before others
-
-    // Create display texture
-    GLuint display_texture;
-    glGenTextures(1, &display_texture);
-
-    // Create ImGui windows
-    ramEditor = new MemoryEditor();
-    ramEditor->Open = false;
-    romViewer = new MemoryEditor();
-    romViewer->Open = false;
-    romViewer->ReadOnly = true;
-
-    // 7-segment display font
-    ImFontConfig config;
-    config.SizePixels = 40;
-    auto font7Segment = io.Fonts->AddFontDefault(&config);
-
-    // Custom persistent data
+void setupPersistenceHandler(ImGuiContext *context) {
     // Todo: Load and store 'show' variables and peripherals dynamically
     ImGuiContext& g = *context;
     ImGuiSettingsHandler ini_handler;
@@ -188,465 +118,590 @@ int main(int argc, char* argv[]) {
         buf->appendf("Peripherals=%d\n", controllerPeripheral);
     };
     g.SettingsHandlers.push_back(ini_handler);
+}
 
-    // Colors
-    const auto windowColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    const auto flagColor = ImVec4(0.0f,1.0f,1.0f,1.0f);
-    const auto registerColor = ImVec4(1.0f,1.0f,0.0f,1.0f);
-    const auto breakpointColor = ImVec4(1.0f,0.1f,0.1f,1.0f);
+bool loadRom(const std::string &path) {
+    std::ifstream input(path, std::ios::binary);
+    if (!input.good()) {
+        std::cout << "Failed to open ROM: '" << path << "'" << std::endl;
+        return false;
+    }
+    input.seekg(0, std::ios::end);
+    std::streamsize len = input.tellg();
+    rom = new uint8_t[len];
+    input.seekg(0, std::ios::beg);
+    input.read(reinterpret_cast<char *>(rom), len);
+    input.close();
+    emulator->load(rom, len);
+    delete disassembler;
+    disassembler = new Disassembler(rom, len);
+    return true;
+}
 
-    auto exited = false;
-    while (!exited) {
-        // Poll events
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            ImGui_ImplSDL2_ProcessEvent(&event);
-            if (event.type == SDL_QUIT or (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window)))
-                exited = true;
-        }
-
-        // Start frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame(window);
-        ImGui::NewFrame();
-
-        // Check for shortcuts
-        if (ImGui::IsKeyDown(SDL_SCANCODE_LCTRL)) {
-            if (ImGui::IsKeyPressed(SDL_SCANCODE_P, false))
-                paused ^= 1;
-            if (ImGui::IsKeyPressed(SDL_SCANCODE_O, false))
+void displayMainMenuBar() {
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Open ROM", "ctrl+O"))
                 ImGuiFileDialog::Instance()->OpenDialog("ChooseROM", "Choose ROM", ".bin", ".");
-            if (ImGui::IsKeyPressed(SDL_SCANCODE_B, false))
+            if (ImGui::MenuItem("Exit"))
+                exited = true;
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Emulation")) {
+            if (ImGui::MenuItem("Reset", "ctrl+R")) {
+                halted = false;
+                emulator->reset();
+            }
+            if (ImGui::MenuItem("Pause", "ctrl+P", paused))
+                paused ^= 1;
+            if (ImGui::MenuItem("Enable Breakpoints", "ctrl+B", enableBreakpoints))
                 enableBreakpoints ^= 1;
-            if (ImGui::IsKeyPressed(SDL_SCANCODE_Z, true) and !halted and paused)
+            if (ImGui::MenuItem("Step CPU", "ctrl+Z") and !halted and paused)
                 stepBreakpoint = true;
-            if (ImGui::IsKeyPressed(SDL_SCANCODE_R, false)) {
-                halted = false;
-                emulator.reset();
-            }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Peripherals")) {
+            if (ImGui::MenuItem("Controller", nullptr, controllerPeripheral))
+                controllerPeripheral ^= 1;
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("View")) {
+            if (ImGui::MenuItem("Show Display", nullptr, showDisplay))
+                showDisplay ^= 1;
+            if (ImGui::MenuItem("Show Print Log", nullptr, showPrintLog))
+                showPrintLog ^= 1;
+            if (ImGui::MenuItem("Show I/O Panel", nullptr, showIO))
+                showIO ^= 1;
+            if (ImGui::MenuItem("Show GPIO", nullptr, showGPIO))
+                showGPIO ^= 1;
+            ImGui::Separator();
+            if (ImGui::MenuItem("Show ROM Viewer", nullptr, romViewer->Open))
+                romViewer->Open ^= 1;
+            if (ImGui::MenuItem("Show RAM Editor", nullptr, ramEditor->Open))
+                ramEditor->Open ^= 1;
+            if (ImGui::MenuItem("Show Processor", nullptr, showProcessor))
+                showProcessor ^= 1;
+            if (ImGui::MenuItem("Show Disassembly", nullptr, showDisassembly))
+                showDisassembly ^= 1;
+            if (ImGui::MenuItem("Show Breakpoints", nullptr, showBreakpoints))
+                showBreakpoints ^= 1;
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+}
+
+void displayRomBrowser() {
+    if (ImGuiFileDialog::Instance()->Display("ChooseROM", ImGuiWindowFlags_NoCollapse, ImVec2(400, 250))) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            halted = false;
+            breakpoints.clear();
+            enableBreakpoints = false;
+            loadRom(ImGuiFileDialog::Instance()->GetCurrentPath() + "/" + ImGuiFileDialog::Instance()->GetCurrentFileName());
+            emulator->reset();
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+}
+
+void displayScreen() {
+    if (!showDisplay)
+        return;
+
+    ImGui::SetNextWindowPos(ImVec2(5, 25), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Display", &showDisplay, ImGuiWindowFlags_AlwaysAutoResize);
+
+    // Right click context menu
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows) && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+        ImGui::OpenPopup("context");
+
+    // Options menu
+    if (ImGui::BeginPopup("context")) {
+        ImGui::SetNextItemWidth(100);
+        if (ImGui::DragInt("##scale", &displayScale, 0.2f, 1, 6, "Scale: %dx")) {
+            if (displayScale < 1)
+                displayScale = 1;
+        }
+        ImGui::EndPopup();
+    }
+
+    ImGui::Image((void *)(intptr_t)displayTexture, ImVec2(DISPLAY_WIDTH * displayScale, DISPLAY_HEIGHT * displayScale));
+
+    // Options button
+    if (ImGui::Button("Options"))
+        ImGui::OpenPopup("context");
+
+    ImGui::End();
+}
+
+void displayMemoryViewers() {
+    if (romViewer->Open) {
+        ImGui::SetNextWindowSize(ImVec2(0, 218), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImVec2(506, 25), ImGuiCond_FirstUseEver);
+        romViewer->DrawWindow("ROM Viewer", emulator->getROM(), 0x8000);
+    }
+    if (ramEditor->Open) {
+        ImGui::SetNextWindowSize(ImVec2(0, 218), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImVec2(506, 248), ImGuiCond_FirstUseEver);
+        ramEditor->DrawWindow("RAM Editor", emulator->getMemory(), 0x8000);
+    }
+}
+
+void displayPrintLog() {
+    if (!showPrintLog)
+        return;
+
+    ImGui::SetNextWindowSize(ImVec2(496, 170), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(5, 472), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Print Log", &showPrintLog);
+    ImGui::BeginChild("PrintLog", ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 60), true);
+    ImGui::TextUnformatted(emulator->getPrintBuffer().data());
+    ImGui::EndChild();
+    if (ImGui::Button("Clear"))
+        emulator->getPrintBuffer().clear();
+    ImGui::End();
+}
+
+void displayPanelIO() {
+    if (!showIO)
+        return;
+
+    ImGui::SetNextWindowSize(ImVec2(552, 170));
+    ImGui::SetNextWindowPos(ImVec2(506, 472), ImGuiCond_FirstUseEver);
+    ImGui::Begin("I/O Panel", &showIO, ImGuiWindowFlags_NoResize);
+    ImGui::BeginColumns("I/O Columns", 10, ImGuiOldColumnFlags_NoResize);
+
+    // Switches
+    for (int i = 0; i < 10; i++) {
+        ImGui::BeginGroup();
+        ImGui::Dummy(ImVec2(1, 0));
+        ImGui::SameLine();
+        ToggleButton(("SW" + std::to_string(i)).c_str(), &emulator->getSwitch(i));
+        ImGui::EndGroup();
+        ImGui::NextColumn();
+    }
+    for (int i = 0; i < 10; i++) {
+        ImGui::Text("  SW%d", i);
+        ImGui::NextColumn();
+    }
+    ImGui::Separator();
+
+    // LEDs
+    for (int i = 0; i < 10; i++) {
+        ImVec2 p = ImGui::GetCursorScreenPos();
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        draw_list->AddCircleFilled(ImVec2(p.x + 20, p.y + 15), 8, emulator->getLight(i) ?
+                                                                  IM_COL32(255, 50, 50, 255) : IM_COL32(50, 50, 50, 255));
+        ImGui::Dummy(ImVec2(20, 22));
+        ImGui::NextColumn();
+    }
+    for (int i = 0; i < 10; i++) {
+        ImGui::Text(" LED%d", i);
+        ImGui::NextColumn();
+    }
+    ImGui::Separator();
+
+    // Buttons
+    for (int i = 0; i < 2; i++) {
+        ImGui::Button(("BTN" + std::to_string(i)).c_str(), ImVec2(42, 42));
+        emulator->getButton(i) = ImGui::IsItemActive();
+        ImGui::NextColumn();
+    }
+
+    // Seven segment displays
+    for (int i = 0; i < 6; i++) {
+        ImGui::PushFont(font7Segment);
+        ImGui::BeginGroup();
+        ImGui::Dummy(ImVec2(2, 0));
+        ImGui::SameLine();
+        ImGui::Text("%d", emulator->getSevenSegmentDisplay(i) & 0xF);
+        ImGui::EndGroup();
+        ImGui::PopFont();
+        ImGui::NextColumn();
+    }
+
+    ImGui::End();
+}
+
+void displayPanelGPIO() {
+    if (!showGPIO)
+        return;
+
+    ImGui::SetNextWindowSize(ImVec2(1268, 75), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(5, 648), ImGuiCond_FirstUseEver);
+    ImGui::Begin("GPIO Panel", &showGPIO, ImGuiWindowFlags_NoResize);
+    if (ImGui::BeginTable("GPIO Table", 3)) {
+        ImGui::TableSetupColumn("GPIO", ImGuiTableColumnFlags_WidthFixed, 725);
+        ImGui::TableSetupColumn("Arduino Header I/O", ImGuiTableColumnFlags_WidthFixed, 325);
+        ImGui::TableSetupColumn("ADCs", ImGuiTableColumnFlags_WidthFixed, 180);
+        ImGui::TableHeadersRow();
+        char buf[3];
+
+        // GPIO
+        ImGui::TableNextColumn();
+        for (int i = 0; i < 36; i++) {
+            ImGui::PushID(i);
+            sprintf(buf, "%d", emulator->getGPIO(i));
+            ImGui::SetNextItemWidth(12);
+            if (ImGui::InputText("##", buf, 2, ImGuiInputTextFlags_NoHorizontalScroll
+                                               | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
+                emulator->getGPIO(i) = buf[0] != '0';
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("GPIO %d", i);
+            ImGui::SameLine();
+            ImGui::PopID();
         }
 
-        // Run emulator for about a frame
-        if (!halted and (!paused or stepBreakpoint)) {
-            try {
-                for (int i = 0; i < 1000; i++) { // Todo: Fix to 1MHz or something rather than ~60KHz
-                    if (controllerPeripheral) {
-                        emulator.getGPIO(0) = ImGui::IsKeyDown(SDL_SCANCODE_W) or ImGui::IsKeyDown(SDL_SCANCODE_UP);
-                        emulator.getGPIO(1) = ImGui::IsKeyDown(SDL_SCANCODE_S) or ImGui::IsKeyDown(SDL_SCANCODE_DOWN);
-                        emulator.getGPIO(2) = ImGui::IsKeyDown(SDL_SCANCODE_A) or ImGui::IsKeyDown(SDL_SCANCODE_LEFT);
-                        emulator.getGPIO(3) = ImGui::IsKeyDown(SDL_SCANCODE_D) or ImGui::IsKeyDown(SDL_SCANCODE_RIGHT);
-                    }
+        // Arduino I/O
+        ImGui::TableNextColumn();
+        for (int i = 0; i < 16; i++) {
+            ImGui::PushID(i + 36);
+            sprintf(buf, "%d", emulator->getArduinoIO(i));
+            ImGui::SetNextItemWidth(12);
+            if (ImGui::InputText("##", buf, 2, ImGuiInputTextFlags_NoHorizontalScroll
+                                               | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
+                emulator->getArduinoIO(i) = buf[0] != '0';
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Arduino I/O %d", i);
+            ImGui::SameLine();
+            ImGui::PopID();
+        }
 
-                    emulator.run();
+        // ADCs
+        ImGui::TableNextColumn();
+        for (int i = 0; i < 6; i++) {
+            ImGui::PushID(i + 52);
+            sprintf(buf, "%x", emulator->getADC(i));
+            ImGui::SetNextItemWidth(24);
+            if (ImGui::InputText("##", buf, 3, ImGuiInputTextFlags_NoHorizontalScroll
+                                               | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
+                emulator->getADC(i) = strtol(buf, nullptr, 16);
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("ADC %d", i);
+            ImGui::SameLine();
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+    }
+    ImGui::End();
+}
 
-                    if (disassembler)
-                        disassembler->update(emulator.getPC(), emulator.getRegH() << 8 | emulator.getRegL());
+// Based on: https://github.com/drhelius/Gearboy
+void displayProcessor() {
+    if (!showProcessor)
+        return;
 
-                    bool broken = false;
-                    if (enableBreakpoints)
-                        for (auto breakpoint: breakpoints)
-                            if (emulator.getPC() == breakpoint) {
-                                broken = true;
-                                break;
-                            }
-                    if (broken) {
-                        paused = true;
-                        break;
-                    }
+    ImGui::SetNextWindowPos(ImVec2(1063, 25), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(159, 218), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Processor", &showProcessor, ImGuiWindowFlags_NoResize);
 
-                    if (stepBreakpoint)
-                        break;
+    // CPU Flags
+    ImGui::TextColored(*flagColor, "   Z");
+    ImGui::SameLine();
+    ImGui::Text("= %d", (bool)(emulator->getStatus() & FLAG_Z));
+    ImGui::SameLine();
+    ImGui::TextColored(*flagColor, "  C");
+    ImGui::SameLine();
+    ImGui::Text("= %d", (bool)(emulator->getStatus() & FLAG_C));
+    ImGui::TextColored(*flagColor, "   N");
+    ImGui::SameLine();
+    ImGui::Text("= %d", (bool)(emulator->getStatus() & FLAG_N));
+    ImGui::SameLine();
+    ImGui::TextColored(*flagColor, "  V");
+    ImGui::SameLine();
+    ImGui::Text("= %d", (bool)(emulator->getStatus() & FLAG_V));
+
+    // CPU Registers
+    ImGui::Columns(2, "registers");
+    ImGui::Separator();
+    ImGui::TextColored(*registerColor, " A");
+    ImGui::SameLine();
+    ImGui::Text("= $%02X", emulator->getRegA());
+    ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED, BYTE_TO_BINARY(emulator->getRegA()));
+    ImGui::NextColumn();
+    ImGui::TextColored(*registerColor, " B");
+    ImGui::SameLine();
+    ImGui::Text("= $%02X", emulator->getRegB());
+    ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED, BYTE_TO_BINARY(emulator->getRegB()));
+    ImGui::NextColumn();
+    ImGui::Separator();
+    ImGui::TextColored(*registerColor, " H");
+    ImGui::SameLine();
+    ImGui::Text("= $%02X", emulator->getRegH());
+    ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED, BYTE_TO_BINARY(emulator->getRegH()));
+    ImGui::NextColumn();
+    ImGui::TextColored(*registerColor, " L");
+    ImGui::SameLine();
+    ImGui::Text("= $%02X", emulator->getRegL());
+    ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED, BYTE_TO_BINARY(emulator->getRegL()));
+
+    // PC
+    ImGui::NextColumn();
+    ImGui::Columns(1);
+    ImGui::Separator();
+    ImGui::TextColored(*registerColor, "    PC");
+    ImGui::SameLine();
+    ImGui::Text("= $%04X", emulator->getPC());
+    ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED " " BYTE_TO_BINARY_PATTERN_SPACED,
+                BYTE_TO_BINARY((emulator->getPC() & 0xFF00) >> 8),
+                BYTE_TO_BINARY(emulator->getPC() & 0xFF));
+
+    // SP
+    ImGui::NextColumn();
+    ImGui::Columns(2);
+    ImGui::Separator();
+    ImGui::TextColored(*registerColor, "SP");
+    ImGui::SameLine();
+    ImGui::Text("= $%02X", emulator->getSP());
+    ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED, BYTE_TO_BINARY(emulator->getSP()));
+
+    // Halted or not
+    ImGui::NextColumn();
+    ImGui::Separator();
+    ImGui::TextColored(*breakpointColor, "HALT");
+    ImGui::SameLine();
+    ImGui::Text("= %d", halted);
+
+    ImGui::End();
+}
+
+void displayBreakpoints() {
+    if (!showBreakpoints)
+        return;
+
+    ImGui::SetNextWindowSize(ImVec2(145, 218), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(1227, 25), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Breakpoints", &showBreakpoints);
+    ImGui::BeginChild("BreakpointList", ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 60), true);
+    for (auto breakpoint: breakpoints) {
+        ImGui::PushID(breakpoint);
+        if (ImGui::Button("X")) {
+            breakpoints.erase(breakpoint);
+            ImGui::PopID();
+            break;
+        }
+        ImGui::PopID();
+        ImGui::SameLine();
+        ImGui::TextColored(*breakpointColor, "$%04x", breakpoint);
+    }
+    ImGui::EndChild();
+    ImGui::SetNextItemWidth(40);
+    ImGui::InputText("##", breakpointText, 5, ImGuiInputTextFlags_NoHorizontalScroll
+                                              | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll);
+    ImGui::SameLine();
+    if (ImGui::Button("Add") and breakpointText[0] != 0) {
+        breakpoints.insert(strtol(breakpointText, nullptr, 16));
+        breakpointText[0] = 0; // Set first character to null to clear string
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Clear"))
+        breakpoints.clear();
+    ImGui::End();
+}
+
+void displayDisassembly() {
+    if (!showDisassembly)
+        return;
+
+    ImGui::SetNextWindowSize(ImVec2(276, 393), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(1063, 248), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Disassembly", &showDisassembly);
+    ImGui::BeginChild("DisassemblyView", ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 60), true);
+    if (disassembler) {
+        int previousEnd = -1;
+        for (const auto &instruction: disassembler->getDisassembled()) {
+            if (previousEnd != -1 and previousEnd < instruction.address)
+                ImGui::TextUnformatted("----------------------------------");
+            ImGui::PushStyleColor(ImGuiCol_Text, emulator->getPC() == instruction.address ? *flagColor : *windowColor);
+            ImGui::TextUnformatted(instruction.text.c_str());
+            ImGui::PopStyleColor();
+            if (emulator->getPC() == instruction.address and disassemblerJumpToPC)
+                ImGui::SetScrollHereY();
+            previousEnd = instruction.address + instruction.size;
+        }
+    }
+    ImGui::EndChild();
+    ImGui::Checkbox("Follow PC", &disassemblerJumpToPC);
+    ImGui::End();
+}
+
+void handleShortcuts() {
+    if (ImGui::IsKeyDown(SDL_SCANCODE_LCTRL)) {
+        if (ImGui::IsKeyPressed(SDL_SCANCODE_P, false))
+            paused ^= 1;
+        if (ImGui::IsKeyPressed(SDL_SCANCODE_O, false))
+            ImGuiFileDialog::Instance()->OpenDialog("ChooseROM", "Choose ROM", ".bin", ".");
+        if (ImGui::IsKeyPressed(SDL_SCANCODE_B, false))
+            enableBreakpoints ^= 1;
+        if (ImGui::IsKeyPressed(SDL_SCANCODE_Z, true) and !halted and paused)
+            stepBreakpoint = true;
+        if (ImGui::IsKeyPressed(SDL_SCANCODE_R, false)) {
+            halted = false;
+            emulator->reset();
+        }
+    }
+}
+
+void runEmulator() {
+    if (!halted and (!paused or stepBreakpoint)) {
+        try {
+            for (int i = 0; i < 1000; i++) { // Todo: Fix to 1MHz or something rather than ~60KHz
+                if (controllerPeripheral) {
+                    emulator->getGPIO(0) = ImGui::IsKeyDown(SDL_SCANCODE_W) or ImGui::IsKeyDown(SDL_SCANCODE_UP);
+                    emulator->getGPIO(1) = ImGui::IsKeyDown(SDL_SCANCODE_S) or ImGui::IsKeyDown(SDL_SCANCODE_DOWN);
+                    emulator->getGPIO(2) = ImGui::IsKeyDown(SDL_SCANCODE_A) or ImGui::IsKeyDown(SDL_SCANCODE_LEFT);
+                    emulator->getGPIO(3) = ImGui::IsKeyDown(SDL_SCANCODE_D) or ImGui::IsKeyDown(SDL_SCANCODE_RIGHT);
                 }
-            } catch (HaltException &exception) {
-                halted = true;
-            }
-            stepBreakpoint = false;
-        }
 
-        // Update display texture from buffer
-        glBindTexture(GL_TEXTURE_2D, display_texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, DISPLAY_WIDTH, DISPLAY_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, emulator.getDisplayBuffer());
-        glBindTexture(GL_TEXTURE_2D, 0);
+                emulator->run();
 
-        // Main menu bar
-        if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("Open ROM", "ctrl+O"))
-                    ImGuiFileDialog::Instance()->OpenDialog("ChooseROM", "Choose ROM", ".bin", ".");
-                if (ImGui::MenuItem("Exit"))
-                    exited = true;
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Emulation")) {
-                if (ImGui::MenuItem("Reset", "ctrl+R")) {
-                    halted = false;
-                    emulator.reset();
-                }
-                if (ImGui::MenuItem("Pause", "ctrl+P", paused))
-                    paused ^= 1;
-                if (ImGui::MenuItem("Enable Breakpoints", "ctrl+B", enableBreakpoints))
-                    enableBreakpoints ^= 1;
-                if (ImGui::MenuItem("Step CPU", "ctrl+Z") and !halted and paused)
-                    stepBreakpoint = true;
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Peripherals")) {
-                if (ImGui::MenuItem("Controller", nullptr, controllerPeripheral))
-                    controllerPeripheral ^= 1;
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("View")) {
-                if (ImGui::MenuItem("Show Display", nullptr, showDisplay))
-                    showDisplay ^= 1;
-                if (ImGui::MenuItem("Show Print Log", nullptr, showPrintLog))
-                    showPrintLog ^= 1;
-                if (ImGui::MenuItem("Show I/O Panel", nullptr, showIO))
-                    showIO ^= 1;
-                if (ImGui::MenuItem("Show GPIO", nullptr, showGPIO))
-                    showGPIO ^= 1;
-                ImGui::Separator();
-                if (ImGui::MenuItem("Show ROM Viewer", nullptr, romViewer->Open))
-                    romViewer->Open ^= 1;
-                if (ImGui::MenuItem("Show RAM Editor", nullptr, ramEditor->Open))
-                    ramEditor->Open ^= 1;
-                if (ImGui::MenuItem("Show Processor", nullptr, showProcessor))
-                    showProcessor ^= 1;
-                if (ImGui::MenuItem("Show Disassembly", nullptr, showDisassembly))
-                    showDisassembly ^= 1;
-                if (ImGui::MenuItem("Show Breakpoints", nullptr, showBreakpoints))
-                    showBreakpoints ^= 1;
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
-        }
+                if (disassembler)
+                    disassembler->update(emulator->getPC(), emulator->getRegH() << 8 | emulator->getRegL());
 
-        // ROM File Browser
-        if (ImGuiFileDialog::Instance()->Display("ChooseROM", ImGuiWindowFlags_NoCollapse, ImVec2(400, 250))) {
-            if (ImGuiFileDialog::Instance()->IsOk()) {
-                halted = false;
-                breakpoints.clear();
-                enableBreakpoints = false;
-                loadRom(emulator, ImGuiFileDialog::Instance()->GetCurrentPath() + "/" + ImGuiFileDialog::Instance()->GetCurrentFileName());
-                emulator.reset();
-            }
-            ImGuiFileDialog::Instance()->Close();
-        }
-
-        // Display window
-        if (showDisplay) {
-            ImGui::SetNextWindowPos(ImVec2(5, 25), ImGuiCond_FirstUseEver);
-            ImGui::Begin("Display", &showDisplay, ImGuiWindowFlags_AlwaysAutoResize);
-
-            // Right click context menu
-            if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows) && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
-                ImGui::OpenPopup("context");
-
-            // Options menu
-            if (ImGui::BeginPopup("context")) {
-                ImGui::SetNextItemWidth(100);
-                if (ImGui::DragInt("##scale", &displayScale, 0.2f, 1, 6, "Scale: %dx")) {
-                    if (displayScale < 1)
-                        displayScale = 1;
-                }
-                ImGui::EndPopup();
-            }
-
-            ImGui::Image((void *)(intptr_t)display_texture, ImVec2(DISPLAY_WIDTH * displayScale, DISPLAY_HEIGHT * displayScale));
-
-            // Options button
-            if (ImGui::Button("Options"))
-                ImGui::OpenPopup("context");
-
-            ImGui::End();
-        }
-
-        // Print log
-        if (showPrintLog) {
-            ImGui::SetNextWindowSize(ImVec2(496, 170), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowPos(ImVec2(5, 472), ImGuiCond_FirstUseEver);
-            ImGui::Begin("Print Log", &showPrintLog);
-            ImGui::BeginChild("PrintLog", ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 60), true);
-            ImGui::TextUnformatted(emulator.getPrintBuffer().data());
-            ImGui::EndChild();
-            if (ImGui::Button("Clear"))
-                emulator.getPrintBuffer().clear();
-            ImGui::End();
-        }
-
-        // Disassembly
-        if (showDisassembly) {
-            ImGui::SetNextWindowSize(ImVec2(276, 393), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowPos(ImVec2(1063, 248), ImGuiCond_FirstUseEver);
-            ImGui::Begin("Disassembly", &showPrintLog);
-            ImGui::BeginChild("DisassemblyView", ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 60), true);
-            if (disassembler) {
-                int previousEnd = -1;
-                for (const auto &instruction: disassembler->getDisassembled()) {
-                    if (previousEnd != -1 and previousEnd < instruction.address)
-                        ImGui::TextUnformatted("----------------------------------");
-                    ImGui::PushStyleColor(ImGuiCol_Text, emulator.getPC() == instruction.address ? flagColor : windowColor);
-                    ImGui::TextUnformatted(instruction.text.c_str());
-                    ImGui::PopStyleColor();
-                    if (emulator.getPC() == instruction.address and disassemblerJumpToPC)
-                        ImGui::SetScrollHereY();
-                    previousEnd = instruction.address + instruction.size;
-                }
-            }
-            ImGui::EndChild();
-            ImGui::Checkbox("Follow PC", &disassemblerJumpToPC);
-            ImGui::End();
-        }
-
-        // Breakpoints
-        if (showBreakpoints) {
-            ImGui::SetNextWindowSize(ImVec2(145, 218), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowPos(ImVec2(1227, 25), ImGuiCond_FirstUseEver);
-            ImGui::Begin("Breakpoints", &showBreakpoints);
-            ImGui::BeginChild("BreakpointList", ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 60), true);
-            for (auto breakpoint: breakpoints) {
-                ImGui::PushID(breakpoint);
-                if (ImGui::Button("X")) {
-                    breakpoints.erase(breakpoint);
-                    ImGui::PopID();
+                bool broken = false;
+                if (enableBreakpoints)
+                    for (auto breakpoint: breakpoints)
+                        if (emulator->getPC() == breakpoint) {
+                            broken = true;
+                            break;
+                        }
+                if (broken) {
+                    paused = true;
                     break;
                 }
-                ImGui::PopID();
-                ImGui::SameLine();
-                ImGui::TextColored(breakpointColor, "$%04x", breakpoint);
+
+                if (stepBreakpoint)
+                    break;
             }
-            ImGui::EndChild();
-            ImGui::SetNextItemWidth(40);
-            ImGui::InputText("##", breakpointText, 5, ImGuiInputTextFlags_NoHorizontalScroll
-                                                           | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll);
-            ImGui::SameLine();
-            if (ImGui::Button("Add") and breakpointText[0] != 0) {
-                breakpoints.insert(strtol(breakpointText, nullptr, 16));
-                breakpointText[0] = 0; // Set first character to null to clear string
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Clear"))
-                breakpoints.clear();
-            ImGui::End();
+        } catch (HaltException &exception) {
+            halted = true;
         }
-
-        // GPIO Panel
-        if (showGPIO) {
-            ImGui::SetNextWindowSize(ImVec2(1268, 75), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowPos(ImVec2(5, 648), ImGuiCond_FirstUseEver);
-            ImGui::Begin("GPIO Panel", &showGPIO, ImGuiWindowFlags_NoResize);
-            if (ImGui::BeginTable("GPIO Table", 3)) {
-                ImGui::TableSetupColumn("GPIO", ImGuiTableColumnFlags_WidthFixed, 725);
-                ImGui::TableSetupColumn("Arduino Header I/O", ImGuiTableColumnFlags_WidthFixed, 325);
-                ImGui::TableSetupColumn("ADCs", ImGuiTableColumnFlags_WidthFixed, 180);
-                ImGui::TableHeadersRow();
-                char buf[3];
-
-                // GPIO
-                ImGui::TableNextColumn();
-                for (int i = 0; i < 36; i++) {
-                    ImGui::PushID(i);
-                    sprintf(buf, "%d", emulator.getGPIO(i));
-                    ImGui::SetNextItemWidth(12);
-                    if (ImGui::InputText("##", buf, 2, ImGuiInputTextFlags_NoHorizontalScroll
-                            | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
-                        emulator.getGPIO(i) = buf[0] != '0';
-                    if (ImGui::IsItemHovered())
-                        ImGui::SetTooltip("GPIO %d", i);
-                    ImGui::SameLine();
-                    ImGui::PopID();
-                }
-
-                // Arduino I/O
-                ImGui::TableNextColumn();
-                for (int i = 0; i < 16; i++) {
-                    ImGui::PushID(i + 36);
-                    sprintf(buf, "%d", emulator.getArduinoIO(i));
-                    ImGui::SetNextItemWidth(12);
-                    if (ImGui::InputText("##", buf, 2, ImGuiInputTextFlags_NoHorizontalScroll
-                            | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
-                        emulator.getArduinoIO(i) = buf[0] != '0';
-                    if (ImGui::IsItemHovered())
-                        ImGui::SetTooltip("Arduino I/O %d", i);
-                    ImGui::SameLine();
-                    ImGui::PopID();
-                }
-
-                // ADCs
-                ImGui::TableNextColumn();
-                for (int i = 0; i < 6; i++) {
-                    ImGui::PushID(i + 52);
-                    sprintf(buf, "%x", emulator.getADC(i));
-                    ImGui::SetNextItemWidth(24);
-                    if (ImGui::InputText("##", buf, 3, ImGuiInputTextFlags_NoHorizontalScroll
-                            | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
-                        emulator.getADC(i) = strtol(buf, nullptr, 16);
-                    if (ImGui::IsItemHovered())
-                        ImGui::SetTooltip("ADC %d", i);
-                    ImGui::SameLine();
-                    ImGui::PopID();
-                }
-                ImGui::EndTable();
-            }
-            ImGui::End();
-        }
-
-        // I/O Panel
-        if (showIO) {
-            ImGui::SetNextWindowSize(ImVec2(552, 170));
-            ImGui::SetNextWindowPos(ImVec2(506, 472), ImGuiCond_FirstUseEver);
-            ImGui::Begin("I/O Panel", &showIO, ImGuiWindowFlags_NoResize);
-            ImGui::BeginColumns("I/O Columns", 10, ImGuiOldColumnFlags_NoResize);
-
-            // Switches
-            for (int i = 0; i < 10; i++) {
-                ImGui::BeginGroup();
-                ImGui::Dummy(ImVec2(1, 0));
-                ImGui::SameLine();
-                ToggleButton(("SW" + std::to_string(i)).c_str(), &emulator.getSwitch(i));
-                ImGui::EndGroup();
-                ImGui::NextColumn();
-            }
-            for (int i = 0; i < 10; i++) {
-                ImGui::Text("  SW%d", i);
-                ImGui::NextColumn();
-            }
-            ImGui::Separator();
-
-            // LEDs
-            for (int i = 0; i < 10; i++) {
-                ImVec2 p = ImGui::GetCursorScreenPos();
-                ImDrawList* draw_list = ImGui::GetWindowDrawList();
-                draw_list->AddCircleFilled(ImVec2(p.x + 20, p.y + 15), 8, emulator.getLight(i) ?
-                    IM_COL32(255, 50, 50, 255) : IM_COL32(50, 50, 50, 255));
-                ImGui::Dummy(ImVec2(20, 22));
-                ImGui::NextColumn();
-            }
-            for (int i = 0; i < 10; i++) {
-                ImGui::Text(" LED%d", i);
-                ImGui::NextColumn();
-            }
-            ImGui::Separator();
-
-            // Buttons
-            for (int i = 0; i < 2; i++) {
-                ImGui::Button(("BTN" + std::to_string(i)).c_str(), ImVec2(42, 42));
-                emulator.getButton(i) = ImGui::IsItemActive();
-                ImGui::NextColumn();
-            }
-
-            // Seven segment displays
-            for (int i = 0; i < 6; i++) {
-                ImGui::PushFont(font7Segment);
-                ImGui::BeginGroup();
-                ImGui::Dummy(ImVec2(2, 0));
-                ImGui::SameLine();
-                ImGui::Text("%d", emulator.getSevenSegmentDisplay(i) & 0xF);
-                ImGui::EndGroup();
-                ImGui::PopFont();
-                ImGui::NextColumn();
-            }
-
-            ImGui::End();
-        }
-
-        // Processor window --- Based on: https://github.com/drhelius/Gearboy
-        if (showProcessor) {
-            ImGui::SetNextWindowPos(ImVec2(1063, 25), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(159, 218), ImGuiCond_FirstUseEver);
-            ImGui::Begin("Processor", &showProcessor, ImGuiWindowFlags_NoResize);
-
-            // CPU Flags
-            ImGui::TextColored(flagColor, "   Z");
-            ImGui::SameLine();
-            ImGui::Text("= %d", (bool)(emulator.getStatus() & FLAG_Z));
-            ImGui::SameLine();
-            ImGui::TextColored(flagColor, "  C");
-            ImGui::SameLine();
-            ImGui::Text("= %d", (bool)(emulator.getStatus() & FLAG_C));
-            ImGui::TextColored(flagColor, "   N");
-            ImGui::SameLine();
-            ImGui::Text("= %d", (bool)(emulator.getStatus() & FLAG_N));
-            ImGui::SameLine();
-            ImGui::TextColored(flagColor, "  V");
-            ImGui::SameLine();
-            ImGui::Text("= %d", (bool)(emulator.getStatus() & FLAG_V));
-
-            // CPU Registers
-            ImGui::Columns(2, "registers");
-            ImGui::Separator();
-            ImGui::TextColored(registerColor, " A");
-            ImGui::SameLine();
-            ImGui::Text("= $%02X", emulator.getRegA());
-            ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED, BYTE_TO_BINARY(emulator.getRegA()));
-            ImGui::NextColumn();
-            ImGui::TextColored(registerColor, " B");
-            ImGui::SameLine();
-            ImGui::Text("= $%02X", emulator.getRegB());
-            ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED, BYTE_TO_BINARY(emulator.getRegB()));
-            ImGui::NextColumn();
-            ImGui::Separator();
-            ImGui::TextColored(registerColor, " H");
-            ImGui::SameLine();
-            ImGui::Text("= $%02X", emulator.getRegH());
-            ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED, BYTE_TO_BINARY(emulator.getRegH()));
-            ImGui::NextColumn();
-            ImGui::TextColored(registerColor, " L");
-            ImGui::SameLine();
-            ImGui::Text("= $%02X", emulator.getRegL());
-            ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED, BYTE_TO_BINARY(emulator.getRegL()));
-
-            // PC
-            ImGui::NextColumn();
-            ImGui::Columns(1);
-            ImGui::Separator();
-            ImGui::TextColored(registerColor, "    PC");
-            ImGui::SameLine();
-            ImGui::Text("= $%04X", emulator.getPC());
-            ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED " " BYTE_TO_BINARY_PATTERN_SPACED,
-                        BYTE_TO_BINARY((emulator.getPC() & 0xFF00) >> 8),
-                        BYTE_TO_BINARY(emulator.getPC() & 0xFF));
-
-            // SP
-            ImGui::NextColumn();
-            ImGui::Columns(2);
-            ImGui::Separator();
-            ImGui::TextColored(registerColor, "SP");
-            ImGui::SameLine();
-            ImGui::Text("= $%02X", emulator.getSP());
-            ImGui::Text(BYTE_TO_BINARY_PATTERN_SPACED, BYTE_TO_BINARY(emulator.getSP()));
-
-            // Halted or not
-            ImGui::NextColumn();
-            ImGui::Separator();
-            ImGui::TextColored(breakpointColor, "HALT");
-            ImGui::SameLine();
-            ImGui::Text("= %d", halted);
-
-            ImGui::End();
-        }
-
-        // Memory Editors
-        if (romViewer->Open) {
-            ImGui::SetNextWindowSize(ImVec2(0, 218), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowPos(ImVec2(506, 25), ImGuiCond_FirstUseEver);
-            romViewer->DrawWindow("ROM Viewer", emulator.getROM(), 0x8000);
-        }
-        if (ramEditor->Open) {
-            ImGui::SetNextWindowSize(ImVec2(0, 218), ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowPos(ImVec2(506, 248), ImGuiCond_FirstUseEver);
-            ramEditor->DrawWindow("RAM Editor", emulator.getMemory(), 0x8000);
-        }
-
-        // Render
-        ImGui::Render();
-        glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-        glClearColor(windowColor.x * windowColor.w, windowColor.y * windowColor.w, windowColor.z * windowColor.w, windowColor.w);
-        glClear(GL_COLOR_BUFFER_BIT);
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        SDL_GL_SwapWindow(window);
+        stepBreakpoint = false;
     }
+}
+
+bool mainLoop() {
+    // Poll events
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        ImGui_ImplSDL2_ProcessEvent(&event);
+        if (event.type == SDL_QUIT or (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window)))
+            return true;
+    }
+
+    // Start frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame(window);
+    ImGui::NewFrame();
+
+    handleShortcuts();
+
+    runEmulator();
+
+    // Update display texture from buffer
+    glBindTexture(GL_TEXTURE_2D, displayTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, DISPLAY_WIDTH, DISPLAY_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, emulator->getDisplayBuffer());
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Draw windows
+    displayMainMenuBar();
+    displayRomBrowser();
+    displayScreen();
+    displayMemoryViewers();
+    displayPrintLog();
+    displayPanelIO();
+    displayPanelGPIO();
+    displayProcessor();
+    displayBreakpoints();
+    displayDisassembly();
+
+    // Render
+    ImGui::Render();
+    glViewport(0, 0, (int)imguiIO->DisplaySize.x, (int)imguiIO->DisplaySize.y);
+    glClearColor(windowColor->x * windowColor->w, windowColor->y * windowColor->w, windowColor->z * windowColor->w, windowColor->w);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SDL_GL_SwapWindow(window);
+    return exited;
+}
+
+int main(int argc, char* argv[]) {
+    emulator = new Emulator();
+
+    // Parse program arguments
+    if (argc == 1)
+        paused = true;
+    else if (argc > 2) {
+        std::cout << "Usage: './emulator' or './emulator <program>.bin'" << std::endl;
+        return -1;
+    } else if (!loadRom(argv[1]))
+        return -1;
+
+    // Initialize SDL and OpenGL
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER)) {
+        std::cout << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
+        return -1;
+    }
+    const char* glsl_version = "#version 130";
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    auto window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    window = SDL_CreateWindow("Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1378, 729, window_flags);
+    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+    SDL_GL_MakeCurrent(window, gl_context);
+    SDL_GL_SetSwapInterval(1); // Enable vsync
+    auto glewState = glewInit();
+    if (glewState != GLEW_OK) {
+        std::cout << "Failed to initialize OpenGL loader: " << glewState << std::endl;
+        return -1;
+    }
+
+    // Setup ImGui
+    IMGUI_CHECKVERSION();
+    auto context = ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    imguiIO = &io;
+    io.WantCaptureKeyboard = true;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    ImGui::StyleColorsDark(); // Setup Dear ImGui style
+    ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+    io.Fonts->AddFontDefault(); // Load default font before others
+
+    // Create display texture
+    glGenTextures(1, &displayTexture);
+
+    // Create ImGui windows
+    ramEditor = new MemoryEditor();
+    ramEditor->Open = false;
+    romViewer = new MemoryEditor();
+    romViewer->Open = false;
+    romViewer->ReadOnly = true;
+
+    // 7-segment display font
+    ImFontConfig config;
+    config.SizePixels = 40;
+    font7Segment = io.Fonts->AddFontDefault(&config);
+
+    // Colors
+    windowColor = new ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    flagColor = new ImVec4(0.0f,1.0f,1.0f,1.0f);
+    registerColor = new ImVec4(1.0f,1.0f,0.0f,1.0f);
+    breakpointColor = new ImVec4(1.0f,0.1f,0.1f,1.0f);
+
+    setupPersistenceHandler(context);
+
+    while (true)
+        if (mainLoop())
+            break;
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
@@ -658,6 +713,11 @@ int main(int argc, char* argv[]) {
     // Must be deleted after ImGui shutdown for INI saving
     delete ramEditor;
     delete romViewer;
+
+    delete windowColor;
+    delete registerColor;
+    delete flagColor;
+    delete breakpointColor;
 
     delete disassembler;
     delete[] rom;
