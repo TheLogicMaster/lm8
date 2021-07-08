@@ -1,6 +1,7 @@
 #pragma ide diagnostic ignored "cert-err34-c" // Ignore sscanf warnings
 #include <iostream>
 #include <functional>
+#include <set>
 
 #include <SDL.h>
 #include "imgui/imgui.h"
@@ -8,12 +9,17 @@
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include <GL/glew.h>
 #include <imgui_internal.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/fetch.h>
+#else
+#include "ImGuiFileDialog.h"
+#endif
 
 #include "imgui_memory_editor.h"
 #include "imgui_toggle_button.h"
 #include "Disassembler.h"
 #include "Emulator.h"
-#include "ImGuiFileDialog.h"
 
 // Macros from: https://github.com/drhelius/Gearboy/blob/master/platforms/desktop-shared/gui_debug.h
 #define BYTE_TO_BINARY_PATTERN_SPACED "%c%c%c%c %c%c%c%c"
@@ -28,6 +34,7 @@
   (byte & 0x01 ? '1' : '0')
 
 static SDL_Window *window;
+static SDL_GLContext glContext;
 static ImGuiIO *imguiIO;
 static GLuint displayTexture;
 static bool exited = false;
@@ -61,7 +68,7 @@ static const ImVec4 *flagColor;
 static const ImVec4 *registerColor;
 static const ImVec4 *breakpointColor;
 
-void setupPersistenceHandler(ImGuiContext *context) {
+static void setupPersistenceHandler(ImGuiContext *context) {
     // Todo: Load and store 'show' variables and peripherals dynamically
     ImGuiContext& g = *context;
     ImGuiSettingsHandler ini_handler;
@@ -120,14 +127,15 @@ void setupPersistenceHandler(ImGuiContext *context) {
     g.SettingsHandlers.push_back(ini_handler);
 }
 
-bool loadRom(const std::string &path) {
+static bool loadRom(const std::string &path) {
+#ifndef __EMSCRIPTEN__
     std::ifstream input(path, std::ios::binary);
     if (!input.good()) {
         std::cout << "Failed to open ROM: '" << path << "'" << std::endl;
         return false;
     }
     input.seekg(0, std::ios::end);
-    std::streamsize len = input.tellg();
+    long len = input.tellg();
     rom = new uint8_t[len];
     input.seekg(0, std::ios::beg);
     input.read(reinterpret_cast<char *>(rom), len);
@@ -135,16 +143,43 @@ bool loadRom(const std::string &path) {
     emulator->load(rom, len);
     delete disassembler;
     disassembler = new Disassembler(rom, len);
+#else
+    emscripten_fetch_attr_t attr;
+    emscripten_fetch_attr_init(&attr);
+    strcpy(attr.requestMethod, "GET");
+    attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
+    attr.onsuccess = [](auto fetch) {
+        auto len = fetch->numBytes;
+        rom = new uint8_t[len];
+        memcpy(rom, fetch->data, len);
+        emscripten_fetch_close(fetch);
+        emulator->load(rom, len);
+        delete disassembler;
+        disassembler = new Disassembler(rom, len);
+        halted = false;
+        breakpoints.clear();
+        enableBreakpoints = false;
+        emulator->reset();
+    };
+    emscripten_fetch(&attr, path.c_str());
+#endif
     return true;
 }
 
-void displayMainMenuBar() {
+static void displayMainMenuBar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
+#ifndef __EMSCRIPTEN__
             if (ImGui::MenuItem("Open ROM", "ctrl+O"))
                 ImGuiFileDialog::Instance()->OpenDialog("ChooseROM", "Choose ROM", ".bin", ".");
             if (ImGui::MenuItem("Exit"))
                 exited = true;
+#else
+            static const char *roms[] {"Hello World", "Hello World 2", "Snake", "IO Panel"};
+            for (auto &rom: roms)
+                if (ImGui::MenuItem(rom))
+                    loadRom(rom + std::string(".bin"));
+#endif
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Emulation")) {
@@ -191,20 +226,23 @@ void displayMainMenuBar() {
     }
 }
 
-void displayRomBrowser() {
+static void displayRomBrowser() {
+#ifndef __EMSCRIPTEN__
     if (ImGuiFileDialog::Instance()->Display("ChooseROM", ImGuiWindowFlags_NoCollapse, ImVec2(400, 250))) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
             halted = false;
             breakpoints.clear();
             enableBreakpoints = false;
-            loadRom(ImGuiFileDialog::Instance()->GetCurrentPath() + "/" + ImGuiFileDialog::Instance()->GetCurrentFileName());
+            loadRom(ImGuiFileDialog::Instance()->GetCurrentPath() + "/" +
+                    ImGuiFileDialog::Instance()->GetCurrentFileName());
             emulator->reset();
         }
         ImGuiFileDialog::Instance()->Close();
     }
+#endif
 }
 
-void displayScreen() {
+static void displayScreen() {
     if (!showDisplay)
         return;
 
@@ -225,7 +263,7 @@ void displayScreen() {
         ImGui::EndPopup();
     }
 
-    ImGui::Image((void *)(intptr_t)displayTexture, ImVec2(DISPLAY_WIDTH * displayScale, DISPLAY_HEIGHT * displayScale));
+    ImGui::Image((ImTextureID)(intptr_t)displayTexture, ImVec2(DISPLAY_WIDTH * displayScale, DISPLAY_HEIGHT * displayScale));
 
     // Options button
     if (ImGui::Button("Options"))
@@ -234,7 +272,7 @@ void displayScreen() {
     ImGui::End();
 }
 
-void displayMemoryViewers() {
+static void displayMemoryViewers() {
     if (romViewer->Open) {
         ImGui::SetNextWindowSize(ImVec2(0, 218), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowPos(ImVec2(506, 25), ImGuiCond_FirstUseEver);
@@ -247,7 +285,7 @@ void displayMemoryViewers() {
     }
 }
 
-void displayPrintLog() {
+static void displayPrintLog() {
     if (!showPrintLog)
         return;
 
@@ -262,7 +300,7 @@ void displayPrintLog() {
     ImGui::End();
 }
 
-void displayPanelIO() {
+static void displayPanelIO() {
     if (!showIO)
         return;
 
@@ -323,7 +361,7 @@ void displayPanelIO() {
     ImGui::End();
 }
 
-void displayPanelGPIO() {
+static void displayPanelGPIO() {
     if (!showGPIO)
         return;
 
@@ -387,7 +425,7 @@ void displayPanelGPIO() {
 }
 
 // Based on: https://github.com/drhelius/Gearboy
-void displayProcessor() {
+static void displayProcessor() {
     if (!showProcessor)
         return;
 
@@ -465,7 +503,7 @@ void displayProcessor() {
     ImGui::End();
 }
 
-void displayBreakpoints() {
+static void displayBreakpoints() {
     if (!showBreakpoints)
         return;
 
@@ -499,7 +537,7 @@ void displayBreakpoints() {
     ImGui::End();
 }
 
-void displayDisassembly() {
+static void displayDisassembly() {
     if (!showDisassembly)
         return;
 
@@ -525,12 +563,14 @@ void displayDisassembly() {
     ImGui::End();
 }
 
-void handleShortcuts() {
+static void handleShortcuts() {
     if (ImGui::IsKeyDown(SDL_SCANCODE_LCTRL)) {
         if (ImGui::IsKeyPressed(SDL_SCANCODE_P, false))
             paused ^= 1;
+#ifndef __EMSCRIPTEN__
         if (ImGui::IsKeyPressed(SDL_SCANCODE_O, false))
             ImGuiFileDialog::Instance()->OpenDialog("ChooseROM", "Choose ROM", ".bin", ".");
+#endif
         if (ImGui::IsKeyPressed(SDL_SCANCODE_B, false))
             enableBreakpoints ^= 1;
         if (ImGui::IsKeyPressed(SDL_SCANCODE_Z, true) and !halted and paused)
@@ -542,7 +582,7 @@ void handleShortcuts() {
     }
 }
 
-void runEmulator() {
+static void runEmulator() {
     if (!halted and (!paused or stepBreakpoint)) {
         try {
             for (int i = 0; i < 1000; i++) { // Todo: Fix to 1MHz or something rather than ~60KHz
@@ -580,13 +620,16 @@ void runEmulator() {
     }
 }
 
-bool mainLoop() {
+static void mainLoop(void *arg) {
+    imguiIO = &ImGui::GetIO();
+    IM_UNUSED(arg);
+
     // Poll events
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         ImGui_ImplSDL2_ProcessEvent(&event);
         if (event.type == SDL_QUIT or (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window)))
-            return true;
+            exited = true;
     }
 
     // Start frame
@@ -600,9 +643,11 @@ bool mainLoop() {
 
     // Update display texture from buffer
     glBindTexture(GL_TEXTURE_2D, displayTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, DISPLAY_WIDTH, DISPLAY_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, emulator->getDisplayBuffer());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, DISPLAY_WIDTH, DISPLAY_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, emulator->getDisplayBuffer());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // Draw windows
@@ -624,12 +669,19 @@ bool mainLoop() {
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_GL_SwapWindow(window);
-    return exited;
 }
 
 int main(int argc, char* argv[]) {
     emulator = new Emulator();
 
+#ifdef __EMSCRIPTEN__
+    showIO = false;
+    showGPIO = false;
+    displayScale = 5;
+    showPrintLog = false;
+    controllerPeripheral = true;
+    loadRom("Snake.bin");
+#else
     // Parse program arguments
     if (argc == 1)
         paused = true;
@@ -638,42 +690,54 @@ int main(int argc, char* argv[]) {
         return -1;
     } else if (!loadRom(argv[1]))
         return -1;
+#endif
 
     // Initialize SDL and OpenGL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER)) {
         std::cout << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
         return -1;
     }
-    const char* glsl_version = "#version 130";
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+#ifdef __EMSCRIPTEN__
+    const char* glslVersion = "#version 100";
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+#else
+    const char* glslVersion = "#version 130";
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+#endif
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     auto window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     window = SDL_CreateWindow("Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1378, 729, window_flags);
-    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-    SDL_GL_MakeCurrent(window, gl_context);
+    glContext = SDL_GL_CreateContext(window);
+    SDL_GL_MakeCurrent(window, glContext);
     SDL_GL_SetSwapInterval(1); // Enable vsync
+#ifndef __EMSCRIPTEN__
     auto glewState = glewInit();
     if (glewState != GLEW_OK) {
         std::cout << "Failed to initialize OpenGL loader: " << glewState << std::endl;
         return -1;
     }
+#endif
 
     // Setup ImGui
     IMGUI_CHECKVERSION();
     auto context = ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    imguiIO = &io;
+#ifdef __EMSCRIPTEN__
+    IM_UNUSED(context);
+    io.IniFilename = NULL;
+#endif
     io.WantCaptureKeyboard = true;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     ImGui::StyleColorsDark(); // Setup Dear ImGui style
-    ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
-    ImGui_ImplOpenGL3_Init(glsl_version);
+    ImGui_ImplSDL2_InitForOpenGL(window, glContext);
+    ImGui_ImplOpenGL3_Init(glslVersion);
     io.Fonts->AddFontDefault(); // Load default font before others
 
     // Create display texture
@@ -697,16 +761,22 @@ int main(int argc, char* argv[]) {
     registerColor = new ImVec4(1.0f,1.0f,0.0f,1.0f);
     breakpointColor = new ImVec4(1.0f,0.1f,0.1f,1.0f);
 
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop_arg(mainLoop, nullptr, 0, true);
+    IM_UNUSED(setupPersistenceHandler);
+#else
     setupPersistenceHandler(context);
 
-    while (true)
-        if (mainLoop())
+    while (true) {
+        mainLoop(nullptr);
+        if (exited)
             break;
+    }
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
-    SDL_GL_DeleteContext(gl_context);
+    SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
@@ -721,6 +791,7 @@ int main(int argc, char* argv[]) {
 
     delete disassembler;
     delete[] rom;
+#endif
 
     return 0;
 }

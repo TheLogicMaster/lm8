@@ -33,7 +33,7 @@ mingw32-make
 Requires 'libsdl2-dev' and 'libglew-dev'
 
 Install dependencies:
-``` bash
+```bash
 # Ubuntu/Debian install
 sudo apt install libsdl2-dev libglew-dev
 ```
@@ -45,4 +45,20 @@ mkdir build
 cd build
 cmake ..
 make
+```
+
+### Emscripten
+The [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html) is required
+for building the Web port of the emulator. Hardcoded ROMs are fetched from the served
+web directory.
+
+Linux building:
+```bash
+# Run from project's Emscripten directory
+source {Emscripten SDK dir}/emsdk_env.sh # Set Emscripten environment variables
+make # Build web port
+```
+To build and serve from dev server with built ROMs:
+```bash
+make serve
 ```
