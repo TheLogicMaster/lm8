@@ -1,15 +1,73 @@
 ; A snake game using the controller peripheral
 
+    jmp title_screen
+
 ; Program loop
 loop:
-    ; Check for game started
-    ldr [started],a
-    jr game,nz
+    jsr delay
+
+    jsr move_snake
+
+    jsr check_new_position
+    jr no_collision,z
+    jmp title_screen
+no_collision:
+
+    jsr check_apple
+
+    ldr [new_y],a
+    str [y],a
+    ldr [new_x],a
+    str [x],a
+
+    jsr shift_snake_body
+
+    jsr draw_game
+
+    jmp loop
+
+
+    ; Display the title screen and wait for user input
+title_screen:
+    ldr $25,a
+    out {clear_screen},a
+    lda title_snake
+    ldr #50,b
+title_screen_draw:
+    push b
+    ldr [HL],a
+    ina
+    ldr #8,b
+    jsr multiply
+    out {graphics_x},a
+    ldr [HL],a
+    ina
+    jsr multiply
+    out {graphics_y},a
+    ldr #13,a
+    out {draw_sprite},a
+    pop b
+    dec b
+    jr title_screen_draw,nz
+    ldr #24,a
+    out {graphics_x},a
+    ldr #16,a
+    out {graphics_y},a
+    ldr #12,a
+    out {draw_sprite},a
+    ldr #120,a
+    out {graphics_x},a
+    ldr #24,a
+    out {graphics_y},a
+    ldr #14,a
+    out {draw_sprite},a
+    out {swap_display},a
+title_screen_wait_release:
     jsr get_input
-    jr loop,z
-    ; Reset game
-    ldr #1,a
-    str [started],a
+    jr title_screen_wait_release,nz
+title_screen_wait_press:
+    jsr get_input
+    jr title_screen_wait_press,z
     ldr #32,a
     str [x],a
     str [y],a
@@ -21,29 +79,7 @@ loop:
     str [HL],a
     jsr generate_apple
     jsr draw_game
-
-game:
-    jsr delay
-
-    jsr move_snake
-
-    jsr check_new_position
-    jr no_collision,z
-    ldr #0,a
-    str [started],a
     jmp loop
-no_collision:
-    jsr check_apple
-    ldr [new_y],a
-    str [y],a
-    ldr [new_x],a
-    str [x],a
-
-    jsr shift_snake_body
-
-    jsr draw_game
-
-    jmp loop ; GOTO loop
 
 
     ; Limit game speed with a counter and dummy operations
@@ -67,7 +103,7 @@ delay_no_input:
     ; Renders the game to the screen
 draw_game:
     push a
-    ldr #0,a
+    ldr $25,a
     out {clear_screen},a
     jsr draw_apple
     jsr draw_snake_head
@@ -495,8 +531,65 @@ multiply_done:
     bin "sprites/apple.bin"
 
 
+    org $400
+title_snake:
+    ; S
+    db #0,#6
+    db #1,#7
+    db #2,#7
+    db #3,#6
+    db #3,#5
+    db #2,#4
+    db #1,#4
+    db #0,#3
+    db #0,#2
+    db #1,#1
+    db #2,#1
+    ; N
+    db #5,#7
+    db #5,#6
+    db #5,#5
+    db #5,#4
+    db #5,#3
+    db #6,#4
+    db #7,#5
+    db #7,#6
+    db #7,#7
+    ; A
+    db #9,#7
+    db #9,#6
+    db #9,#5
+    db #9,#4
+    db #10,#5
+    db #10,#3
+    db #11,#7
+    db #11,#6
+    db #11,#5
+    db #11,#4
+    ; K
+    db #13,#2
+    db #13,#3
+    db #13,#4
+    db #13,#5
+    db #13,#6
+    db #13,#7
+    db #14,#6
+    db #15,#7
+    db #15,#5
+    db #15,#4
+    ; E
+    db #17,#3
+    db #17,#4
+    db #17,#5
+    db #17,#6
+    db #17,#7
+    db #18,#3
+    db #19,#3
+    db #18,#5
+    db #18,#7
+    db #19,#7
+
     data ; Enter data section
-started:    var         ; Whether the game has started or not
 score:      var         ; Number of apples collected
 input:      var         ; The last input from the user or zero
 apple_x:    var         ; The apple's X coordinate
@@ -510,4 +603,4 @@ check_x:    var         ; The X value used for snake collision checking
 check_y:    var         ; The Y value used for snake collision checking
 new_x:      var         ; The new head X coordinate for collision checking
 new_y:      var         ; The new head Y coordinate for collision checking
-snake:      var[320]    ; Array of snake body directions starting from head
+snake:      var[400]    ; Array of snake body directions starting from head

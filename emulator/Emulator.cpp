@@ -460,8 +460,11 @@ void Emulator::drawPixel(uint8_t x, uint8_t y, RGB888 color) {
 
 void Emulator::drawSprite(uint8_t id) {
     for (int y = 0; y < 8; y++)
-        for (int x = 0; x < 8; x++)
-            drawPixel(graphicsX + x, graphicsY + y, rgb332To888(readUint8(64 * id + 8 * y + x)));
+        for (int x = 0; x < 8; x++) {
+            auto color = readUint8(64 * id + 8 * y + x);
+            if (color != 0)
+                drawPixel(graphicsX + x, graphicsY + y, rgb332To888(color));
+        }
 }
 
 void Emulator::fillScreen(RGB888 color) {
