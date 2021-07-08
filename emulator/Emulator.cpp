@@ -1,8 +1,15 @@
 #include <iostream>
 #include <cstring>
 #include <bitset>
+#include <ctime>
 
 #include "Emulator.h"
+
+Emulator::Emulator() {
+    srand(time(nullptr));
+    renderingBuffer = displayBuffers[0];
+    drawingBuffer = displayBuffers[1];
+}
 
 void Emulator::load(uint8_t *romData, long size) {
     memcpy(&rom, romData, size);
@@ -165,6 +172,8 @@ void Emulator::reset() {
     sp = 0;
     status = 0;
     fillScreen(RGB888{0, 0, 0});
+    renderingBuffer = displayBuffers[0];
+    drawingBuffer = displayBuffers[1];
     memset(ram, 0, 0x8000);
     memset(lights, 0, 10);
     memset(sevenSegmentDisplays, 0, 6);
@@ -173,7 +182,7 @@ void Emulator::reset() {
 }
 
 uint8_t *Emulator::getDisplayBuffer() {
-    return displayBuffer;
+    return renderingBuffer;
 }
 
 std::string &Emulator::getPrintBuffer() {
@@ -324,6 +333,8 @@ uint8_t Emulator::readPort(uint8_t port) {
             return arduinoIO[port - 72];
         case 87 ... 92:
             return analogDigitalConverters[port - 87];
+        case 93:
+            return rand() % 256;
         default:
             return 0;
     }
@@ -369,6 +380,15 @@ void Emulator::writePort(uint8_t port, uint8_t value) {
             break;
         case 71 ... 86: // Arduino Header I/O
             arduinoIO[port - 71] = value;
+            break;
+        case 94:
+            if (displayBuffers[0] == renderingBuffer) {
+                renderingBuffer = displayBuffers[1];
+                drawingBuffer = displayBuffers[0];
+            } else {
+                renderingBuffer = displayBuffers[0];
+                drawingBuffer = displayBuffers[1];
+            }
             break;
         default:
             break;
@@ -435,7 +455,7 @@ RGB888 Emulator::rgb332To888(uint8_t color) {
 void Emulator::drawPixel(uint8_t x, uint8_t y, RGB888 color) {
     if (x >= DISPLAY_WIDTH or y >= DISPLAY_HEIGHT)
         return;
-    memcpy(displayBuffer + (DISPLAY_WIDTH * y + x) * 3, &color, 3);
+    memcpy(drawingBuffer + (DISPLAY_WIDTH * y + x) * 3, &color, 3);
 }
 
 void Emulator::drawSprite(uint8_t id) {

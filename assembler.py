@@ -19,6 +19,8 @@ constants = {
     "controller_down":   36,  # GPIO 1
     "controller_left":   37,  # GPIO 2
     "controller_right":  38,  # GPIO 3
+    "rand":              93,
+    "swap_display":      94,
 }
 constants.update({"seven_segment_" + str(i): i + 2 for i in range(6)})
 constants.update({"led_" + str(i): i + 10 for i in range(10)})
@@ -306,7 +308,7 @@ def main():
                 else:
                     error("Invalid byte data")
 
-        elif instr == "incbin":
+        elif instr == "bin":
             ensure_params(params, 1)
             match = re.search(r"^\"(.+)\"$", params[0])
             if not match:
@@ -424,7 +426,7 @@ def main():
             output_byte(0b10011100)
 
         elif instr == "halt":
-            output_implicit_instr(params, 0b11111100)
+            output_implicit_instr(params, 0b10100000)
 
         else:
             error("Unknown instruction: " + instr)
@@ -445,10 +447,10 @@ def main():
         if label not in labels:
             error("No such label: " + label, -1)
         offset = labels[label] - (addr + 1)  # Relative to address of next instruction
+        if offset < -128 or offset > 127:
+            error("Too far relative jump: " + label, -1)
         if offset < 0:  # Convert to signed byte
             offset += 256
-        if offset < 0 or offset > 255:
-            error("Too far relative jump", -1)
         ensure_output_size(addr + 1)
         output[addr] = offset
 

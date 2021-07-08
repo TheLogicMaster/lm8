@@ -25,6 +25,7 @@ struct RGB888 {
 
 class Emulator {
 public:
+    Emulator();
     void load(uint8_t *romData, long size);
     void run();
     void reset();
@@ -50,7 +51,9 @@ public:
     uint8_t getStatus() const;
 
 private:
-    uint8_t displayBuffer[DISPLAY_HEIGHT * DISPLAY_WIDTH * 3]{};
+    uint8_t displayBuffers[2][DISPLAY_HEIGHT * DISPLAY_WIDTH * 3]{};
+    uint8_t *renderingBuffer;
+    uint8_t *drawingBuffer;
     bool switches[10]{};
     bool lights[10]{};
     bool buttons[2]{};

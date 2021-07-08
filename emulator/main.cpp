@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
         // Run emulator for about a frame
         if (!halted and (!paused or stepBreakpoint)) {
             try {
-                for (int i = 0; i < 100; i++) { // Todo: Fix to 1MHz or something rather than ~6KHz
+                for (int i = 0; i < 1000; i++) { // Todo: Fix to 1MHz or something rather than ~60KHz
                     if (controllerPeripheral) {
                         emulator.getGPIO(0) = ImGui::IsKeyDown(SDL_SCANCODE_W) or ImGui::IsKeyDown(SDL_SCANCODE_UP);
                         emulator.getGPIO(1) = ImGui::IsKeyDown(SDL_SCANCODE_S) or ImGui::IsKeyDown(SDL_SCANCODE_DOWN);

@@ -1,6 +1,6 @@
 ; This demonstrates using DE10-Lite I/O or the emulator I/O panel
 
-jmp loop ; Program entry point
+    jmp loop ; Program entry point
 
 message: db "Pressed Button ",$0 ; Message to print
 
@@ -81,7 +81,7 @@ counter_done:
 
     jr loop ; GOTO loop
 
-data ; Enter data section
+    data ; Enter data section
 btn0:  var  ; Btn0 state variable
 btn1:  var  ; Btn1 state variable
 temp:  var  ; Temp variale
