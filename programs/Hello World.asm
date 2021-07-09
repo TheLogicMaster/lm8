@@ -11,7 +11,7 @@ program:
 print:
     ldr [hl],a ; Load character into A
     jr done,z ; Jump to "done" if A is zero, i.e. end of string
-    out #0,a ; Print character in A
+    out {print_char},a ; Print character in A
     ina ; Increment HL register
     jr print ; Jump to print
 

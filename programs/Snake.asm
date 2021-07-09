@@ -603,4 +603,4 @@ check_x:    var         ; The X value used for snake collision checking
 check_y:    var         ; The Y value used for snake collision checking
 new_x:      var         ; The new head X coordinate for collision checking
 new_y:      var         ; The new head Y coordinate for collision checking
-snake:      var[400]    ; Array of snake body directions starting from head
+snake:      var[320]    ; Array of snake body directions starting from head

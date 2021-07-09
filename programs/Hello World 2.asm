@@ -6,5 +6,5 @@ message: db "Hello World!\n",$0 ; Message to print
 
 program:
     ldr =message,a ; Load message address into A
-    out #1,a ; Print message at [A]
+    out {print_string},a ; Print message at [A]
     halt ; Halt execution

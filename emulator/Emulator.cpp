@@ -12,6 +12,7 @@ Emulator::Emulator() {
 }
 
 void Emulator::load(uint8_t *romData, long size) {
+    memset(&rom, 0, 0x8000);
     memcpy(&rom, romData, size);
 }
 
