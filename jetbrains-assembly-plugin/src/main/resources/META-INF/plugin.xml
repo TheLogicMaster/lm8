@@ -1,0 +1,56 @@
+<idea-plugin>
+
+  <!-- Unique id for this plugin. Must stay constant for the life of the plugin. -->
+  <id>com.thelogicmaster.custom_assembly_plugin</id>
+
+  <!-- Text to display as name on Preferences/Settings | Plugin page -->
+  <name>Custom Architecture Assembly</name>
+
+  <!-- Product and plugin compatibility requirements -->
+  <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.python</depends>
+
+  <!-- Text to display as description on Preferences/Settings | Plugin page -->
+  <description>
+    <![CDATA[
+      Support for the custom assembly language used by my Custom 8-bit Architecture project.
+    ]]>
+  </description>
+  <change-notes>
+    <![CDATA[
+      <ul>
+        <li><b>1.0</b> Initial release</li>
+      </ul>
+    ]]>
+  </change-notes>
+
+  <!-- Text to display as company information on Preferences/Settings | Plugin page -->
+  <vendor url="https://thelogicmaster.com">TheLogicMaster</vendor>
+
+  <actions>
+    <action id="NewAssemblyFile" class="com.thelogicmaster.custom_assembly_plugin.AssemblyFileCreateAction"/>
+  </actions>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <applicationService serviceImplementation="com.thelogicmaster.custom_assembly_plugin.AssemblySettingsState"/>
+    <applicationConfigurable parentId="tools" instance="com.thelogicmaster.custom_assembly_plugin.AssemblySettingsConfigurable"
+                             id="com.thelogicmaster.custom_assembly_plugin.AssemblySettingsConfigurable" displayName="Custom Assembly Settings"/>
+    <editorNotificationProvider implementation="com.thelogicmaster.custom_assembly_plugin.AssemblyNotificationProvider"/>
+    <fileType name="Assembly File" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblyFileType" fieldName="INSTANCE" language="Assembly" extensions="asm"/>
+    <lang.parserDefinition language="Assembly" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblyParserDefinition"/>
+    <lang.syntaxHighlighterFactory language="Assembly" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblySyntaxHighlighterFactory"/>
+    <colorSettingsPage implementation="com.thelogicmaster.custom_assembly_plugin.AssemblyColorSettingsPage"/>
+    <annotator language="Assembly" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblyAnnotator"/>
+    <runLineMarkerContributor language="Assembly" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblyRunLineMarkerContributor"/>
+    <completion.contributor language="Assembly" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblyCompletionContributor"/>
+    <psi.referenceContributor language="Assembly" implementation="com.thelogicmaster.custom_assembly_plugin.AssemblyReferenceContributor"/>
+    <lang.refactoringSupport language="Assembly" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblyRefactoringSupportProvider"/>
+    <lang.findUsagesProvider language="Assembly" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblyFindUsagesProvider"/>
+    <lang.psiStructureViewFactory language="Assembly" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblyStructureViewFactory"/>
+    <lang.formatter language="Assembly" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblyFormattingModelBuilder"/>
+    <lang.commenter language="Assembly" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblyCommenter"/>
+    <lang.documentationProvider language="Assembly" implementationClass="com.thelogicmaster.custom_assembly_plugin.AssemblyDocumentationProvider"/>
+    <runConfigurationProducer implementation="com.thelogicmaster.custom_assembly_plugin.AssemblyRunConfigurationProducer"/>
+  </extensions>
+
+</idea-plugin>

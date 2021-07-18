@@ -1,0 +1,34 @@
+{
+  parserClass="com.thelogicmaster.custom_assembly_plugin.AssemblyParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Assembly"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.thelogicmaster.custom_assembly_plugin.psi"
+  psiImplPackage="com.thelogicmaster.custom_assembly_plugin.psi.impl"
+
+  elementTypeHolderClass="com.thelogicmaster.custom_assembly_plugin.psi.AssemblyTypes"
+  elementTypeClass="com.thelogicmaster.custom_assembly_plugin.psi.AssemblyElementType"
+  tokenTypeClass="com.thelogicmaster.custom_assembly_plugin.psi.AssemblyTokenType"
+
+  psiImplUtilClass="com.thelogicmaster.custom_assembly_plugin.psi.impl.AssemblyPsiImplUtil"
+}
+
+assemblyFile ::= item_*
+
+private item_ ::= (label_definition|instruction|COMMENT|CRLF)
+
+private operand ::= CONSTANT|LABEL|REGISTER|CONDITION|ARRAY|STRING|HL
+
+instruction ::= MNEMONIC (operand (SEPARATOR operand)*)? {
+      mixin="com.thelogicmaster.custom_assembly_plugin.psi.impl.AssemblyInstructionElementImpl"
+      implements="com.thelogicmaster.custom_assembly_plugin.psi.AssemblyInstructionElement"
+      methods=[getMnemonic getLabelNode]
+}
+
+label_definition ::= LABEL_DEF {
+    mixin="com.thelogicmaster.custom_assembly_plugin.psi.impl.AssemblyLabelElementImpl"
+    implements="com.thelogicmaster.custom_assembly_plugin.psi.AssemblyLabelElement"
+    methods=[getName setName getNameIdentifier getPresentation]
+}

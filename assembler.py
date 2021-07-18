@@ -1,6 +1,8 @@
 #!/bin/python3
 
-import sys
+# This script will assemble a program into the same directory and optionally run it with the emulator
+
+import argparse
 import os
 import re
 
@@ -218,12 +220,14 @@ def output_relative_jump(param):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: 'assembler.py <program>.asm'")
-        exit(-1)
+    parser = argparse.ArgumentParser(description='Assemble a program')
+    parser.add_argument('program', help='The program file to assemble')
+    parser.add_argument('-r', '--run', action='store_true', help="Whether to run the emulator after assembly")
+    parser.add_argument('-e', '--emulator', help='The path to the emulator if not ./emulator/build/Emulator')
+    args = parser.parse_args()
 
     # Read assembly file
-    f = open(sys.argv[1], "r")
+    f = open(args.program)
     lines = f.readlines()
     f.close()
 
@@ -313,7 +317,7 @@ def main():
             match = re.search(r"^\"(.+)\"$", params[0])
             if not match:
                 error("Invalid binary file")
-            with open(os.path.join(os.path.dirname(sys.argv[1]), match[1]), "rb") as f:
+            with open(os.path.join(os.path.dirname(args.program), match[1]), "rb") as f:
                 while byte := f.read(1):
                     output_byte(ord(byte))
 
@@ -465,9 +469,13 @@ def main():
         output[addr] = labels[label]
 
     # Save machine code results
-    f = open(os.path.splitext(sys.argv[1])[0] + ".bin", "wb")
+    rom_path = os.path.splitext(args.program)[0] + ".bin"
+    f = open(rom_path, "wb")
     f.write(output)
     f.close()
+
+    if args.run:
+        os.system(f"\"{args.emulator if args.emulator else './emulator/build/Emulator'}\" \"{os.path.abspath(rom_path)}\"")
 
 
 if __name__ == "__main__":

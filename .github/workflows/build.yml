@@ -84,6 +84,13 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
+      - name: Build plugin
+        run: |
+          cd ./jetbrains-assembly-plugin
+          ./gradlew buildPlugin
+          cp ./build/libs/assembly-plugin-*.jar ../plugin-${{ steps.get_version.outputs.VERSION }}.jar
+
+
       - name: Create Release
         uses: actions/create-release@v1
         env:
@@ -100,6 +107,7 @@ jobs:
         run: |
           hub release edit -a ./linux-${{ steps.get_version.outputs.VERSION }}.zip -m "" ${{ steps.get_version.outputs.VERSION }}
           hub release edit -a ./html-${{ steps.get_version.outputs.VERSION }}.zip -m "" ${{ steps.get_version.outputs.VERSION }}
+          hub release edit -a ./plugin-${{ steps.get_version.outputs.VERSION }}.jar -m "" ${{ steps.get_version.outputs.VERSION }}
 
   Windows:
     needs: Linux

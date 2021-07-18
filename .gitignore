@@ -4,3 +4,9 @@ emulator/cmake-build-debug/
 emulator/.idea/
 
 .idea/
+
+jetbrains-assembly-plugin/.gradle/
+
+jetbrains-assembly-plugin/build/
+
+emulator/build/

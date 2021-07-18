@@ -1,0 +1,30 @@
+plugins {
+  id 'java'
+  id 'org.jetbrains.intellij' version '1.1.2'
+}
+
+group 'com.thelogicmaster'
+version '1.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+  mavenCentral()
+}
+
+// Include the generated files in the source set
+sourceSets.main.java.srcDirs 'src/main/gen'
+
+// See https://github.com/JetBrains/gradle-intellij-plugin/
+intellij {
+  plugins = ['PythonCore:212.4746.13']
+}
+
+buildSearchableOptions {
+  enabled = false
+}
+
+patchPluginXml {
+  version = project.version
+  sinceBuild = '202'
+}

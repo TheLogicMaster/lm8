@@ -24,10 +24,12 @@ no_collision:
 
     jsr draw_game
 
+; Todo: Show score on seven segment display
+
     jmp loop
 
 
-    ; Display the title screen and wait for user input
+; Display the title screen and wait for user input
 title_screen:
     ldr $25,a
     out {clear_screen},a
@@ -82,11 +84,11 @@ title_screen_wait_press:
     jmp loop
 
 
-    ; Limit game speed with a counter and dummy operations
+; Limit game speed with a counter and dummy operations
 delay:
     ldr $0,a
     ldr $3,b
-    delay_next:
+delay_next:
     push a
     jsr get_input
     jr delay_no_input,z
@@ -100,7 +102,7 @@ delay_no_input:
     ret
 
 
-    ; Renders the game to the screen
+; Renders the game to the screen
 draw_game:
     push a
     ldr $25,a
@@ -113,8 +115,8 @@ draw_game:
     ret
 
 
-    ; Draws the apple
-    ; Modifies no registers or variables
+; Draws the apple
+; Modifies no registers or variables
 draw_apple:
     push a
     ldr [apple_x],a
@@ -127,8 +129,8 @@ draw_apple:
     ret
 
 
-    ; Draws the snake head
-    ; Modifies no registers or variables
+; Draws the snake head
+; Modifies no registers or variables
 draw_snake_head:
     push a
     ldr [x],a
@@ -141,8 +143,8 @@ draw_snake_head:
     ret
 
 
-    ; Gets the next snake segment position from [HL]
-    ; [body_x] and [body_y] are appended with the direction vector
+; Gets the next snake segment position from [HL]
+; [body_x] and [body_y] are appended with the direction vector
 get_snake_segment:
     push a
     ldr [HL],a
@@ -191,9 +193,9 @@ get_snake_segment_add:
     ret
 
 
-    ; Draws the snake body to the screen
-    ; Modifies no registers
-    ; Modifies [body_x] and [body_y]
+; Draws the snake body to the screen
+; Modifies no registers
+; Modifies [body_x] and [body_y]
 draw_snake_body:
     push a
     push b
@@ -225,10 +227,10 @@ draw_snake_body_done:
     ret
 
 
-    ; Shifts a new body direction into the front of the snake
-    ; The value of [body_shift] is shifted in
-    ; No registers are modified
-    ; The last snake direction is left in [body_shift]
+; Shifts a new body direction into the front of the snake
+; The value of [body_shift] is shifted in
+; No registers are modified
+; The last snake direction is left in [body_shift]
 shift_snake_body:
     push a
     push b
@@ -255,10 +257,10 @@ shift_snake_body_done:
     ret
 
 
-    ; Check if the position ([check_x], [check_y]) is part of the current snake
-    ; Returns 1 in A if a collision occured
-    ; Zero flag is set if a collision didn't occur
-    ; The last snake direction is left in [body_shift]
+; Check if the position ([check_x], [check_y]) is part of the current snake
+; Returns 1 in A if a collision occured
+; Zero flag is set if a collision didn't occur
+; The last snake direction is left in [body_shift]
 check_snake_collision:
     push a
     push b
@@ -301,8 +303,8 @@ check_snake_collision_not:
     ret
 
 
-    ; Generates the apple at a random non-overlapping position
-    ; No registers are modified.
+; Generates the apple at a random non-overlapping position
+; No registers are modified.
 generate_apple:
     push a
     push b
@@ -327,7 +329,7 @@ generate_apple_next:
     in {rand},a
     and $F
     jsr multiply
-    ; Ensure apple isn't in same position
+; Ensure apple isn't in same position
     ldr [new_y],b
     cmp b
     jr generate_apple_not_head,nz
@@ -338,7 +340,7 @@ generate_apple_next:
     jr generate_apple_not_head,nz
     jr generate_apple_next
 generate_apple_not_head:
-    ; Ensure apple isn't in snake
+; Ensure apple isn't in snake
     str [check_x],h
     str [check_y],a
     push a
@@ -353,9 +355,9 @@ generate_apple_not_head:
     ret
 
 
-    ; Check for a collision between the new head position and the walls/body
-    ; Returns a boolean in A for whether a collision occured or not
-    ; Z Flag is set if no collision occured
+; Check for a collision between the new head position and the walls/body
+; Returns a boolean in A for whether a collision occured or not
+; Z Flag is set if no collision occured
 check_new_position:
     ldr [new_x],a
     cmp #160
@@ -376,9 +378,9 @@ check_new_position_collided:
     ret
 
 
-    ; Check for an apple at new head position
-    ; Increments score if apple is present and respawns apple
-    ; Doesn't modify any registers
+; Check for an apple at new head position
+; Increments score if apple is present and respawns apple
+; Doesn't modify any registers
 check_apple:
     push a
     push b
@@ -400,7 +402,7 @@ check_apple_done:
     ret
 
 
-    ; Sets the new snake position based on Controller input
+; Sets the new snake position based on Controller input
 move_snake:
     push a
     push b
@@ -456,10 +458,10 @@ move_snake_move:
     ret
 
 
-    ; Retrieves an integer direction from the Controller input
-    ; Returns the CW ordinal in A with 1 being East
-    ; Returns zero if no inputs are detected
-    ; Only modifies register A
+; Retrieves an integer direction from the Controller input
+; Returns the CW ordinal in A with 1 being East
+; Returns zero if no inputs are detected
+; Only modifies register A
 get_input: ; Todo: Make iterative if not difficult
     in {controller_right},a
     jr get_input_not_right,z
@@ -483,8 +485,8 @@ get_input_not_up:
     ret
 
 
-    ; Performs A mod B and stores the result in A
-    ; Only register A is modified
+; Performs A mod B and stores the result in A
+; Only register A is modified
 modulus:
     cmp b
     jr modulus_done,c
@@ -494,8 +496,8 @@ modulus_done:
     ret
 
 
-    ; Calculates the opposite direction of A and returns it in A
-    ; Only register A is modified
+; Calculates the opposite direction of A and returns it in A
+; Only register A is modified
 get_opposite_direction:
     push b
     ldr #4,b
@@ -505,8 +507,8 @@ get_opposite_direction:
     ret
 
 
-    ; Multiplies A by B and stores the result in A
-    ; Only register A is modified
+; Multiplies A by B and stores the result in A
+; Only register A is modified
 multiply:
     push h
     push b
@@ -533,7 +535,7 @@ multiply_done:
 
     org $400
 title_snake:
-    ; S
+; S
     db #0,#6
     db #1,#7
     db #2,#7
@@ -545,7 +547,7 @@ title_snake:
     db #0,#2
     db #1,#1
     db #2,#1
-    ; N
+; N
     db #5,#7
     db #5,#6
     db #5,#5
@@ -555,7 +557,7 @@ title_snake:
     db #7,#5
     db #7,#6
     db #7,#7
-    ; A
+; A
     db #9,#7
     db #9,#6
     db #9,#5
@@ -566,7 +568,7 @@ title_snake:
     db #11,#6
     db #11,#5
     db #11,#4
-    ; K
+; K
     db #13,#2
     db #13,#3
     db #13,#4
@@ -577,7 +579,7 @@ title_snake:
     db #15,#7
     db #15,#5
     db #15,#4
-    ; E
+; E
     db #17,#3
     db #17,#4
     db #17,#5
@@ -590,17 +592,31 @@ title_snake:
     db #19,#7
 
     data ; Enter data section
-score:      var         ; Number of apples collected
-input:      var         ; The last input from the user or zero
-apple_x:    var         ; The apple's X coordinate
-apple_y:    var         ; The apple's Y coordinate
-x:          var         ; X coordinate of head
-y:          var         ; Y coordinate of head
-body_x:     var         ; X coordinate of current body segment
-body_y:     var         ; Y coordinate of current body segment
-body_shift: var         ; A direction to be shifted into the body
-check_x:    var         ; The X value used for snake collision checking
-check_y:    var         ; The Y value used for snake collision checking
-new_x:      var         ; The new head X coordinate for collision checking
-new_y:      var         ; The new head Y coordinate for collision checking
-snake:      var[320]    ; Array of snake body directions starting from head
+; Number of apples collected
+score: var
+; The last input from the user or zero
+input: var
+; The apple's X coordinate
+apple_x: var
+; The apple's Y coordinate
+apple_y: var
+; X coordinate of head
+x: var
+; Y coordinate of head
+y: var
+; X coordinate of current body segment
+body_x: var
+; Y coordinate of current body segment
+body_y: var
+; A direction to be shifted into the body
+body_shift: var
+; The X value used for snake collision checking
+check_x: var
+; The Y value used for snake collision checking
+check_y: var
+; The new head X coordinate for collision checking
+new_x: var
+; The new head Y coordinate for collision checking
+new_y: var
+; Array of snake body directions starting from head
+snake: var[320]

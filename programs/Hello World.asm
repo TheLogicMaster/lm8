@@ -1,6 +1,6 @@
 ; This demonstrates manually printing out a string using Print
 
-jmp program ; Program entry point
+    jmp program ; Program entry point
 
 message: db "Hello World!\n",$0 ; Message to print
 
