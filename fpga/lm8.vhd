@@ -1,0 +1,57 @@
+-- Top level CPU entity
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+
+ENTITY lm8 IS
+	PORT (
+		-- Clocks
+		ADC_CLK_10, MAX10_CLK1_50, MAX10_CLK2_50 : IN STD_LOGIC;
+		
+		-- SDRAM
+		DRAM_DQ : INOUT STD_LOGIC_VECTOR(0 to 15);
+		DRAM_ADDR : OUT STD_LOGIC_VECTOR(0 to 12);
+		DRAM_BA : OUT STD_LOGIC_VECTOR(0 to 1);
+		DRAM_CAS_N, DRAM_CKE, DRAM_CLK, DRAM_CS_N, DRAM_LDQM, DRAM_RAS_N, DRAM_UDQM, DRAM_WE_N : OUT STD_LOGIC;
+		
+		-- Switches
+		SW : IN STD_LOGIC_VECTOR(0 to 10); 
+		
+		-- Push buttons
+		KEY: IN STD_LOGIC_VECTOR(0 to 1); 
+		
+		-- Seven segment displays
+		HEX0, HEX1, HEX2, HEX3, HEX4, HEX5 : OUT STD_LOGIC_VECTOR(0 to 7);
+		
+		-- LEDs
+		LEDR : OUT STD_LOGIC_VECTOR(0 to 10);
+		
+		-- VGA
+		VGA_R, VGA_G, VGA_B : OUT STD_LOGIC_VECTOR(0 to 3);
+		VGA_HS, VGA_VS : OUT STD_LOGIC;
+		
+		-- Accelerometer
+		GSENSOR_INT : IN STD_LOGIC_VECTOR(1 to 2);
+		GSENSOR_SDI, GSENSOR_SDO : INOUT STD_LOGIC;
+		GSENSOR_CS_N, GSENSOR_SCLK : OUT STD_LOGIC;
+		
+		-- Arduino
+		ARDUINO_IO : INOUT STD_LOGIC_VECTOR(0 to 15);
+		ARDUINO_RESET_N : INOUT STD_LOGIC;
+		
+		-- GPIO
+		GPIO : INOUT STD_LOGIC_VECTOR(0 to 35)
+	);
+END lm8;
+
+ARCHITECTURE impl OF lm8 IS
+BEGIN
+	SEVEN_SEG_0 : work.seg7 PORT MAP(x"9", HEX0);
+	SEVEN_SEG_1 : work.seg7 PORT MAP(x"6", HEX1);
+	SEVEN_SEG_2 : work.seg7 PORT MAP(x"9", HEX2);
+	SEVEN_SEG_3 : work.seg7 PORT MAP(x"6", HEX3);
+	SEVEN_SEG_4 : work.seg7 PORT MAP(x"9", HEX4);
+	SEVEN_SEG_5 : work.seg7 PORT MAP(x"6", HEX5);
+
+	LEDR <= SW;
+END ARCHITECTURE;
