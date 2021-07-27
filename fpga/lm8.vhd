@@ -1,57 +1,59 @@
 -- Top level CPU entity
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.all;
+library ieee;
+use ieee.std_logic_1164.all;
 
-ENTITY lm8 IS
-	PORT (
+entity lm8 is
+	port (
 		-- Clocks
-		ADC_CLK_10, MAX10_CLK1_50, MAX10_CLK2_50 : IN STD_LOGIC;
+		ADC_CLK_10, MAX10_CLK1_50, MAX10_CLK2_50 : in std_logic;
 		
 		-- SDRAM
-		DRAM_DQ : INOUT STD_LOGIC_VECTOR(0 to 15);
-		DRAM_ADDR : OUT STD_LOGIC_VECTOR(0 to 12);
-		DRAM_BA : OUT STD_LOGIC_VECTOR(0 to 1);
-		DRAM_CAS_N, DRAM_CKE, DRAM_CLK, DRAM_CS_N, DRAM_LDQM, DRAM_RAS_N, DRAM_UDQM, DRAM_WE_N : OUT STD_LOGIC;
+		DRAM_DQ : inout std_logic_vector(15 downto 0);
+		DRAM_ADDR : out std_logic_vector(12 downto 0);
+		DRAM_BA : out std_logic_vector(1 downto 0);
+		DRAM_CAS_N, DRAM_CKE, DRAM_CLK, DRAM_CS_N, DRAM_LDQM, DRAM_RAS_N, DRAM_UDQM, DRAM_WE_N : out std_logic;
 		
 		-- Switches
-		SW : IN STD_LOGIC_VECTOR(0 to 10); 
+		SW : in std_logic_vector(10 downto 0); 
 		
 		-- Push buttons
-		KEY: IN STD_LOGIC_VECTOR(0 to 1); 
+		KEY: in std_logic_vector(1 downto 0); 
 		
 		-- Seven segment displays
-		HEX0, HEX1, HEX2, HEX3, HEX4, HEX5 : OUT STD_LOGIC_VECTOR(0 to 7);
+		HEX0, HEX1, HEX2, HEX3, HEX4, HEX5 : out std_logic_vector(7 downto 0);
 		
 		-- LEDs
-		LEDR : OUT STD_LOGIC_VECTOR(0 to 10);
+		LEDR : out std_logic_vector(10 downto 0);
 		
 		-- VGA
-		VGA_R, VGA_G, VGA_B : OUT STD_LOGIC_VECTOR(0 to 3);
-		VGA_HS, VGA_VS : OUT STD_LOGIC;
+		VGA_R, VGA_G, VGA_B : out std_logic_vector(3 downto 0);
+		VGA_HS, VGA_VS : out std_logic;
 		
 		-- Accelerometer
-		GSENSOR_INT : IN STD_LOGIC_VECTOR(1 to 2);
-		GSENSOR_SDI, GSENSOR_SDO : INOUT STD_LOGIC;
-		GSENSOR_CS_N, GSENSOR_SCLK : OUT STD_LOGIC;
+		GSENSOR_INT : in std_logic_vector(2 downto 1);
+		GSENSOR_SDI, GSENSOR_SDO : inout std_logic;
+		GSENSOR_CS_N, GSENSOR_SCLK : out std_logic;
 		
 		-- Arduino
-		ARDUINO_IO : INOUT STD_LOGIC_VECTOR(0 to 15);
-		ARDUINO_RESET_N : INOUT STD_LOGIC;
+		ARDUINO_IO : inout std_logic_vector(15 downto 0);
+		ARDUINO_RESET_N : inout std_logic;
 		
 		-- GPIO
-		GPIO : INOUT STD_LOGIC_VECTOR(0 to 35)
+		GPIO : inout std_logic_vector(35 downto 0)
 	);
-END lm8;
+end entity;
 
-ARCHITECTURE impl OF lm8 IS
-BEGIN
-	SEVEN_SEG_0 : work.seg7 PORT MAP(x"9", HEX0);
-	SEVEN_SEG_1 : work.seg7 PORT MAP(x"6", HEX1);
-	SEVEN_SEG_2 : work.seg7 PORT MAP(x"9", HEX2);
-	SEVEN_SEG_3 : work.seg7 PORT MAP(x"6", HEX3);
-	SEVEN_SEG_4 : work.seg7 PORT MAP(x"9", HEX4);
-	SEVEN_SEG_5 : work.seg7 PORT MAP(x"6", HEX5);
+architecture impl of lm8 is
+	signal flags_0, flags_1 : std_logic_vector(3 downto 0);
+	signal result_0, result_1 : std_logic_vector(7 downto 0);
+begin
+	seven_seg_0 : work.seg7 port map(x"9", HEX0);
+	seven_seg_1 : work.seg7 port map(x"6", HEX1);
+	seven_seg_2 : work.seg7 port map(x"9", HEX2);
+	seven_seg_3 : work.seg7 port map(x"6", HEX3);
+	seven_seg_4 : work.seg7 port map(x"9", HEX4);
+	seven_seg_5 : work.seg7 port map(x"6", HEX5);
 
 	LEDR <= SW;
-END ARCHITECTURE;
+end architecture;

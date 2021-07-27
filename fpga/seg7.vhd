@@ -1,36 +1,32 @@
 -- A seven segment display driver
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.all;
+library ieee;
+use ieee.std_logic_1164.all;
 
-ENTITY seg7 IS
-	PORT (
-		digit : IN STD_LOGIC_VECTOR(0 to 3);
-		segments: OUT STD_LOGIC_VECTOR(0 to 7)
+entity seg7 is
+	port (
+		digit : in std_logic_vector(3 downto 0);
+		segments: out std_logic_vector(7 downto 0)
 	);
-END seg7;
+end entity;
 
-ARCHITECTURE impl OF seg7 IS
-BEGIN
-	switch: PROCESS (digit)
-	BEGIN
-		CASE digit IS
-			WHEN x"0" => segments <= "00000011";
-			WHEN x"1" => segments <= "10011111";
-			WHEN x"2" => segments <= "00100101";
-			WHEN x"3" => segments <= "00001101";
-			WHEN x"4" => segments <= "10011001";
-			WHEN x"5" => segments <= "01001001";
-			WHEN x"6" => segments <= "01000001";
-			WHEN x"7" => segments <= "00011111";
-			WHEN x"8" => segments <= "00000001";
-			WHEN x"9" => segments <= "00011001";
-			WHEN x"A" => segments <= "00010001";
-			WHEN x"B" => segments <= "11000001";
-			WHEN x"C" => segments <= "01100011";
-			WHEN x"D" => segments <= "10000101";
-			WHEN x"E" => segments <= "01100001";
-			WHEN x"F" => segments <= "01110001";
-		END CASE;
-	END PROCESS;
-END impl;
+architecture impl of seg7 is
+begin
+	with digit select segments <=
+		"11000000" when x"0",
+		"11111001" when x"1",
+		"10100100" when x"2",
+		"10110000" when x"3",
+		"10011001" when x"4",
+		"10010010" when x"5",
+		"10000010" when x"6",
+		"11111000" when x"7",
+		"10000000" when x"8",
+		"10010000" when x"9",
+		"10001000" when x"A",
+		"10000011" when x"B",
+		"11000110" when x"C",
+		"10100001" when x"D",
+		"10000110" when x"E",
+		"10001110" when x"F";
+end architecture;
