@@ -23,6 +23,10 @@ constants = {
     "controller_right":  38,  # GPIO 3
     "rand":              93,
     "swap_display":      94,
+    "gpio_output":       95,
+    "gpio_input":        96,
+    "arduino_output":    97,
+    "arduino_input":     98,
 }
 constants.update({"seven_segment_" + str(i): i + 2 for i in range(6)})
 constants.update({"led_" + str(i): i + 10 for i in range(10)})
@@ -223,6 +227,8 @@ def main():
     parser = argparse.ArgumentParser(description='Assemble a program')
     parser.add_argument('program', help='The program file to assemble')
     parser.add_argument('-r', '--run', action='store_true', help="Whether to run the emulator after assembly")
+    parser.add_argument('-f', '--fpga', default='none', choices=['none', 'patch', 'flash'], type=str.lower,
+                        help="Whether to patch or run for FPGA (Windows only)")
     parser.add_argument('-e', '--emulator', help='The path to the emulator if not ./emulator/build/Emulator')
     args = parser.parse_args()
 
@@ -473,6 +479,12 @@ def main():
     f = open(rom_path, "wb")
     f.write(output)
     f.close()
+
+    if args.fpga == 'patch':
+        os.system(f'/bin/bash ./simulation/patch_rom.sh "{os.path.abspath(rom_path)}"')
+    elif args.fpga == 'flash':
+        os.system(f'/bin/bash ./simulation/patch_rom.sh "{os.path.abspath(rom_path)}"')
+        os.system('/bin/bash ./simulation/compile_and_flash.sh')
 
     if args.run:
         os.system(f"\"{args.emulator if args.emulator else './emulator/build/Emulator'}\" \"{os.path.abspath(rom_path)}\"")

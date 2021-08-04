@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy
+ date="2021.08.02.20:29:42"
+ outputDirectory="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/">
+ <perimeter>
+  <parameter
+     name="AUTO_GENERATION_ID"
+     type="Integer"
+     defaultValue="0"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_UNIQUE_ID"
+     type="String"
+     defaultValue=""
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_FAMILY"
+     type="String"
+     defaultValue="MAX 10"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE"
+     type="String"
+     defaultValue="10M50DAF484C6GES"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_SPEEDGRADE"
+     type="String"
+     defaultValue="6"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_CLK_CLOCK_RATE"
+     type="Long"
+     defaultValue="-1"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_CLK_CLOCK_DOMAIN"
+     type="Integer"
+     defaultValue="-1"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_CLK_RESET_DOMAIN"
+     type="Integer"
+     defaultValue="-1"
+     onHdl="0"
+     affectsHdl="1" />
+  <interface name="clk" kind="clock" start="0">
+   <property name="clockRate" value="0" />
+   <property name="externallyDriven" value="false" />
+   <property name="ptfSchematicName" value="" />
+   <port name="CLOCK" direction="input" role="clk" width="1" />
+  </interface>
+  <interface name="readings" kind="conduit" start="0">
+   <property name="associatedClock" value="" />
+   <property name="associatedReset" value="" />
+   <port name="CH0" direction="output" role="CH0" width="12" />
+   <port name="CH1" direction="output" role="CH1" width="12" />
+   <port name="CH2" direction="output" role="CH2" width="12" />
+   <port name="CH3" direction="output" role="CH3" width="12" />
+   <port name="CH4" direction="output" role="CH4" width="12" />
+   <port name="CH5" direction="output" role="CH5" width="12" />
+   <port name="CH6" direction="output" role="CH6" width="12" />
+   <port name="CH7" direction="output" role="CH7" width="12" />
+  </interface>
+  <interface name="reset" kind="reset" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="synchronousEdges" value="DEASSERT" />
+   <port name="RESET" direction="input" role="reset" width="1" />
+  </interface>
+ </perimeter>
+ <entity
+   path=""
+   parameterizationKey="adc:1.0:AUTO_CLK_CLOCK_DOMAIN=-1,AUTO_CLK_CLOCK_RATE=-1,AUTO_CLK_RESET_DOMAIN=-1,AUTO_DEVICE=10M50DAF484C6GES,AUTO_DEVICE_FAMILY=MAX 10,AUTO_DEVICE_SPEEDGRADE=6,AUTO_GENERATION_ID=1627950580,AUTO_UNIQUE_ID=(altera_up_avalon_adc_mega:18.0:AUTO_CLK_CLOCK_RATE=0,AUTO_DEVICE_FAMILY=MAX 10,board=DE10-Lite,board_rev=Autodetect,max10plldivby=5,max10pllmultby=1,numch=5,numch_=6,sclk_freq=10.0,sys_clk_freq=50,tsclk=5)"
+   instancePathKey="adc"
+   kind="adc"
+   version="1.0"
+   name="adc">
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_GENERATION_ID" value="1627950580" />
+  <parameter name="AUTO_DEVICE" value="10M50DAF484C6GES" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="MAX 10" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_UNIQUE_ID" value="" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="6" />
+  <generatedFiles>
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/adc.vhd"
+       type="VHDL" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_up_avalon_adv_adc.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_control.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_control_avrg_fifo.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_control_fsm.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_sample_store.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_sample_store_ram.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_sequencer.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_sequencer_csr.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_sequencer_ctrl.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/chsel_code_converter_sw_to_hw.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/DE10_Lite_ADC_Core_modular_adc_0.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/fiftyfivenm_adcblock_primitive_wrapper.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/fiftyfivenm_adcblock_top_wrapper.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/adc_adc_mega_0.v"
+       type="VERILOG" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc.qsys" />
+  </sourceFiles>
+  <childSourceFiles>
+   <file
+       path="/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/altera_up_avalon_adc_mega_hw.tcl" />
+   <file
+       path="/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/altera_up_avalon_adv_adc.v" />
+  </childSourceFiles>
+  <messages>
+   <message level="Debug" culprit="adc">queue size: 0 starting:adc "adc"</message>
+   <message level="Progress" culprit="min"></message>
+   <message level="Progress" culprit="max"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Debug">Transform: CustomInstructionTransform</message>
+   <message level="Debug">No custom instruction connections, skipping transform </message>
+   <message level="Debug" culprit="merlin_custom_instruction_transform"><![CDATA[After transform: <b>1</b> modules, <b>0</b> connections]]></message>
+   <message level="Debug">Transform: MMTransform</message>
+   <message level="Debug">Transform: InterruptMapperTransform</message>
+   <message level="Debug">Transform: InterruptSyncTransform</message>
+   <message level="Debug">Transform: InterruptFanoutTransform</message>
+   <message level="Debug">Transform: AvalonStreamingTransform</message>
+   <message level="Debug">Transform: ResetAdaptation</message>
+   <message level="Debug" culprit="adc"><![CDATA["<b>adc</b>" reuses <b>altera_up_avalon_adc_mega</b> "<b>submodules/adc_adc_mega_0</b>"]]></message>
+   <message level="Debug" culprit="adc">queue size: 0 starting:altera_up_avalon_adc_mega "submodules/adc_adc_mega_0"</message>
+   <message level="Info" culprit="adc_mega_0">Starting Generation of ADC Controller for DE-series Board</message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_control.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_control_avrg_fifo.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control_avrg_fifo.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_control_fsm.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control_fsm.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_sample_store.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sample_store.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_sample_store_ram.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sample_store_ram.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_sequencer.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_sequencer_csr.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer_csr.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_sequencer_ctrl.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer_ctrl.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>chsel_code_converter_sw_to_hw.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/chsel_code_converter_sw_to_hw.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>DE10_Lite_ADC_Core_modular_adc_0.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/DE10_Lite_ADC_Core_modular_adc_0.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>fiftyfivenm_adcblock_primitive_wrapper.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/fiftyfivenm_adcblock_primitive_wrapper.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>fiftyfivenm_adcblock_top_wrapper.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/fiftyfivenm_adcblock_top_wrapper.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Info" culprit="adc_mega_0">/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/altera_up_avalon_adv_adc.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control_avrg_fifo.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control_fsm.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sample_store.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sample_store_ram.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer_csr.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer_ctrl.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/chsel_code_converter_sw_to_hw.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/DE10_Lite_ADC_Core_modular_adc_0.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/fiftyfivenm_adcblock_primitive_wrapper.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/fiftyfivenm_adcblock_top_wrapper.v /tmp/alt8842_4487764721868747107.dir/0002_sopcgen/adc_adc_mega_0.v</message>
+   <message level="Debug">set ALTERA_HW_TCL_KEEP_TEMP_FILES=1 to retain temp files</message>
+   <message level="Debug">Command: /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/quartus/linux64/quartus_sh -t /tmp/alt8842_4487764721868747107.dir/0003_sopcqmap/not_a_project_setup.tcl</message>
+   <message level="Debug">Command: /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/quartus/linux64/quartus_map not_a_project --generate_hdl_interface=/tmp/alt8842_4487764721868747107.dir/0002_sopcgen/adc_adc_mega_0.v --set=HDL_INTERFACE_OUTPUT_PATH=/tmp/alt8842_4487764721868747107.dir/0003_sopcqmap/ --ini=disable_check_quartus_compatibility_qsys_only=on</message>
+   <message level="Debug">Command took 0.417s</message>
+   <message level="Debug">Command took 0.596s</message>
+   <message level="Debug">set ALTERA_HW_TCL_KEEP_TEMP_FILES=1 to retain temp files</message>
+   <message level="Debug">Command: /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/quartus/linux64/quartus_sh -t /tmp/alt8842_4487764721868747107.dir/0004_sopcqmap/not_a_project_setup.tcl</message>
+   <message level="Debug">Command: /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/quartus/linux64/quartus_map not_a_project --generate_hdl_interface=/tmp/alt8842_4487764721868747107.dir/0002_sopcgen/adc_adc_mega_0.v --set=HDL_INTERFACE_OUTPUT_PATH=/tmp/alt8842_4487764721868747107.dir/0004_sopcqmap/ --set=HDL_INTERFACE_INSTANCE_NAME=inst --set=HDL_INTERFACE_INSTANCE_ENTITY=adc_adc_mega_0 --set=HDL_INTERFACE_INSTANCE_PARAMETERS=board=S"DE10-Lite";board_rev=S"Autodetect";tsclk=D"5";numch=D"5";max10pllmultby=D"1";max10plldivby=D"5"; --ini=disable_check_quartus_compatibility_qsys_only=on</message>
+   <message level="Debug">Command took 0.373s</message>
+   <message level="Debug">Command took 0.596s</message>
+   <message level="Info" culprit="adc_mega_0"><![CDATA["<b>adc</b>" instantiated <b>altera_up_avalon_adc_mega</b> "<b>adc_mega_0</b>"]]></message>
+  </messages>
+ </entity>
+ <entity
+   path="submodules/"
+   parameterizationKey="altera_up_avalon_adc_mega:18.0:AUTO_CLK_CLOCK_RATE=0,AUTO_DEVICE_FAMILY=MAX 10,board=DE10-Lite,board_rev=Autodetect,max10plldivby=5,max10pllmultby=1,numch=5,numch_=6,sclk_freq=10.0,sys_clk_freq=50,tsclk=5"
+   instancePathKey="adc:.:adc_mega_0"
+   kind="altera_up_avalon_adc_mega"
+   version="18.0"
+   name="adc_adc_mega_0">
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="0" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="MAX 10" />
+  <parameter name="max10plldivby" value="5" />
+  <parameter name="sys_clk_freq" value="50" />
+  <parameter name="tsclk" value="5" />
+  <parameter name="sclk_freq" value="10.0" />
+  <parameter name="numch_" value="6" />
+  <parameter name="board_rev" value="Autodetect" />
+  <parameter name="max10pllmultby" value="1" />
+  <parameter name="board" value="DE10-Lite" />
+  <parameter name="numch" value="5" />
+  <generatedFiles>
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_up_avalon_adv_adc.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_control.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_control_avrg_fifo.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_control_fsm.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_sample_store.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_sample_store_ram.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_sequencer.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_sequencer_csr.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/altera_modular_adc_sequencer_ctrl.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/chsel_code_converter_sw_to_hw.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/DE10_Lite_ADC_Core_modular_adc_0.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/fiftyfivenm_adcblock_primitive_wrapper.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/fiftyfivenm_adcblock_top_wrapper.v"
+       type="VERILOG" />
+   <file
+       path="/home/justin/logisim_evolution_workspace/simulation_fpga/main/adc/synthesis/submodules/adc_adc_mega_0.v"
+       type="VERILOG" />
+  </generatedFiles>
+  <childGeneratedFiles/>
+  <sourceFiles>
+   <file
+       path="/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/altera_up_avalon_adc_mega_hw.tcl" />
+   <file
+       path="/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/altera_up_avalon_adv_adc.v" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator instantiator="adc" as="adc_mega_0" />
+  <messages>
+   <message level="Debug" culprit="adc">queue size: 0 starting:altera_up_avalon_adc_mega "submodules/adc_adc_mega_0"</message>
+   <message level="Info" culprit="adc_mega_0">Starting Generation of ADC Controller for DE-series Board</message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_control.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_control_avrg_fifo.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control_avrg_fifo.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_control_fsm.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control_fsm.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_sample_store.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sample_store.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_sample_store_ram.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sample_store_ram.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_sequencer.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_sequencer_csr.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer_csr.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>altera_modular_adc_sequencer_ctrl.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer_ctrl.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>chsel_code_converter_sw_to_hw.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/chsel_code_converter_sw_to_hw.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>DE10_Lite_ADC_Core_modular_adc_0.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/DE10_Lite_ADC_Core_modular_adc_0.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>fiftyfivenm_adcblock_primitive_wrapper.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/fiftyfivenm_adcblock_primitive_wrapper.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> from generate callback added file <b>fiftyfivenm_adcblock_top_wrapper.v</b> with wrong prefix; use [get_generation_property output_name] to get correct prefix]]></message>
+   <message level="Warning" culprit="adc_mega_0"><![CDATA[<b>add_file</b> on static file <b>/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/fiftyfivenm_adcblock_top_wrapper.v</b> from generate callback is unsafe; add static files from main program]]></message>
+   <message level="Info" culprit="adc_mega_0">/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/altera_up_avalon_adv_adc.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control_avrg_fifo.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_control_fsm.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sample_store.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sample_store_ram.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer_csr.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/altera_modular_adc_sequencer_ctrl.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/chsel_code_converter_sw_to_hw.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/DE10_Lite_ADC_Core_modular_adc_0.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/fiftyfivenm_adcblock_primitive_wrapper.v /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/ip/altera/university_program/input_output/altera_up_avalon_adc/hdl/de10/fiftyfivenm_adcblock_top_wrapper.v /tmp/alt8842_4487764721868747107.dir/0002_sopcgen/adc_adc_mega_0.v</message>
+   <message level="Debug">set ALTERA_HW_TCL_KEEP_TEMP_FILES=1 to retain temp files</message>
+   <message level="Debug">Command: /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/quartus/linux64/quartus_sh -t /tmp/alt8842_4487764721868747107.dir/0003_sopcqmap/not_a_project_setup.tcl</message>
+   <message level="Debug">Command: /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/quartus/linux64/quartus_map not_a_project --generate_hdl_interface=/tmp/alt8842_4487764721868747107.dir/0002_sopcgen/adc_adc_mega_0.v --set=HDL_INTERFACE_OUTPUT_PATH=/tmp/alt8842_4487764721868747107.dir/0003_sopcqmap/ --ini=disable_check_quartus_compatibility_qsys_only=on</message>
+   <message level="Debug">Command took 0.417s</message>
+   <message level="Debug">Command took 0.596s</message>
+   <message level="Debug">set ALTERA_HW_TCL_KEEP_TEMP_FILES=1 to retain temp files</message>
+   <message level="Debug">Command: /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/quartus/linux64/quartus_sh -t /tmp/alt8842_4487764721868747107.dir/0004_sopcqmap/not_a_project_setup.tcl</message>
+   <message level="Debug">Command: /mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/quartus/linux64/quartus_map not_a_project --generate_hdl_interface=/tmp/alt8842_4487764721868747107.dir/0002_sopcgen/adc_adc_mega_0.v --set=HDL_INTERFACE_OUTPUT_PATH=/tmp/alt8842_4487764721868747107.dir/0004_sopcqmap/ --set=HDL_INTERFACE_INSTANCE_NAME=inst --set=HDL_INTERFACE_INSTANCE_ENTITY=adc_adc_mega_0 --set=HDL_INTERFACE_INSTANCE_PARAMETERS=board=S"DE10-Lite";board_rev=S"Autodetect";tsclk=D"5";numch=D"5";max10pllmultby=D"1";max10plldivby=D"5"; --ini=disable_check_quartus_compatibility_qsys_only=on</message>
+   <message level="Debug">Command took 0.373s</message>
+   <message level="Debug">Command took 0.596s</message>
+   <message level="Info" culprit="adc_mega_0"><![CDATA["<b>adc</b>" instantiated <b>altera_up_avalon_adc_mega</b> "<b>adc_mega_0</b>"]]></message>
+  </messages>
+ </entity>
+</deploy>

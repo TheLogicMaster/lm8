@@ -115,11 +115,13 @@ def main():
     state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C0, read_sel=READ_MEM, pc_inc=True)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C1, read_sel=READ_MEM, pc_inc=True)
+    state(addr_mode=ADDR_CACHE)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_REG, read_sel=READ_MEM, addr_mode=ADDR_CACHE, f_write=True, instr_done=True)
 
     # LDR [HL],reg
     instr(0b000011)
     state()
+    state(addr_mode=ADDR_HL)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_REG, read_sel=READ_MEM, addr_mode=ADDR_HL, f_write=True, instr_done=True)
 
     # STR [addr],reg
@@ -287,6 +289,7 @@ def main():
     # POP reg
     instr(0b100101)
     state()
+    state(addr_mode=ADDR_SP)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_REG, read_sel=READ_MEM, addr_mode=ADDR_SP, sp_en=True, sp_inc=True, instr_done=True)
 
     # JSR addr
@@ -301,12 +304,15 @@ def main():
     # RET
     instr(0b100111)
     state()
+    state(addr_mode=ADDR_SP)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C0, read_sel=READ_MEM, addr_mode=ADDR_SP, sp_en=True, sp_inc=True)
+    state(addr_mode=ADDR_SP)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C1, read_sel=READ_MEM, addr_mode=ADDR_SP, sp_en=True, sp_inc=True)
     state(pc_write=True, mode=PC_CACHE, instr_done=True)
 
     # HALT
     instr(0b101000)
+    state()
     state(halt=True)
 
     output = bytearray(len(states) * STATE_SIZE)
