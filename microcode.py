@@ -1,5 +1,8 @@
 #!/bin/python3
 
+# Generates CPU microcode binary
+
+# CPU constants
 INSTR_COUNT = 64
 INSTR_STATES = 6
 STATE_SIZE = 3
@@ -10,6 +13,7 @@ ADDR_SP = 1
 ADDR_HL = 2
 ADDR_CACHE = 3
 
+# Data destinations
 WRITE_A = 0
 WRITE_REG = 1
 WRITE_H = 2
@@ -19,6 +23,7 @@ WRITE_C1 = 5
 WRITE_MEM = 6
 WRITE_PORT = 7
 
+# Data sources
 READ_A = 0
 READ_REG = 1
 READ_H = 2
@@ -30,15 +35,18 @@ READ_PC_LOW = 7
 READ_PC_HIGH = 8
 READ_PORT = 9
 
+# Data operations
 OP_ALU = 0
 OP_PASS = 1
 OP_INC = 2
 OP_DEC = 3
 
+# PC write modes
 PC_HL = 0
 PC_CACHE = 1
 PC_ADD = 2
 
+# ALU modes
 ALU_ADD = 0
 ALU_ADC = 1
 ALU_SUB = 2
@@ -48,11 +56,13 @@ ALU_OR = 5
 ALU_XOR = 6
 ALU_CMP = 7
 
+# Instruction end conditions
 COND_FLAG = 0
 COND_NOT_FLAG = 1
 COND_NOT_ZERO = 2
 COND_NOT_MAX = 3
 
+# Microcode generation state
 states = [0 for i in range(INSTR_COUNT * INSTR_STATES)]
 instruction = 0
 instruction_state = 0
@@ -165,7 +175,7 @@ def main():
     # INA
     instr(0b001011)
     state(write=True, write_op=OP_INC, write_sel=WRITE_L, read_sel=READ_L, f_write=True)
-    state(read_sel=READ_L, condition=True, mode=COND_NOT_ZERO)
+    state(read_sel=READ_L, write_op=OP_PASS, condition=True, mode=COND_NOT_ZERO)
     state(write=True, write_op=OP_INC, write_sel=WRITE_H, read_sel=READ_H, f_write=True, instr_done=True)
 
     # DEA

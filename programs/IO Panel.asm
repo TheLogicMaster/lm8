@@ -49,10 +49,10 @@ check_buttons:
     ldr '0',a ; A = '0'
     sub {button_0} ; A = A - {button_0}
     add b ; A = A + B
-    out {print_char},a ; Print A
+    out {serial},a ; Print A
     ldr [temp],a ; A = [temp]
     ldr '\n',b ; B = '\n'
-    out {print_char},b ; Print '\n'
+    out {serial},b ; Print '\n'
 not_btn:
     in b ; B = btn
     str [hl],b ; [hl] = B

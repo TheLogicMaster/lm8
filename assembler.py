@@ -8,10 +8,8 @@ import re
 
 # Constants to be substituted during assembly
 constants = {
-    "print_char":        0,
+    "serial":            0,
     "print_string":      1,
-    "button_0":          8,
-    "button_1":          9,
     "graphics_x":        30,
     "graphics_y":        31,
     "draw_pixel":        32,
@@ -27,13 +25,29 @@ constants = {
     "gpio_input":        96,
     "arduino_output":    97,
     "arduino_input":     98,
+    "pwm_enable":        99,
+    "pwm_disable":       100,
+    "serial_enable":     107,
+    "microseconds":      0,
+    "centimilliseconds": 1,
+    "decimilliseconds":  2,
+    "milliseconds":      3,
+    "centiseconds":      4,
+    "deciseconds":       5,
+    "seconds":           6,
+    "decaseconds":       7
 }
 constants.update({"seven_segment_" + str(i): i + 2 for i in range(6)})
+constants.update({"button_" + str(i): i + 8 for i in range(2)})
 constants.update({"led_" + str(i): i + 10 for i in range(10)})
 constants.update({"switch_" + str(i): i + 20 for i in range(10)})
 constants.update({"gpio_" + str(i): i + 35 for i in range(36)})
 constants.update({"arduino_" + str(i): i + 71 for i in range(16)})
 constants.update({"adc_" + str(i): i + 87 for i in range(6)})
+constants.update({"pwm_" + str([3, 5, 6, 9, 10, 11][i]): i + 101 for i in range(6)})
+constants.update({"timer_unit_" + str(i): i + 108 for i in range(2)})
+constants.update({"timer_count_" + str(i): i + 110 for i in range(2)})
+constants.update({"timer_" + str(i): i + 112 for i in range(2)})
 
 line_number = 0
 output = bytearray()
@@ -228,7 +242,7 @@ def main():
     parser.add_argument('program', help='The program file to assemble')
     parser.add_argument('-r', '--run', action='store_true', help="Whether to run the emulator after assembly")
     parser.add_argument('-f', '--fpga', default='none', choices=['none', 'patch', 'flash'], type=str.lower,
-                        help="Whether to patch or run for FPGA (Windows only)")
+                        help="Whether to patch or run for FPGA (Linux only)")
     parser.add_argument('-e', '--emulator', help='The path to the emulator if not ./emulator/build/Emulator')
     args = parser.parse_args()
 

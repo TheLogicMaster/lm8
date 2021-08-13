@@ -4,9 +4,8 @@
 
 set -e
 
-QUARTUS_DIR=/mnt/Storage/Syncronized/Programs/Linux/Quartus-Prime/quartus/bin
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)"
-PROJECT=${SCRIPT_DIR}/fpga
+source "${SCRIPT_DIR}/env.sh"
 
 (
     cd "${PROJECT}"

@@ -10,3 +10,5 @@ jetbrains-assembly-plugin/.gradle/
 jetbrains-assembly-plugin/build/
 
 emulator/build/
+
+programs/songs

@@ -85,6 +85,7 @@ title_screen_wait_press:
 
 
 ; Limit game speed with a counter and dummy operations
+; Todo: Switch to timer based delay after emulator supports it
 delay:
     ldr $0,a
     ldr $3,b
