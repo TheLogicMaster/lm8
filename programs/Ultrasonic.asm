@@ -2,7 +2,7 @@
 ; Doesn't work yet
 
     ldr $2,H
-    out {gpio_output},H
+    out {arduino_output},H
 
 ; Setup timer 0 for 10 microseconds
     ldr {microseconds},A

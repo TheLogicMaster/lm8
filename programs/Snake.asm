@@ -1,5 +1,11 @@
 ; A snake game using the controller peripheral
 
+    ; Setup frame timer
+    ldr {deciseconds},A
+    out {timer_unit_0},A
+    ldr #2,A
+    out {timer_count_0},A
+
     jmp title_screen
 
 ; Program loop
@@ -84,22 +90,18 @@ title_screen_wait_press:
     jmp loop
 
 
-; Limit game speed with a counter and dummy operations
-; Todo: Switch to timer based delay after emulator supports it
+; Limit game speed with a frame timer
 delay:
-    ldr $0,a
-    ldr $3,b
-delay_next:
-    push a
+    push A
+    out {timer_0},A
+delay_wait:
     jsr get_input
     jr delay_no_input,z
     str [input],a
 delay_no_input:
-    pop a
-    dec a
-    jr delay_next,nz
-    dec b
-    jr delay_next,nz
+    in {timer_0},A
+    jr delay_wait,Z
+    pop A
     ret
 
 

@@ -6,7 +6,7 @@ a Logisim-Evolution simulation, and an FPGA implementation.
 <img src="media/snake_game.png?raw=true" width="811" height="648">
 
 ## Emulator
-- [Online Demo](https://thelogicmaster.github.io/Computer-GH-Actions-Testing/)
+- [Online Demo](https://thelogicmaster.github.io/CustomComputer/)
 - Breakpoint/step-through debugging
 - Memory/register inspection
 - Emulated De10-Lite I/O

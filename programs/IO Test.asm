@@ -99,7 +99,7 @@ leds_from_io_loop:
     add {gpio_0}
     jr leds_from_io_out
 leds_from_io_arduino:
-    sub $4
+    sub $5
     add {arduino_0}
 leds_from_io_out:
     in b

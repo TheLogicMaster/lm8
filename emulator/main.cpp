@@ -47,7 +47,11 @@ static bool showIO = true;
 static bool showGPIO = true;
 static bool showDisassembly = false;
 static bool showBreakpoints = false;
+static bool showTimers = false;
+static bool showPWM = false;
 static bool controllerPeripheral = false;
+static int processorSpeeds[8]{0, 1, 2, 3, 4, 5, 9, 14};
+static int processorSpeed = 0;
 
 static Emulator *emulator;
 static Disassembler* disassembler;
@@ -62,11 +66,14 @@ static bool enableBreakpoints = false;
 static std::set<uint16_t> breakpoints{};
 static char breakpointText[5]{};
 
+// Todo: Give colors better names
 static ImFont *font7Segment;
-static const ImVec4 *windowColor;
-static const ImVec4 *flagColor;
-static const ImVec4 *registerColor;
-static const ImVec4 *breakpointColor;
+static ImVec4 *windowColor;
+static ImVec4 *flagColor;
+static ImVec4 *registerColor;
+static ImVec4 *breakpointColor;
+static ImVec4 *outputColor;
+static ImVec4 *disabledColor;
 
 static void setupPersistenceHandler(ImGuiContext *context) {
     // Todo: Load and store 'show' variables and peripherals dynamically
@@ -83,6 +90,8 @@ static void setupPersistenceHandler(ImGuiContext *context) {
         int value, value2, n;
         if (sscanf(line, "DisplayScale=%d%n", &value, &n) == 1)
             displayScale = value;
+        if (sscanf(line, "ProcessorSpeed=%d%n", &value, &n) == 1)
+            processorSpeed = value;
         else if (sscanf(line, "ShowDisplay=%d%n", &value, &n) == 1)
             showDisplay = value;
         else if (sscanf(line, "ShowProcessor=%d%n", &value, &n) == 1)
@@ -101,15 +110,20 @@ static void setupPersistenceHandler(ImGuiContext *context) {
             showDisassembly = value;
         else if (sscanf(line, "ShowBreakpoints=%d%n", &value, &n) == 1)
             showBreakpoints = value;
+        else if (sscanf(line, "ShowTimers=%d%n", &value, &n) == 1)
+            showTimers= value;
+        else if (sscanf(line, "ShowPWM=%d%n", &value, &n) == 1)
+            showPWM = value;
         else if (sscanf(line, "WindowSize=%d,%d%n", &value, &value2, &n) == 2)
             SDL_SetWindowSize(window, value, value2);
-        else if (sscanf(line, "Peripherals=%d%n", &value, &n) == 1)
+        else if (sscanf(line, "Controller=%d%n", &value, &n) == 1)
             controllerPeripheral = value;
     };
     ini_handler.ApplyAllFn = nullCallback;
     ini_handler.WriteAllFn = [](ImGuiContext* ctx, ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf) {
         buf->append("[Emulator][Data]\n");
         buf->appendf("DisplayScale=%d\n", displayScale);
+        buf->appendf("ProcessorSpeed=%d\n", processorSpeed);
         buf->appendf("ShowDisplay=%d\n", showDisplay);
         buf->appendf("ShowProcessor=%d\n", showProcessor);
         buf->appendf("ShowRAM=%d\n", ramEditor->Open);
@@ -119,10 +133,12 @@ static void setupPersistenceHandler(ImGuiContext *context) {
         buf->appendf("ShowGPIO=%d\n", showGPIO);
         buf->appendf("ShowDisassembly=%d\n", showDisassembly);
         buf->appendf("ShowBreakpoints=%d\n", showBreakpoints);
+        buf->appendf("ShowTimers=%d\n", showTimers);
+        buf->appendf("ShowPWM=%d\n", showPWM);
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
         buf->appendf("WindowSize=%d,%d\n", w, h);
-        buf->appendf("Peripherals=%d\n", controllerPeripheral);
+        buf->appendf("Controller=%d\n", controllerPeripheral);
     };
     g.SettingsHandlers.push_back(ini_handler);
 }
@@ -187,39 +203,30 @@ static void displayMainMenuBar() {
                 halted = false;
                 emulator->reset();
             }
-            if (ImGui::MenuItem("Pause", "ctrl+P", paused))
-                paused ^= 1;
-            if (ImGui::MenuItem("Enable Breakpoints", "ctrl+B", enableBreakpoints))
-                enableBreakpoints ^= 1;
+            ImGui::MenuItem("Pause", "ctrl+P", &paused);
+            ImGui::MenuItem("Enable Breakpoints", "ctrl+B", &enableBreakpoints);
             if (ImGui::MenuItem("Step CPU", "ctrl+Z") and !halted and paused)
                 stepBreakpoint = true;
+            ImGui::Combo("Processor Speed", &processorSpeed, " 1 MHz\0 512 KHz\0 256 KHz\0 128 KHz\0 64 KHz\0 32 KHz\0 2 Khz\0 64 Hz\0", 8);
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Peripherals")) {
-            if (ImGui::MenuItem("Controller", nullptr, controllerPeripheral))
-                controllerPeripheral ^= 1;
+            ImGui::MenuItem("Controller", nullptr, &controllerPeripheral);
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("View")) {
-            if (ImGui::MenuItem("Show Display", nullptr, showDisplay))
-                showDisplay ^= 1;
-            if (ImGui::MenuItem("Show Print Log", nullptr, showPrintLog))
-                showPrintLog ^= 1;
-            if (ImGui::MenuItem("Show I/O Panel", nullptr, showIO))
-                showIO ^= 1;
-            if (ImGui::MenuItem("Show GPIO", nullptr, showGPIO))
-                showGPIO ^= 1;
+            ImGui::MenuItem("Show Display", nullptr, &showDisplay);
+            ImGui::MenuItem("Show Print Log", nullptr, &showPrintLog);
+            ImGui::MenuItem("Show I/O Panel", nullptr, &showIO);
+            ImGui::MenuItem("Show GPIO", nullptr, &showGPIO);
             ImGui::Separator();
-            if (ImGui::MenuItem("Show ROM Viewer", nullptr, romViewer->Open))
-                romViewer->Open ^= 1;
-            if (ImGui::MenuItem("Show RAM Editor", nullptr, ramEditor->Open))
-                ramEditor->Open ^= 1;
-            if (ImGui::MenuItem("Show Processor", nullptr, showProcessor))
-                showProcessor ^= 1;
-            if (ImGui::MenuItem("Show Disassembly", nullptr, showDisassembly))
-                showDisassembly ^= 1;
-            if (ImGui::MenuItem("Show Breakpoints", nullptr, showBreakpoints))
-                showBreakpoints ^= 1;
+            ImGui::MenuItem("Show ROM Viewer", nullptr, &romViewer->Open);
+            ImGui::MenuItem("Show RAM Editor", nullptr, &ramEditor->Open);
+            ImGui::MenuItem("Show Processor", nullptr, &showProcessor);
+            ImGui::MenuItem("Show Disassembly", nullptr, &showDisassembly);
+            ImGui::MenuItem("Show Breakpoints", nullptr, &showBreakpoints);
+            ImGui::MenuItem("Show Timers", nullptr, &showTimers);
+            ImGui::MenuItem("Show PWM", nullptr, &showPWM);
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
@@ -375,15 +382,22 @@ static void displayPanelGPIO() {
         ImGui::TableHeadersRow();
         char buf[3];
 
+        ImGuiTextFlags ioFlags = ImGuiInputTextFlags_NoHorizontalScroll | ImGuiInputTextFlags_CharsHexadecimal
+                | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll;
+
         // GPIO
         ImGui::TableNextColumn();
         for (int i = 0; i < 36; i++) {
             ImGui::PushID(i);
             sprintf(buf, "%d", emulator->getGPIO(i));
             ImGui::SetNextItemWidth(12);
-            if (ImGui::InputText("##", buf, 2, ImGuiInputTextFlags_NoHorizontalScroll
-                                               | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
+            bool output = emulator->getGpioOutput(i);
+            if (output)
+                ImGui::PushStyleColor(ImGuiCol_Text, emulator->getGPIO(i) ? *outputColor : *breakpointColor);
+            if (ImGui::InputText("##", buf, 2, ioFlags | (output ? ImGuiInputTextFlags_ReadOnly : 0)))
                 emulator->getGPIO(i) = buf[0] != '0';
+            if (output)
+                ImGui::PopStyleColor();
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("GPIO %d", i);
             ImGui::SameLine();
@@ -396,9 +410,13 @@ static void displayPanelGPIO() {
             ImGui::PushID(i + 36);
             sprintf(buf, "%d", emulator->getArduinoIO(i));
             ImGui::SetNextItemWidth(12);
-            if (ImGui::InputText("##", buf, 2, ImGuiInputTextFlags_NoHorizontalScroll
-                                               | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AlwaysOverwrite | ImGuiInputTextFlags_AutoSelectAll))
+            bool output = emulator->getArduinoOutput(i);
+            if (output)
+                ImGui::PushStyleColor(ImGuiCol_Text, emulator->getArduinoIO(i) ? *outputColor : *breakpointColor);
+            if (ImGui::InputText("##", buf, 2, ioFlags | (output ? ImGuiInputTextFlags_ReadOnly : 0)))
                 emulator->getArduinoIO(i) = buf[0] != '0';
+            if (output)
+                ImGui::PopStyleColor();
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip("Arduino I/O %d", i);
             ImGui::SameLine();
@@ -485,7 +503,6 @@ static void displayProcessor() {
                 BYTE_TO_BINARY(emulator->getPC() & 0xFF));
 
     // SP
-    ImGui::NextColumn();
     ImGui::Columns(2);
     ImGui::Separator();
     ImGui::TextColored(*registerColor, "SP");
@@ -495,11 +512,36 @@ static void displayProcessor() {
 
     // Halted or not
     ImGui::NextColumn();
-    ImGui::Separator();
     ImGui::TextColored(*breakpointColor, "HALT");
     ImGui::SameLine();
     ImGui::Text("= %d", halted);
 
+    ImGui::End();
+}
+
+static void displayDisassembly() {
+    if (!showDisassembly)
+        return;
+
+    ImGui::SetNextWindowSize(ImVec2(276, 394), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(1063, 248), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Disassembly", &showDisassembly);
+    ImGui::BeginChild("DisassemblyView", ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 60), true);
+    if (disassembler) {
+        int previousEnd = -1;
+        for (const auto &instruction: disassembler->getDisassembled()) {
+            if (previousEnd != -1 and previousEnd < instruction.address)
+                ImGui::TextUnformatted("----------------------------------");
+            ImGui::PushStyleColor(ImGuiCol_Text, emulator->getPC() == instruction.address ? *flagColor : *windowColor);
+            ImGui::TextUnformatted(instruction.text.c_str());
+            ImGui::PopStyleColor();
+            if (emulator->getPC() == instruction.address and disassemblerJumpToPC)
+                ImGui::SetScrollHereY();
+            previousEnd = instruction.address + instruction.size;
+        }
+    }
+    ImGui::EndChild();
+    ImGui::Checkbox("Follow PC", &disassemblerJumpToPC);
     ImGui::End();
 }
 
@@ -537,29 +579,39 @@ static void displayBreakpoints() {
     ImGui::End();
 }
 
-static void displayDisassembly() {
-    if (!showDisassembly)
+static void displayTimers() {
+    if (!showTimers)
         return;
 
-    ImGui::SetNextWindowSize(ImVec2(276, 393), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowPos(ImVec2(1063, 248), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Disassembly", &showDisassembly);
-    ImGui::BeginChild("DisassemblyView", ImVec2(ImGui::GetWindowWidth() - 10, ImGui::GetWindowHeight() - 60), true);
-    if (disassembler) {
-        int previousEnd = -1;
-        for (const auto &instruction: disassembler->getDisassembled()) {
-            if (previousEnd != -1 and previousEnd < instruction.address)
-                ImGui::TextUnformatted("----------------------------------");
-            ImGui::PushStyleColor(ImGuiCol_Text, emulator->getPC() == instruction.address ? *flagColor : *windowColor);
-            ImGui::TextUnformatted(instruction.text.c_str());
-            ImGui::PopStyleColor();
-            if (emulator->getPC() == instruction.address and disassemblerJumpToPC)
-                ImGui::SetScrollHereY();
-            previousEnd = instruction.address + instruction.size;
-        }
+    ImGui::SetNextWindowSize(ImVec2(196, 74), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(1279, 648), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Timers", &showTimers);
+    for (int i = 0; i < TIMER_COUNT; i++) {
+        ImGui::TextColored(emulator->getTimerValue(i) ? *outputColor : *breakpointColor, "%i:", i);
+        ImGui::SameLine();
+        ImGui::Text("% 3i", emulator->getTimerCount(i));
+        ImGui::SameLine();
+        ImGui::Text("%sseconds", TIMER_MODES[emulator->getTimerMode(i)]);
     }
-    ImGui::EndChild();
-    ImGui::Checkbox("Follow PC", &disassemblerJumpToPC);
+    ImGui::End();
+}
+
+static void displayPWM() {
+    if (!showPWM)
+        return;
+
+    ImGui::SetNextWindowSize(ImVec2(95, 155), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(1377, 25), ImGuiCond_FirstUseEver);
+    ImGui::Begin("PWM", &showPWM);
+    ImGui::TextColored(*registerColor, "Count");
+    ImGui::SameLine();
+    ImGui::Text("= $%02x", emulator->getPwmCount());
+    ImGui::Separator();
+    for (int i = 0; i < 6; i++) {
+        ImGui::TextColored(emulator->getPwmEnable(i) ? *flagColor : *disabledColor, i > 3 ? "A%i:" : "A%i: ", PWM_PINS[i]);
+        ImGui::SameLine();
+        ImGui::Text("$%02x", emulator->getPwmDutyCycle(i));
+    }
     ImGui::End();
 }
 
@@ -585,13 +637,20 @@ static void handleShortcuts() {
 static void runEmulator() {
     if (!halted and (!paused or stepBreakpoint)) {
         try {
-            for (int i = 0; i < 1000; i++) { // Todo: Fix to 1MHz or something rather than ~60KHz
+            // Todo: Configurable clock speed
+            for (int i = 0; i < 16667 / (1 << processorSpeeds[processorSpeed]); i++) { // Run at around 1 million instructions per second
                 if (controllerPeripheral) {
-                    emulator->getGPIO(0) = ImGui::IsKeyDown(SDL_SCANCODE_W) or ImGui::IsKeyDown(SDL_SCANCODE_UP);
-                    emulator->getGPIO(1) = ImGui::IsKeyDown(SDL_SCANCODE_S) or ImGui::IsKeyDown(SDL_SCANCODE_DOWN);
-                    emulator->getGPIO(2) = ImGui::IsKeyDown(SDL_SCANCODE_A) or ImGui::IsKeyDown(SDL_SCANCODE_LEFT);
-                    emulator->getGPIO(3) = ImGui::IsKeyDown(SDL_SCANCODE_D) or ImGui::IsKeyDown(SDL_SCANCODE_RIGHT);
+                    if (!emulator->getGpioOutput(0))
+                        emulator->getGPIO(0) = ImGui::IsKeyDown(SDL_SCANCODE_W) or ImGui::IsKeyDown(SDL_SCANCODE_UP);
+                    if (!emulator->getGpioOutput(1))
+                        emulator->getGPIO(1) = ImGui::IsKeyDown(SDL_SCANCODE_S) or ImGui::IsKeyDown(SDL_SCANCODE_DOWN);
+                    if (!emulator->getGpioOutput(2))
+                        emulator->getGPIO(2) = ImGui::IsKeyDown(SDL_SCANCODE_A) or ImGui::IsKeyDown(SDL_SCANCODE_LEFT);
+                    if (!emulator->getGpioOutput(3))
+                        emulator->getGPIO(3) = ImGui::IsKeyDown(SDL_SCANCODE_D) or ImGui::IsKeyDown(SDL_SCANCODE_RIGHT);
                 }
+
+                emulator->updateTimers(1 << processorSpeeds[processorSpeed]);
 
                 emulator->run();
 
@@ -659,8 +718,10 @@ static void mainLoop(void *arg) {
     displayPanelIO();
     displayPanelGPIO();
     displayProcessor();
-    displayBreakpoints();
     displayDisassembly();
+    displayBreakpoints();
+    displayTimers();
+    displayPWM();
 
     // Render
     ImGui::Render();
@@ -712,7 +773,7 @@ int main(int argc, char* argv[]) {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     auto window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    window = SDL_CreateWindow("Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1378, 729, window_flags);
+    window = SDL_CreateWindow("Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1482, 729, window_flags);
     glContext = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, glContext);
     SDL_GL_SetSwapInterval(1); // Enable vsync
@@ -760,8 +821,11 @@ int main(int argc, char* argv[]) {
     flagColor = new ImVec4(0.0f,1.0f,1.0f,1.0f);
     registerColor = new ImVec4(1.0f,1.0f,0.0f,1.0f);
     breakpointColor = new ImVec4(1.0f,0.1f,0.1f,1.0f);
+    outputColor = new ImVec4(0.0f,1.0f,0.0f,1.0f);
+    disabledColor = new ImVec4(0.7f,0.7f,0.7f,1.0f);
 
 #ifdef __EMSCRIPTEN__
+    processorSpeed = 2;
     emscripten_set_main_loop_arg(mainLoop, nullptr, 0, true);
     IM_UNUSED(setupPersistenceHandler);
 #else
@@ -788,6 +852,8 @@ int main(int argc, char* argv[]) {
     delete registerColor;
     delete flagColor;
     delete breakpointColor;
+    delete outputColor;
+    delete disabledColor;
 
     delete disassembler;
     delete[] rom;

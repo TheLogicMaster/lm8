@@ -6,12 +6,27 @@
 #define DISPLAY_WIDTH 160
 #define DISPLAY_HEIGHT 128
 
+#define TIMER_COUNT 2
+
 #define PRINT_BUFFER 10000
 
 #define FLAG_Z 1 << 3
 #define FLAG_C 1 << 2
 #define FLAG_N 1 << 1
 #define FLAG_V 1 << 0
+
+static const uint8_t PWM_PINS[]{3, 5, 6, 9, 10, 11};
+
+static const char TIMER_MODES[8][11]{
+        "micro",
+        "centimilli",
+        "decimilli",
+        "milli",
+        "centi",
+        "deci",
+        "",
+        "deca"
+};
 
 struct HaltException : public std::exception {
     const char *what() const noexcept override {
@@ -32,6 +47,7 @@ public:
 
     uint8_t* getDisplayBuffer();
     std::string &getPrintBuffer();
+    uint8_t &getUartIn();
     bool& getSwitch(int id);
     bool& getButton(int id);
     bool getLight(int id);
@@ -39,6 +55,16 @@ public:
     bool& getGPIO(int id);
     bool& getArduinoIO(int id);
     uint8_t& getADC(int id);
+    bool getGpioOutput(int id);
+    bool getArduinoOutput(int id);
+    bool getPwmEnable(int id);
+    uint8_t getPwmDutyCycle(int id);
+    uint8_t getPwmCount();
+    bool getUartEnable();
+    uint8_t getTimerMode(int id);
+    uint8_t getTimerCount(int id);
+    bool getTimerValue(int id);
+    void updateTimers(int delta);
 
     uint8_t* getMemory();
     uint8_t* getROM();
@@ -59,10 +85,20 @@ private:
     bool buttons[2]{};
     uint8_t sevenSegmentDisplays[6]{};
     bool gpio[36]{};
+    bool gpioOutput[36]{};
     bool arduinoIO[16]{};
+    bool arduinoOutput[16]{};
+    bool pwmEnable[6]{};
+    uint8_t pwmDutyCycles[6]{};
+    uint8_t pwmCount{};
+    bool uartEnable{};
+    uint8_t timerModes[2]{};
+    uint8_t timerCounts[2]{};
+    uint64_t timerValues[2]{};
     uint8_t analogDigitalConverters[6]{};
     uint8_t graphicsX = 0;
     uint8_t graphicsY = 0;
+    uint8_t uartIn{};
     std::string printBuffer{};
 
     uint8_t rom[0x8000]{};
@@ -70,7 +106,7 @@ private:
 
     uint8_t regA = 0;
     uint8_t regB = 0;
-    union { // Only works on big-endian systems
+    union { // Only works on little-endian systems
         uint16_t hl;
         struct {
             uint8_t l;

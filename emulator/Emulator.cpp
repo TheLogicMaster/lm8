@@ -2,6 +2,7 @@
 #include <cstring>
 #include <bitset>
 #include <ctime>
+#include <math.h>
 
 #include "Emulator.h"
 
@@ -20,6 +21,11 @@ void Emulator::run() {
     uint8_t instruction = ingestUint8();
 
 //    std::cout << std::hex << "PC: " << pc - 1 << ", INSTR: " << std::bitset<8>(instruction) << ", A: " << (uint16_t)regA << ", B: " << (uint16_t)regB << ", HL: " << regHL.hl << ", F: " << (uint16_t)status << std::endl;
+
+    pwmCount++;
+    for (int i = 0; i < 6; i++)
+        if (arduinoOutput[PWM_PINS[i]] and pwmEnable[i])
+            arduinoIO[PWM_PINS[i]] = pwmDutyCycles[i] == 0xFF or pwmDutyCycles[i] < pwmCount;
 
     switch ((instruction & 0xFC) >> 2) {
         default:
@@ -178,6 +184,21 @@ void Emulator::reset() {
     memset(ram, 0, 0x8000);
     memset(lights, 0, 10);
     memset(sevenSegmentDisplays, 0, 6);
+    for (int i = 0; i < 36; i++)
+        if (gpioOutput[i])
+            gpio[i] = false;
+    memset(gpioOutput, 0, 36);
+    for (int i = 0; i < 16; i++)
+        if (arduinoOutput[i])
+            arduinoIO[i] = false;
+    memset(arduinoOutput, 0, 16);
+    memset(pwmEnable, 0, 6);
+    memset(pwmDutyCycles, 0, 6);
+    pwmCount = 0;
+    uartEnable = false;
+    memset(timerCounts, 0, TIMER_COUNT);
+    memset(timerModes, 0, TIMER_COUNT);
+    memset(timerValues, 0, TIMER_COUNT);
     graphicsX = 0;
     graphicsY = 0;
 }
@@ -188,6 +209,10 @@ uint8_t *Emulator::getDisplayBuffer() {
 
 std::string &Emulator::getPrintBuffer() {
     return printBuffer;
+}
+
+uint8_t &Emulator::getUartIn() {
+    return uartIn;
 }
 
 bool &Emulator::getSwitch(int id) {
@@ -216,6 +241,48 @@ bool &Emulator::getArduinoIO(int id) {
 
 uint8_t &Emulator::getADC(int id) {
     return analogDigitalConverters[id];
+}
+
+bool Emulator::getGpioOutput(int id) {
+    return gpioOutput[id];
+}
+
+bool Emulator::getArduinoOutput(int id) {
+    return arduinoOutput[id];
+}
+
+bool Emulator::getPwmEnable(int id) {
+    return pwmEnable[id];
+}
+
+uint8_t Emulator::getPwmDutyCycle(int id) {
+    return pwmDutyCycles[id];
+}
+
+uint8_t Emulator::getPwmCount() {
+    return pwmCount;
+}
+
+bool Emulator::getUartEnable() {
+    return uartEnable;
+}
+
+uint8_t Emulator::getTimerMode(int id) {
+    return timerModes[id];
+}
+
+uint8_t Emulator::getTimerCount(int id) {
+    return timerCounts[id];
+}
+
+bool Emulator::getTimerValue(int id) {
+    return timerValues[id] >= pow(10.0L, timerModes[id]) * timerCounts[id];
+}
+
+void Emulator::updateTimers(int delta) {
+    for (int i = 0; i < TIMER_COUNT; i++)
+        if (!getTimerValue(i))
+            timerValues[i] += delta;
 }
 
 uint8_t *Emulator::getMemory() {
@@ -316,6 +383,8 @@ bool Emulator::checkCondition(uint8_t instruction) const {
 
 uint8_t Emulator::readPort(uint8_t port) {
     switch (port) {
+        case 0:
+            return uartIn;
         case 2 ... 7: // Seven Segment Displays
             return sevenSegmentDisplays[port - 2];
         case 8 ... 9: // I/O Panel Buttons
@@ -328,14 +397,22 @@ uint8_t Emulator::readPort(uint8_t port) {
             return graphicsX;
         case 31: // Graphics Y
             return graphicsY;
-        case 35 ... 70:
+        case 35 ... 70: // GPIO
             return gpio[port - 35];
-        case 71 ... 86:
-            return arduinoIO[port - 72];
-        case 87 ... 92:
+        case 71 ... 86: // Arduino I/O
+            return arduinoIO[port - 71];
+        case 87 ... 92: // ADCs
             return analogDigitalConverters[port - 87];
-        case 93:
+        case 93: // Random
             return rand() % 256;
+        case 101 ... 106: // PWM Duty Cycles
+            return pwmDutyCycles[port - 101];
+        case 108 ... 109:
+            return timerModes[port - 108];
+        case 110 ... 111:
+            return timerCounts[port - 110];
+        case 112 ... 113:
+            return getTimerValue(port - 112);
         default:
             return 0;
     }
@@ -390,6 +467,40 @@ void Emulator::writePort(uint8_t port, uint8_t value) {
                 renderingBuffer = displayBuffers[0];
                 drawingBuffer = displayBuffers[1];
             }
+            break;
+        case 95: // GPIO Output
+            if (value < 36)
+                gpioOutput[value] = true;
+            break;
+        case 96: // GPIO Input
+            if (value < 36)
+                gpioOutput[value] = false;
+            break;
+        case 97: // Arduino I/O Output
+            arduinoOutput[value & 0xF] = true;
+            break;
+        case 98: // Arduino I/O Input
+            arduinoOutput[value & 0xF] = false;
+            break;
+        case 99 ... 100: // PWM Enable/Disable
+            for (int i = 0; i < 6; i++)
+                if (PWM_PINS[i] == value)
+                    pwmEnable[i] = port == 99;
+            break;
+        case 101 ... 106: // PWM Duty Cycle
+            pwmDutyCycles[port - 101] = value;
+            break;
+        case 107: // UART Enable
+            uartEnable = value;
+            break;
+        case 108 ... 109: // Timer Mode
+            timerModes[port - 108] = value;
+            break;
+        case 110 ... 111: // Timer Count
+            timerCounts[port - 110] = value;
+            break;
+        case 112 ... 113: // Timer Reset
+            timerValues[port - 112] = 0;
             break;
         default:
             break;
