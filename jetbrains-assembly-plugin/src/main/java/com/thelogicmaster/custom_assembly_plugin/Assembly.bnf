@@ -19,7 +19,7 @@ assemblyFile ::= item_*
 
 private item_ ::= (label_definition|instruction|COMMENT|CRLF)
 
-private operand ::= CONSTANT|LABEL|REGISTER|CONDITION|ARRAY|STRING|HL
+private operand ::= CONSTANT|LABEL|REGISTER|CONDITION|ARRAY|STRING|HL|DEFINITION
 
 instruction ::= MNEMONIC (operand (SEPARATOR operand)*)? {
       mixin="com.thelogicmaster.custom_assembly_plugin.psi.impl.AssemblyInstructionElementImpl"

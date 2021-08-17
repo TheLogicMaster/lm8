@@ -1,6 +1,7 @@
 package com.thelogicmaster.custom_assembly_plugin;
 
 import com.intellij.formatting.Alignment;
+import com.intellij.formatting.FormattingContext;
 import com.intellij.formatting.FormattingModel;
 import com.intellij.formatting.FormattingModelBuilder;
 import com.intellij.formatting.FormattingModelProvider;
@@ -51,11 +52,11 @@ public class AssemblyFormattingModelBuilder implements FormattingModelBuilder {
 	}
 
 	@Override
-	public @NotNull FormattingModel createModel (PsiElement element, CodeStyleSettings settings) {
+	public @NotNull FormattingModel createModel (@NotNull FormattingContext formattingContext) {
 		return FormattingModelProvider.createFormattingModelForPsiFile(
-			element.getContainingFile(),
-			new AssemblyBlock(element.getNode(), Wrap.createWrap(WrapType.NONE, false), Alignment.createAlignment(true), createSpaceBuilder(settings)),
-			settings
+			formattingContext.getContainingFile(),
+			new AssemblyBlock(formattingContext.getNode(), Wrap.createWrap(WrapType.NONE, false), Alignment.createAlignment(true), createSpaceBuilder(formattingContext.getCodeStyleSettings())),
+			formattingContext.getCodeStyleSettings()
 		);
 	}
 }

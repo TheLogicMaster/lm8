@@ -125,7 +125,7 @@ public class AssemblyParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // CONSTANT|LABEL|REGISTER|CONDITION|ARRAY|STRING|HL
+  // CONSTANT|LABEL|REGISTER|CONDITION|ARRAY|STRING|HL|DEFINITION
   static boolean operand(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "operand")) return false;
     boolean r;
@@ -136,6 +136,7 @@ public class AssemblyParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, ARRAY);
     if (!r) r = consumeToken(b, STRING);
     if (!r) r = consumeToken(b, HL);
+    if (!r) r = consumeToken(b, DEFINITION);
     return r;
   }
 

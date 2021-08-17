@@ -12,3 +12,4 @@ jetbrains-assembly-plugin/build/
 emulator/build/
 
 programs/songs
+programs/build

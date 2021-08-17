@@ -8,6 +8,8 @@
 
     jmp title_screen
 
+    include "libraries/Math.asm"
+
 ; Program loop
 loop:
     jsr delay
@@ -488,17 +490,6 @@ get_input_not_up:
     ret
 
 
-; Performs A mod B and stores the result in A
-; Only register A is modified
-modulus:
-    cmp b
-    jr modulus_done,c
-    sub b
-    jr modulus
-modulus_done:
-    ret
-
-
 ; Calculates the opposite direction of A and returns it in A
 ; Only register A is modified
 get_opposite_direction:
@@ -507,26 +498,6 @@ get_opposite_direction:
     add #2
     jsr modulus
     pop b
-    ret
-
-
-; Multiplies A by B and stores the result in A
-; Only register A is modified
-multiply:
-    push h
-    push b
-    push a
-    pop h
-    ldr #0,a
-    cmp b
-multiply_next:
-    jr multiply_done,z
-    add h
-    dec b
-    jr multiply_next
-multiply_done:
-    pop b
-    pop h
     ret
 
 

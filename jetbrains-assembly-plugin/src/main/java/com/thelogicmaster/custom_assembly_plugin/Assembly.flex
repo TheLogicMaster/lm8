@@ -30,6 +30,7 @@ STRING=\".*\"
 ARRAY=\[\d+\]
 REGISTER=[abhlABHL]
 CONDITION=n?[zcnvZCNV]
+DEFINITION=\w+=({CONSTANTS}|{LABEL}|{STRING}|{ARRAY}|{REGISTER}|{CONDITION})
 
 %state ERROR OPERANDS LABELED
 
@@ -49,6 +50,7 @@ CONDITION=n?[zcnvZCNV]
 
 <OPERANDS> {
     {SEPARATOR}                                         { return AssemblyTypes.SEPARATOR; }
+    {DEFINITION}                                        { return AssemblyTypes.DEFINITION; }
     \[{CONSTANTS}\]|{CONSTANTS}                         { return AssemblyTypes.CONSTANT; }
     \[hl\]|hl                                           { return AssemblyTypes.HL; }
     {REGISTER}                                          { return AssemblyTypes.REGISTER; }

@@ -1,6 +1,6 @@
 plugins {
   id 'java'
-  id 'org.jetbrains.intellij' version '1.1.2'
+  id 'org.jetbrains.intellij' version '1.1.4'
 }
 
 group 'com.thelogicmaster'
@@ -17,7 +17,9 @@ sourceSets.main.java.srcDirs 'src/main/gen'
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-  plugins = ['PythonCore:212.4746.13']
+  //type = 'PC' // Uncomment to use PyCharm for runIde task
+  version = '2021.2'
+  plugins = ['PythonCore:212.4746.13', 'PsiViewer:212-SNAPSHOT']
 }
 
 buildSearchableOptions {

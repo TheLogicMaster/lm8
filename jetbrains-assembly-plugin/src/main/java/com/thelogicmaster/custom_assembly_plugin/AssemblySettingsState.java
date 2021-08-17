@@ -23,6 +23,7 @@ public class AssemblySettingsState implements PersistentStateComponent<AssemblyS
 
 	public String assemblerPath = "";
 	public String emulatorPath = "";
+	public String simulatorPath = "";
 
 	public static AssemblySettingsState getInstance() {
 		return ApplicationManager.getApplication().getService(AssemblySettingsState.class);
@@ -44,10 +45,19 @@ public class AssemblySettingsState implements PersistentStateComponent<AssemblyS
 			return false;
 
 		if (!emulatorPath.isEmpty()) {
-			return Files.exists(Paths.get(emulatorPath));
+			if (!Files.exists(Paths.get(emulatorPath)))
+				return false;
 		} else if (rootPath != null) {
-			return Files.exists(rootPath.resolve("emulator/build/Emulator").toAbsolutePath());
+			if (!Files.exists(rootPath.resolve("emulator/build/Emulator").toAbsolutePath()))
+				return false;
 		} else
+			return false;
+
+		if (!simulatorPath.isEmpty())
+			return Files.exists(Paths.get(simulatorPath));
+		else if (rootPath != null)
+			return Files.exists(rootPath.resolve("simulation").toAbsolutePath());
+		else
 			return false;
 	}
 

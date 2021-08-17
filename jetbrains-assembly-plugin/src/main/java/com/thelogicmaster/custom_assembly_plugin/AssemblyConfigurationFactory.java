@@ -25,9 +25,8 @@ public class AssemblyConfigurationFactory extends ConfigurationFactory {
 	@Override
 	public @NotNull RunConfiguration createTemplateConfiguration(@NotNull Project project) {
 		PythonRunConfiguration config = (PythonRunConfiguration)PythonConfigurationType.getInstance().getFactory().createTemplateConfiguration(project);
-		VirtualFile projectDir = ProjectUtil.guessProjectDir(project).getParent();
-		config.setScriptName(Paths.get(projectDir.getPath(), "assembler.py").toAbsolutePath().toString());
-		config.setWorkingDirectory(projectDir.getPath());
+		VirtualFile projectDir = ProjectUtil.guessProjectDir(project);
+		config.setScriptName(Paths.get(projectDir.getParent().getPath(), "assembler.py").toAbsolutePath().toString());
 		return config;
 	}
 }

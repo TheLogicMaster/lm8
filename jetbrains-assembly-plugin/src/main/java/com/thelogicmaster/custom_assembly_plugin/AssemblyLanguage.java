@@ -1,42 +1,109 @@
 package com.thelogicmaster.custom_assembly_plugin;
 
+import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
+import com.intellij.psi.search.FileTypeIndex;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.thelogicmaster.custom_assembly_plugin.psi.AssemblyFile;
+import com.thelogicmaster.custom_assembly_plugin.psi.AssemblyInstructionElement;
+import com.thelogicmaster.custom_assembly_plugin.psi.AssemblyLabelDefinition;
+import com.thelogicmaster.custom_assembly_plugin.psi.AssemblyTypes;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AssemblyLanguage extends Language {
 	public static final AssemblyLanguage INSTANCE = new AssemblyLanguage();
 	public static final String[] INSTRUCTIONS;
-	public static final String[] PORTS;
+	public static final Map<String, Integer> PORTS;
+	public static final Map<String, Integer> CONSTANTS;
+	public static final String[] TIMER_UNITS = new String[]{
+		"microseconds", "centimilliseconds", "decimilliseconds", "milliseconds", "centiseconds", "deciseconds", "seconds", "decaseconds"
+	};
 	public static final Map<String, String[]> DOCUMENTATION;
 
+	private static final int MAX_INCLUDE_DEPTH = 100;
+
 	static {
-		ArrayList<String> ports = new ArrayList<>(Arrays.asList(
-			"print_char", "print_string", "graphics_x", "graphics_y", "draw_pixel", "draw_sprite", "clear_screen", "rand", "swap_display"
-		));
+		PORTS = new HashMap<>();
+		PORTS.put("serial", 0);
+		PORTS.put("print_string", 1);
+		PORTS.put("graphics_x", 30);
+		PORTS.put("graphics_y", 31);
+		PORTS.put("draw_pixel", 32);
+		PORTS.put("draw_sprite", 33);
+		PORTS.put("clear_screen", 34);
+		PORTS.put("rand", 93);
+		PORTS.put("swap_display", 94);
+		PORTS.put("gpio_output", 95);
+		PORTS.put("gpio_input", 96);
+		PORTS.put("arduino_output", 97);
+		PORTS.put("arduino_input", 98);
+		PORTS.put("pwm_enable", 99);
+		PORTS.put("pwm_disable", 100);
+		PORTS.put("pwm_3", 101);
+		PORTS.put("pwm_5", 102);
+		PORTS.put("pwm_6", 103);
+		PORTS.put("pwm_9", 104);
+		PORTS.put("pwm_10", 105);
+		PORTS.put("pwm_11", 106);
+		PORTS.put("serial_enable", 107);
 		for (int i = 0; i < 6; i++)
-			ports.add("seven_segment_" + i);
+			PORTS.put("seven_segment_" + i, 2 + i);
 		for (int i = 0; i < 2; i++)
-			ports.add("button_" + i);
+			PORTS.put("button_" + i, 8 + i);
 		for (int i = 0; i < 10; i++)
-			ports.add("led_" + i);
+			PORTS.put("led_" + i, 10 + i);
 		for (int i = 0; i < 10; i++)
-			ports.add("switch_" + i);
+			PORTS.put("switch_" + i, 20 + i);
 		for (int i = 0; i < 36; i++)
-			ports.add("gpio_" + i);
+			PORTS.put("gpio_" + i, 35 + i);
 		for (int i = 0; i < 16; i++)
-			ports.add("arduino_" + i);
+			PORTS.put("arduino_" + i, 71 + i);
 		for (int i = 0; i < 6; i++)
-			ports.add("adc_" + i);
-		PORTS = ports.toArray(new String[0]);
+			PORTS.put("adc_" + i, 87 + 1);
+		for (int i = 0; i < 2; i++)
+			PORTS.put("timer_unit_" + i, 108 + i);
+		for (int i = 0; i < 2; i++)
+			PORTS.put("timer_count_" + i, 110 + i);
+		for (int i = 0; i < 2; i++)
+			PORTS.put("timer_" + i, 112 + i);
+
+		CONSTANTS = new HashMap<>(PORTS);
+		CONSTANTS.put("controller_up", 0);
+		CONSTANTS.put("controller_down", 1);
+		CONSTANTS.put("controller_left", 2);
+		CONSTANTS.put("controller_right", 3);
+		CONSTANTS.put("microseconds", 0);
+		for (int i = 0; i < TIMER_UNITS.length; i++)
+			CONSTANTS.put(TIMER_UNITS[i], i);
 
 		DOCUMENTATION = new HashMap<>();
 		DOCUMENTATION.put("org", new String[]{
 			"Set assembly origin",
 			"ORG $1234"
+		});
+		DOCUMENTATION.put("include", new String[]{
+			"Include an assembly file",
+			"INCLUDE \"libraries/Math.asm\""
+		});
+		DOCUMENTATION.put("def", new String[]{
+			"Define a constant",
+			"DEF constant=$1"
 		});
 		DOCUMENTATION.put("data", new String[]{
 			"Enter variable data section",
@@ -181,6 +248,123 @@ public class AssemblyLanguage extends Language {
 		});
 
 		INSTRUCTIONS = DOCUMENTATION.keySet().toArray(new String[0]);
+	}
+
+	/**
+	 * Collects all Assembly program files in the project
+	 * @param project to collect from
+	 * @return List of collected files
+	 */
+	public static List<AssemblyFile> getProjectFiles(Project project) {
+		ArrayList<AssemblyFile> files = new ArrayList<>();
+		Collection<VirtualFile> virtualFiles = FileTypeIndex.getFiles(AssemblyFileType.INSTANCE, GlobalSearchScope.allScope(project));
+		for (VirtualFile virtualFile: virtualFiles) {
+			AssemblyFile assemblyFile = (AssemblyFile)PsiManager.getInstance(project).findFile(virtualFile);
+			if (assemblyFile == null)
+				continue;
+			files.add(assemblyFile);
+		}
+		return files;
+	}
+
+	private static void extractDefinition(AssemblyInstructionElement instructionElement, Map<String, String> constants) {
+		Matcher matcher = Pattern.compile("def\\W+(\\w+)=(.+)").matcher(instructionElement.getText());
+		if (!matcher.matches())
+			return;
+		constants.put(matcher.group(1), matcher.group(2));
+	}
+
+	private static void collectVisibleConstants(PsiElement file, PsiElement operand, Map<String, String> constants, int depth) {
+		if (depth > MAX_INCLUDE_DEPTH)
+			return;
+
+		AssemblyInstructionElement[] instructions = PsiTreeUtil.getChildrenOfType(file, AssemblyInstructionElement.class);
+		if (instructions == null)
+			return;
+
+		for (AssemblyInstructionElement instruction: instructions) {
+			if (instruction == operand.getParent())
+				return;
+			String mnemonic = instruction.getMnemonic();
+
+			if ("include".equals(mnemonic)) {
+				ASTNode includeNode = instruction.getNode().findChildByType(AssemblyTypes.STRING);
+				if (includeNode == null)
+					continue;
+				String include = includeNode.getText().replace("\"", "");
+				String includePath = Paths.get(operand.getContainingFile().getVirtualFile().getParent().getPath(), include).toAbsolutePath().toString();
+
+				for (AssemblyFile assemblyFile : getProjectFiles(operand.getProject()))
+					if (includePath.equals(assemblyFile.getVirtualFile().getPath()))
+						collectVisibleConstants(assemblyFile, operand, constants, depth + 1);
+			} else if ("def".equals(mnemonic))
+				extractDefinition(instruction, constants);
+		}
+	}
+
+	/**
+	 * Attempts to parse a constant within an operand node.
+	 * Upon failing to do so, just returns the source node text
+	 * @param operand to parse
+	 * @return String of parsed operand
+	 */
+	public static String evaluateOperandConstant(ASTNode operand) {
+		Matcher constantMatcher = Pattern.compile("\\{(\\w+)}").matcher(operand.getText());
+		if (!constantMatcher.matches())
+			return operand.getText();
+		String constant = constantMatcher.group(1);
+
+		HashMap<String, String> constants = new HashMap<>();
+		for (Map.Entry<String, Integer> entry: CONSTANTS.entrySet())
+			constants.put(entry.getKey(), "#" + entry.getValue());
+		collectVisibleConstants(operand.getPsi().getContainingFile(), operand.getPsi().getParent(), constants, 0);
+
+		if (!constants.containsKey(constant))
+			return operand.getText();
+		return constants.get(constant);
+	}
+
+	private static void collectVisibleLabels(PsiFile file, Collection<AssemblyLabelDefinition> definitions, Set<String> collected, Set<String> duplicates, int depth) {
+		if (depth > MAX_INCLUDE_DEPTH)
+			return;
+
+		AssemblyLabelDefinition[] labels = PsiTreeUtil.getChildrenOfType(file, AssemblyLabelDefinition.class);
+		if (labels != null)
+			for (AssemblyLabelDefinition label: labels) {
+				definitions.add(label);
+				String labelName = label.getName();
+				if (!collected.add(labelName))
+					duplicates.add(labelName);
+			}
+
+		AssemblyInstructionElement[] instructions = PsiTreeUtil.getChildrenOfType(file, AssemblyInstructionElement.class);
+		if (instructions != null)
+			for (AssemblyInstructionElement instruction: instructions) {
+				if (!"include".equals(instruction.getMnemonic()))
+					continue;
+
+				ASTNode include = instruction.getNode().findChildByType(AssemblyTypes.STRING);
+				if (include == null)
+					continue;
+				String includeText = include.getText().replace("\"", "");
+				String includePath = Paths.get(file.getVirtualFile().getParent().getPath(), includeText).toAbsolutePath().toString();
+
+				for (AssemblyFile assemblyFile : getProjectFiles(file.getProject()))
+					if (includePath.equals(assemblyFile.getVirtualFile().getPath()))
+						collectVisibleLabels(assemblyFile, definitions, collected, duplicates, depth + 1);
+			}
+	}
+
+	/**
+	 * Collects all visible labels in an Assembly program
+	 * @param file to collect labels from
+	 * @param definitions collection to store results
+	 * @return A set of duplicate label names
+	 */
+	public static Set<String> collectVisibleLabels(PsiFile file, Collection<AssemblyLabelDefinition> definitions) {
+		Set<String> duplicates = new HashSet<>();
+		collectVisibleLabels(file, definitions, new HashSet<>(), duplicates, 0);
+		return duplicates;
 	}
 
 	private AssemblyLanguage() {

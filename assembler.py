@@ -1,6 +1,6 @@
 #!/bin/python3
 
-# This script will assemble a program into the same directory and optionally run it with the emulator
+# This script will assemble a program into the build folder in the current directory and optionally run it with the emulator or flash an FPGA
 
 import argparse
 import os
@@ -50,9 +50,10 @@ constants.update({"timer_count_" + str(i): i + 110 for i in range(2)})
 constants.update({"timer_" + str(i): i + 112 for i in range(2)})
 
 line_number = 0
+file = ""
 output = bytearray()
 address = 0
-data_section = False
+data_address = 0x8000
 labels = {}
 label_addresses = {}
 label_jumps = {}
@@ -63,7 +64,7 @@ label_imm_addresses = {}
 def error(cause, line=None):
     print("Error: " + cause)
     if line is None or line >= 0:
-        print("Line: " + str(line_number if line is None else line))
+        print(f"{file}: Line {line_number if line is None else line}")
     exit(-1)
 
 
@@ -237,23 +238,18 @@ def output_relative_jump(param):
         output_immediate(param)
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Assemble a program')
-    parser.add_argument('program', help='The program file to assemble')
-    parser.add_argument('-r', '--run', action='store_true', help="Whether to run the emulator after assembly")
-    parser.add_argument('-f', '--fpga', default='none', choices=['none', 'patch', 'flash'], type=str.lower,
-                        help="Whether to patch or run for FPGA (Linux only)")
-    parser.add_argument('-e', '--emulator', help='The path to the emulator if not ./emulator/build/Emulator')
-    args = parser.parse_args()
-
-    # Read assembly file
-    f = open(args.program)
-    lines = f.readlines()
-    f.close()
-
+def parse_file():
     global line_number
     global address
-    global data_section
+    global data_address
+    global file
+    global constants
+
+    data_section = False
+
+    f = open(file)
+    lines = f.readlines()
+    f.close()
 
     for line in lines:
         line_number += 1
@@ -266,7 +262,7 @@ def main():
         if match:
             if match[1] in labels:
                 error("Duplicate label: " + match[1])
-            labels[match[1]] = address
+            labels[match[1]] = data_address if data_section else address
             line = line[len(match[0]):]
 
         # Get instruction
@@ -286,7 +282,7 @@ def main():
             if "\"" not in params[i] and "'" not in params[i]:
                 params[i] = params[i].lower()
                 for constant in constants:
-                    params[i] = params[i].replace("{" + constant + "}", "#" + str(constants[constant]))
+                    params[i] = params[i].replace("{" + constant + "}", ("" if type(constants[constant]) is str else "#") + str(constants[constant]))
             params[i] = re.sub(r"^\s+|\s+$", "", params[i])
 
         if data_section and instr != "var" and instr != "org":
@@ -294,25 +290,52 @@ def main():
 
         if instr == "org":
             ensure_params(params, 1)
-            address = parse_address(params[0])
-            if address is None:
+            parsed = parse_address(params[0])
+            if parsed is None:
                 error("Failed to parse origin address")
-            if data_section and address < 0x8000:
-                error("Only addresses at or above 0x8000 are allowed in the data section")
+            if data_section:
+                if parsed < 0x8000:
+                    error("Only addresses at or above 0x8000 are allowed in the data section")
+                data_address = parsed
+            else:
+                address = parsed
+
+        elif instr == "def":
+            ensure_params(params, 1)
+            match = re.search(r"^(\w+)=(.+)$", params[0])
+            if not match:
+                error("Invalid definition")
+            constants[match[1]] = match[2]
+
+        elif instr == "include":
+            current_line = line_number
+            current_file = file
+            ensure_params(params, 1)
+            match = re.search(r"^\"(.+)\"$", params[0])
+            if not match:
+                error("Invalid include file")
+            file = os.path.join(os.path.dirname(file), match[1])
+            try:
+                parse_file()
+            except RecursionError:
+                error("Recursive dependencies")
+            file = current_file
+            line_number = current_line
 
         elif instr == "data":
             ensure_params(params, 0)
             data_section = True
-            address = 0x8000
 
         elif instr == "var":
+            if not data_section:
+                error("The VAR instruction can only be used in the data section")
             if len(params) == 0:
-                address += 1
+                data_address += 1
             elif len(params) == 1:
                 match = re.search(r"^\[([0-9]+)]$", params[0])
                 if not match:
                     error("Invalid var array")
-                address += int(match[1])
+                data_address += int(match[1])
             else:
                 error("Invalid parameters")
 
@@ -337,7 +360,7 @@ def main():
             match = re.search(r"^\"(.+)\"$", params[0])
             if not match:
                 error("Invalid binary file")
-            with open(os.path.join(os.path.dirname(args.program), match[1]), "rb") as f:
+            with open(os.path.join(os.path.dirname(file), match[1]), "rb") as f:
                 while byte := f.read(1):
                     output_byte(ord(byte))
 
@@ -455,6 +478,21 @@ def main():
         else:
             error("Unknown instruction: " + instr)
 
+
+def main():
+    global file
+
+    parser = argparse.ArgumentParser(description='Assemble a program. Assumed to be in the <project>/programs directory by default')
+    parser.add_argument('program', help='The program file to assemble')
+    parser.add_argument('-r', '--run', action='store_true', help="Whether to run the emulator after assembly")
+    parser.add_argument('-f', '--fpga', default='none', choices=['none', 'patch', 'flash'], type=str.lower, help="Whether to patch or run for FPGA (Linux only)")
+    parser.add_argument('-e', '--emulator', help='The path to the emulator relative to build dir if not "../../emulator/build/Emulator"')
+    parser.add_argument('-s', '--simulator', help='The path to the simulator dir relative to build dir if not "../../simulator"')
+    args = parser.parse_args()
+
+    file = args.program
+    parse_file()
+
     # Substitute labels for addresses
     for addr in label_addresses:
         label = label_addresses[addr]
@@ -489,19 +527,23 @@ def main():
         output[addr] = labels[label]
 
     # Save machine code results
-    rom_path = os.path.splitext(args.program)[0] + ".bin"
+    rom_name = os.path.splitext(os.path.basename(args.program))[0] + ".bin"
+    rom_path = os.path.join("./build", rom_name)
+    os.makedirs("./build", exist_ok=True)
     f = open(rom_path, "wb")
     f.write(output)
     f.close()
 
-    if args.fpga == 'patch':
-        os.system(f'/bin/bash ./simulation/patch_rom.sh "{os.path.abspath(rom_path)}"')
-    elif args.fpga == 'flash':
-        os.system(f'/bin/bash ./simulation/patch_rom.sh "{os.path.abspath(rom_path)}"')
-        os.system('/bin/bash ./simulation/compile_and_flash.sh')
+    simulation_dir = args.simulator if args.simulator else '../simulation'
+    if args.fpga == "patch":
+        os.system(f'/bin/bash "{os.path.join(simulation_dir, "patch_rom.sh")}" "{os.path.abspath(rom_path)}"')
+    elif args.fpga == "flash":
+        os.system(f'/bin/bash "{os.path.join(simulation_dir, "patch_rom.sh")}" "{os.path.abspath(rom_path)}"')
+        os.system(f'/bin/bash "{os.path.join(simulation_dir, "compile_and_flash.sh")}"')
 
     if args.run:
-        os.system(f"\"{args.emulator if args.emulator else './emulator/build/Emulator'}\" \"{os.path.abspath(rom_path)}\"")
+        os.chdir('./build')
+        os.system(f"\"{args.emulator if args.emulator else '../../emulator/build/Emulator'}\" \"{rom_name}\"")
 
 
 if __name__ == "__main__":

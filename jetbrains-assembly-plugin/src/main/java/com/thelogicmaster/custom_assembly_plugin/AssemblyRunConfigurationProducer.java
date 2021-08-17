@@ -9,8 +9,6 @@ import com.intellij.psi.PsiFile;
 import com.jetbrains.python.run.PythonRunConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.file.Paths;
-
 public class AssemblyRunConfigurationProducer extends LazyRunConfigurationProducer<PythonRunConfiguration> {
 
 	private final AssemblyConfigurationFactory factory = new AssemblyConfigurationFactory();
@@ -27,14 +25,18 @@ public class AssemblyRunConfigurationProducer extends LazyRunConfigurationProduc
 			return false;
 
 		AssemblySettingsState settings = AssemblySettingsState.getInstance();
-		if (!settings.assemblerPath.isEmpty()) {
+		if (!settings.assemblerPath.isEmpty())
 			configuration.setScriptName(settings.assemblerPath);
-			configuration.setWorkingDirectory(Paths.get(settings.assemblerPath).getParent().toAbsolutePath().toString());
-		}
 
+		configuration.setWorkingDirectory(sourceElement.get().getContainingFile().getVirtualFile().getParent().getPath());
+
+		if (sourceElement.get().getContainingFile() == null)
+			return false;
 		String params = "-r \"" + sourceElement.get().getContainingFile().getVirtualFile().getPath() + "\"";
 		if (!settings.emulatorPath.isEmpty())
 			params = params + " -e \"" + settings.emulatorPath + "\"";
+		if (!settings.simulatorPath.isEmpty())
+			params = params + " -s \"" + settings.simulatorPath + "\"";
 
 		configuration.setScriptParameters(params);
 		configuration.setName("Run " + sourceElement.get().getContainingFile().getName().split("\\.")[0]);

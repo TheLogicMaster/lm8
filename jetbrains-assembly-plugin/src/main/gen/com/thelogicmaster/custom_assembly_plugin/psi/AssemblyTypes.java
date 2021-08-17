@@ -16,6 +16,7 @@ public interface AssemblyTypes {
   IElementType CONDITION = new AssemblyTokenType("CONDITION");
   IElementType CONSTANT = new AssemblyTokenType("CONSTANT");
   IElementType CRLF = new AssemblyTokenType("CRLF");
+  IElementType DEFINITION = new AssemblyTokenType("DEFINITION");
   IElementType HL = new AssemblyTokenType("HL");
   IElementType LABEL = new AssemblyTokenType("LABEL");
   IElementType LABEL_DEF = new AssemblyTokenType("LABEL_DEF");

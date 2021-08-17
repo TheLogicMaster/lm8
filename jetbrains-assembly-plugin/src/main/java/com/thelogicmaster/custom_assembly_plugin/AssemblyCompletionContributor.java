@@ -10,6 +10,7 @@ import com.thelogicmaster.custom_assembly_plugin.psi.AssemblyLabelDefinition;
 import com.thelogicmaster.custom_assembly_plugin.psi.AssemblyTypes;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class AssemblyCompletionContributor extends CompletionContributor {
@@ -48,10 +49,10 @@ public class AssemblyCompletionContributor extends CompletionContributor {
 				boolean loadOrStore = Pattern.matches("^(ldr|str)$", mnemonic);
 				if (loadOrStore)
 					result.addElement(LookupElementBuilder.create("[HL]").withCaseSensitivity(false));
-				for (PsiElement element: parameters.getOriginalFile().getChildren()) {
-					if (!(element instanceof AssemblyLabelDefinition))
-						continue;
-					AssemblyLabelDefinition label = (AssemblyLabelDefinition)element;
+
+				ArrayList<AssemblyLabelDefinition> labels = new ArrayList<>();
+				AssemblyLanguage.collectVisibleLabels(parameters.getOriginalFile(), labels);
+				for (AssemblyLabelDefinition label: labels) {
 					String name = label.getName();
 					if (name == null)
 						continue;
@@ -65,8 +66,12 @@ public class AssemblyCompletionContributor extends CompletionContributor {
 				fillRegisterVariants(result);
 
 			if (Pattern.matches("^(in|out)$", mnemonic))
-				for (String port: AssemblyLanguage.PORTS)
+				for (String port: AssemblyLanguage.PORTS.keySet())
 					result.addElement(LookupElementBuilder.create("{" + port + "}").withCaseSensitivity(false));
+
+			if (Pattern.matches("^ldr$", mnemonic))
+				for (String unit: AssemblyLanguage.TIMER_UNITS)
+					result.addElement(LookupElementBuilder.create("{" + unit + "}").withCaseSensitivity(false));
 		} else if (parameter == 1) {
 			if (Pattern.matches("^(jr)$", mnemonic))
 				for (String register: "Z,C,N,V,nZ,nC,nN,nV".split(","))

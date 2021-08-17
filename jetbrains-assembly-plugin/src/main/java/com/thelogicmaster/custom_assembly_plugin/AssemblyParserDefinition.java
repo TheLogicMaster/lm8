@@ -53,17 +53,17 @@ public class AssemblyParserDefinition implements ParserDefinition {
 	}
 
 	@Override
-	public IFileElementType getFileNodeType() {
+	public @NotNull IFileElementType getFileNodeType() {
 		return FILE;
 	}
 
 	@Override
-	public PsiFile createFile(FileViewProvider viewProvider) {
+	public @NotNull PsiFile createFile(@NotNull FileViewProvider viewProvider) {
 		return new AssemblyFile(viewProvider);
 	}
 
 	@Override
-	public SpaceRequirements spaceExistenceTypeBetweenTokens(ASTNode left, ASTNode right) {
+	public @NotNull SpaceRequirements spaceExistenceTypeBetweenTokens(ASTNode left, ASTNode right) {
 		return SpaceRequirements.MAY;
 	}
 

@@ -22,6 +22,8 @@ public class AssemblySyntaxHighlighter extends SyntaxHighlighterBase {
 		createTextAttributesKey("ASSEMBLY_HL", DefaultLanguageHighlighterColors.GLOBAL_VARIABLE);
 	public static final TextAttributesKey CONSTANT =
 		createTextAttributesKey("ASSEMBLY_CONSTANT", DefaultLanguageHighlighterColors.CONSTANT);
+	public static final TextAttributesKey DEFINITION =
+		createTextAttributesKey("ASSEMBLY_DEFINITION", DefaultLanguageHighlighterColors.CONSTANT);
 	public static final TextAttributesKey CONDITION =
 		createTextAttributesKey("ASSEMBLY_CONDITION", DefaultLanguageHighlighterColors.GLOBAL_VARIABLE);
 	public static final TextAttributesKey MNEMONIC =
@@ -47,6 +49,7 @@ public class AssemblySyntaxHighlighter extends SyntaxHighlighterBase {
 	private static final TextAttributesKey[] HL_KEYS = new TextAttributesKey[]{HL};
 	private static final TextAttributesKey[] CONDITION_KEYS = new TextAttributesKey[]{CONDITION};
 	private static final TextAttributesKey[] CONSTANT_KEYS = new TextAttributesKey[]{CONSTANT};
+	private static final TextAttributesKey[] DEFINITION_KEYS = new TextAttributesKey[]{DEFINITION};
 	private static final TextAttributesKey[] LABEL_KEYS = new TextAttributesKey[]{LABEL};
 	private static final TextAttributesKey[] LABEL_DEF_KEYS = new TextAttributesKey[]{LABEL_DEF};
 	private static final TextAttributesKey[] ARRAY_KEYS = new TextAttributesKey[]{ARRAY};
@@ -62,6 +65,8 @@ public class AssemblySyntaxHighlighter extends SyntaxHighlighterBase {
 	public TextAttributesKey @NotNull [] getTokenHighlights (IElementType tokenType) {
 		if (tokenType.equals(AssemblyTypes.CONSTANT))
 			return CONSTANT_KEYS;
+		else if (tokenType.equals(AssemblyTypes.DEFINITION))
+			return DEFINITION_KEYS;
 		else if (tokenType.equals(AssemblyTypes.REGISTER))
 			return REGISTER_KEYS;
 		else if (tokenType.equals(AssemblyTypes.CONDITION))
