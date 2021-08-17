@@ -44,12 +44,17 @@ jobs:
           popd
           make -C ./emulator/Emscripten
 
+      - name: Assemble programs
+        run: |
+          ./fetch_songs.sh
+          ./assemble.sh
+
       - name: Copy Linux Files
         run: |
           rm -rf ./Emulator
           mkdir ./Emulator
           cp ./emulator/build/Emulator ./Emulator/Emulator.run
-          cp ./programs/*.bin ./Emulator
+          cp ./programs/build/*.bin ./Emulator
           cp ./assembler.py ./Emulator
           cp ./image_convert.py ./Emulator
           cp ./README.md ./Emulator
@@ -65,7 +70,7 @@ jobs:
           rm -rf ./Emulator
           mkdir ./Emulator
           cp ./emulator/Emscripten/web/* ./Emulator
-          cp ./programs/*.bin ./Emulator
+          cp ./programs/build/*.bin ./Emulator
           cp ./README.md ./Emulator
 
       - name: Zip HTML Release
@@ -141,13 +146,24 @@ jobs:
           useVcpkgToolchainFile: false
           buildWithCMake: true
 
+      - name: Install Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Assemble programs
+        shell: bash
+        run: |
+          ./fetch_songs.sh
+          ./assemble.sh
+
       - name: Copy Windows Files
         shell: bash
         run: |
           mkdir ./build
           cp emulator/build/*.exe ./build
           cp emulator/build/*.dll ./build
-          cp programs/*.bin ./build
+          cp programs/build/*.bin ./build
           cp assembler.py ./build
           cp image_convert.py ./build
           cp README.md ./build
