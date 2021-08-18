@@ -7,7 +7,7 @@ Linux is supported for deploying with ADC and UART support.
 
 ## Build Process
 The build process to go from writing an assembly program to deploying was originally quite involved
-and tedious, but the newly automated automated process greatly simplified everything. To summarize
+and tedious, but the newly automated process greatly simplified everything. To summarize
 the process, you need to generate the VHDL code from the Logisim circuit, inject the assembled
 program binary, compile the code, then finally deploy to the dev board. As mentioned, this was
 originally all done manually using the program GUIs, but now deploying can be done with a single

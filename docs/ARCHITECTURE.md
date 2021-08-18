@@ -27,7 +27,7 @@ currently active in the CPU. There are 64 possible instructions, with each instr
 |DATA|N/A|Enter the data section|N/A|N/A|
 |VAR|N/A|A variable placeholder|N/A|N/A|
 |VAR[n]|N/A|A variable array placeholder|N/A|N/A|
-|DB "HI",'\n',0|N/A|Define bytes|N/A|N/A|
+|DB "HI",'\n',$0|N/A|Define bytes|N/A|N/A|
 |BIN|N/A|Inject a binary file|N/A|N/A|
 |NOP|000000**|No operation|****|1|
 |LDR imm,reg|000001rr|reg = imm|Z***|2|
