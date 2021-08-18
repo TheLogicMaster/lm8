@@ -1,4 +1,4 @@
-; Music player
+; Music player --- Run the fetch_songs.sh script to generate the song binaries before assembling
 
     ; Set buzzer pin (Arduino 2) to output mode
     ldr $2,B

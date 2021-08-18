@@ -2,12 +2,10 @@
 
 # Assemble all programs in programs directory
 
-set -e
-
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)"
 
 (
-    cd "${SCRIPT_DIR}/programs"
+    cd "${SCRIPT_DIR}/programs" || exit -1
 
     for f in ./*.asm
     do
