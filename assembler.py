@@ -486,8 +486,8 @@ def main():
     parser.add_argument('program', help='The program file to assemble')
     parser.add_argument('-r', '--run', action='store_true', help="Whether to run the emulator after assembly")
     parser.add_argument('-f', '--fpga', default='none', choices=['none', 'patch', 'flash'], type=str.lower, help="Whether to patch or run for FPGA (Linux only)")
-    parser.add_argument('-e', '--emulator', help='The path to the emulator relative to build dir if not "../../emulator/build/Emulator"')
-    parser.add_argument('-s', '--simulator', help='The path to the simulator dir relative to build dir if not "../../simulator"')
+    parser.add_argument('-e', '--emulator', help='The path to the emulator if not "../emulator/build/Emulator"')
+    parser.add_argument('-s', '--simulator', help='The path to the simulator if not "../simulator"')
     args = parser.parse_args()
 
     file = args.program
@@ -534,7 +534,7 @@ def main():
     f.write(output)
     f.close()
 
-    simulation_dir = args.simulator if args.simulator else '../simulation'
+    simulation_dir = args.simulator if args.simulator else os.path.join(os.pardir, 'simulation')
     if args.fpga == "patch":
         os.system(f'/bin/bash "{os.path.join(simulation_dir, "patch_rom.sh")}" "{os.path.abspath(rom_path)}"')
     elif args.fpga == "flash":
@@ -543,7 +543,7 @@ def main():
 
     if args.run:
         os.chdir('./build')
-        os.system(f"\"{args.emulator if args.emulator else '../../emulator/build/Emulator'}\" \"{rom_name}\"")
+        os.system(f"\"{args.emulator if args.emulator else os.path.join(os.pardir, os.pardir, 'emulator/build/Emulator')}\" \"{rom_name}\"")
 
 
 if __name__ == "__main__":
