@@ -63,6 +63,24 @@ included it. Label names must be unique between all included files. Circular dep
 The `BIN` assembly directive reads all bytes from a specified file and inserts them at the current assembler
 origin. This reads the target file in binary mode, so the raw bytes from the file are what is read.
 
+## Default Constants
+All I/O Ports are available as constants in addition to following ones.
+
+|Constant|Value|Function|
+|--------|-----|--------|
+|controller_up|35|Controller peripheral up (GPIO 0)|
+|controller_down|36|Controller peripheral down (GPIO 1)|
+|controller_left|37|Controller peripheral left (GPIO 2)|
+|controller_right|38|Controller peripheral right (GPIO 3)|
+|microseconds|0|Timer microseconds unit (10 ^ -6 seconds)|
+|centimilliseconds|1|Timer centimilliseconds unit (10^-5 seconds)|
+|decimilliseconds|2|Timer decimilliseconds unit (10^-4 seconds)|
+|milliseconds|3|Timer milliseconds unit (10^-3 seconds)|
+|centiseconds|4|Timer centiseconds unit (10^-2 seconds)|
+|deciseconds|5|Timer deciseconds unit (10^-1 seconds)|
+|seconds|6|Timer seconds unit (10^0 seconds)|
+|decaseconds|7|Timer decaseconds unit (10^1 seconds)|
+
 ## Manual Usage
 To assemble a program manually from the command line, enter the directory with the program and run:
 ```bash

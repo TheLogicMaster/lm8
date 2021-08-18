@@ -20,11 +20,13 @@ Jetbrains IDE language support plugin, a Logisim-Evolution simulation, and an FP
 [Online Demo](https://thelogicmaster.github.io/lm8/) hosted on GitHub Pages.
 
 ## Documentation
+- [Architecture](ARCHITECTURE.md)
 - [Assembler](ASSEMBLER.md)
 - [Emulator](EMULATOR.md)
-- [Architecture](ARCHITECTURE.md)
+- [Hardware Interfaces](HARDWARE.md)
 - [Simulation](SIMULATION.md)
 - [FPGA](FPGA.md)
+- [Jetbrains Plugin](PLUGIN.md)
 
 ## Attributions
 - [ImGui](https://github.com/ocornut/imgui)

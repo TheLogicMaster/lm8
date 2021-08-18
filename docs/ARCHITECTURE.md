@@ -82,3 +82,36 @@ currently active in the CPU. There are 64 possible instructions, with each instr
 - `OUT` instructions can take any number more than 3 cycles based on the port selected.
 - `JR` instructions with conditions take 3 if the condition failed and 4 otherwise.
 - `INA` and `DEA` instructions take an extra cycle if `L` rolls around and changes `H`.
+
+## I/O Ports
+For binary ports, reading will return a 0 or 1 and writing anything but a 0 is seen as a 1.
+
+|Port|Id(s)|Function|
+|----|-----|--------|
+|serial|0|Output a character to the console or UART, read to get UART input|
+|print_string|1|Print a null terminated string at the provided address|
+|seven_segment_n|2-7|Access seven segment display register n (0-5)|
+|button_n|8-9|Read the binary state of button n (0-1)|
+|led_n|10-19|Read or write to LED n (0-9)|
+|switch_n|20-29|Read the binary state of switch n (0-9)|
+|graphics_x|30|Access the graphics X register|
+|graphics_y|31|Access the graphics Y register|
+|draw_pixel|32|Draws a single RGB332 pixel at (X,Y)|
+|draw_sprite|33|Draws an 8x8 RGB332 sprite from the address (value * 64) at (X,Y)|
+|clear_screen|34|Clears the screen with the specified RGB332 color|
+|gpio_n|35-70|Access GPIO pin n (0-35)|
+|arduino_n|71-86|Access Arduino header I/O pin n (0-15)|
+|adc_n|87-92|Read from ADC n (0-6)|
+|rand|93|Read a random number|
+|swap_display|94|Swap the emulator display buffers|
+|gpio_output|95|Set the specified GPIO pin to output mode (0-35)|
+|gpio_input|96|Set the specified GPIO pin to input mode (0-35)|
+|arduino_output|97|Set the Arduino pin (value & 0xF) to output mode (0-15)|
+|arduino_input|98|Set the Arduino pin (value & 0xF) to input mode (0-15)|
+|pwm_enable|99|Enable PWM for a compatible Arduino pin (3, 5, 6, 9, 10, 11)|
+|pwm_disable|100|Disable PWM for a compatible Arduino pin (3, 5, 6, 9, 10, 11)|
+|pwm_n|101-106|Set the PWM duty cycle for compatible pin n (3, 5, 6, 9, 10, 11)|
+|serial_enable|107|Enables or disables the UART output, TX, on Arduino pin 1|
+|timer_unit_n|108-109|Sets the timer count of timer n (0-1) to (50 * 10 ^ value) (0-7)|
+|timer_count_n|110-111|Sets the count multiplier for timer n (0-1)|
+|timer_n|112-113|Returns whether timer n (0-1) has triggered, write to reset timer|
