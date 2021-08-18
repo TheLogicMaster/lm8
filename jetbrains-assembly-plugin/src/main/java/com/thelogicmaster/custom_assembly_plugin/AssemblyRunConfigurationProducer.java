@@ -28,10 +28,11 @@ public class AssemblyRunConfigurationProducer extends LazyRunConfigurationProduc
 		if (!settings.assemblerPath.isEmpty())
 			configuration.setScriptName(settings.assemblerPath);
 
-		configuration.setWorkingDirectory(sourceElement.get().getContainingFile().getVirtualFile().getParent().getPath());
-
 		if (sourceElement.get().getContainingFile() == null)
 			return false;
+
+		configuration.setWorkingDirectory(sourceElement.get().getContainingFile().getVirtualFile().getParent().getPath());
+
 		String params = "-r \"" + sourceElement.get().getContainingFile().getVirtualFile().getPath() + "\"";
 		if (!settings.emulatorPath.isEmpty())
 			params = params + " -e \"" + settings.emulatorPath + "\"";
