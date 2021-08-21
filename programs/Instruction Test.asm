@@ -86,17 +86,17 @@ main_1:
 ; Ensure unsigned carry
     ldr $FF,A
     add $1
-    jr failed,nZ
-    jr failed,nC
-    jr failed,N
-    jr failed,V
+    jr failed_1,nZ
+    jr failed_1,nC
+    jr failed_1,N
+    jr failed_1,V
 ; Ensure signed overflow
     ldr #126,A
     adc B
-    jr failed,Z
-    jr failed,C
-    jr failed,nN
-    jr failed,nV
+    jr failed_1,Z
+    jr failed_1,C
+    jr failed_1,nN
+    jr failed_1,nV
 
 ; Test 6 --- Subtraction instructions
     ldr #6,A
@@ -105,27 +105,27 @@ main_1:
 ; Ensure zero flag
     ldr $1,A
     sub $1
-    jr failed,nZ
-    jr failed,C
-    jr failed,N
-    jr failed,V
+    jr failed_1,nZ
+    jr failed_1,C
+    jr failed_1,N
+    jr failed_1,V
 ; Ensure unsigned carry
     sub B
-    jr failed,Z
-    jr failed,nC
-    jr failed,nN
-    jr failed,nV
+    jr failed_1,Z
+    jr failed_1,nC
+    jr failed_1,nN
+    jr failed_1,nV
 ; Ensure signed overflow
     ldr #129,A
     sbc $1
-    jr failed,Z
-    jr failed,C
-    jr failed,N
-    jr failed,V
+    jr failed_1,Z
+    jr failed_1,C
+    jr failed_1,N
+    jr failed_1,V
 ; Ensure CMP doesn't modify A
     cmp #127
     cmp #127
-    jr failed,nZ
+    jr failed_1,nZ
 
 ; Test 7 --- Bitwise instructions
     ldr #7,A
@@ -134,26 +134,32 @@ main_1:
     ldr $0,B
     ldr $F,A
     and B
-    jr failed,nZ
+    jr failed_1,nZ
     ldr $FF,A
     and $F0
-    jr failed,Z
+    jr failed_1,Z
     cmp $F0
-    jr failed,nZ
+    jr failed_1,nZ
 ; Test OR
     or $F
     cmp $FF
-    jr failed,nZ
+    jr failed_1,nZ
 ; Test XOR
     xor $F0
     cmp $F
-    jr failed,nZ
+    jr failed_1,nZ
 
 ; Test 8 --- Subroutine instructions
     ldr #8,A
     str [test],A
     jsr subroutine
-    jr failed,nZ
+    jr failed_1,nZ
+
+; Relay for conditional relative jumps
+    jr main_2
+failed_1:
+    jmp failed
+main_2:
 
 ; Test 9 --- Variable jumps
     ldr #9,A
@@ -162,6 +168,38 @@ main_1:
     jmp HL
     jr failed
 var_jump_target:
+
+; Test 10 --- Shift operations
+    ldr #10,A
+    str [test],A
+; Test LSL
+    ldr %11010100,A
+    lsl
+    jr failed,nC
+    jr failed,Z
+    cmp %10101000
+    jr failed,nZ
+; Test LSR
+    ldr %00101011,A
+    lsr
+    jr failed,nC
+    jr failed,Z
+    cmp %00010101
+    jr failed,nZ
+; Test ASR
+    ldr %10101011,A
+    asr
+    jr failed,nC
+    jr failed,Z
+    cmp %11010101
+    jr failed,nZ
+    ldr %00101011,A
+    asr
+    jr failed,nC
+    jr failed,Z
+    cmp %00010101
+    jr failed,nZ
+
 
 ; End of tests
     ldr =success_text,A

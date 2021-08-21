@@ -82,6 +82,9 @@ const InstructionType INSTRUCTIONS[64]{
         {"JSR ", Address},
         {"RET", Implied},
         {"HALT", Implied},
+        {"LSL", Implied},
+        {"LSR", Implied},
+        {"ASR", Implied},
 };
 
 class Disassembler {

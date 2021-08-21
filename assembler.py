@@ -475,6 +475,15 @@ def parse_file():
         elif instr == "halt":
             output_implicit_instr(params, 0b10100000)
 
+        elif instr == "lsl":
+            output_implicit_instr(params, 0b10100100)
+
+        elif instr == "lsr":
+            output_implicit_instr(params, 0b10101000)
+
+        elif instr == "asr":
+            output_implicit_instr(params, 0b10101100)
+
         else:
             error("Unknown instruction: " + instr)
 

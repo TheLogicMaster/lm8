@@ -354,12 +354,12 @@ static void displayPanelIO() {
     }
 
     // Seven segment displays
-    for (int i = 0; i < 6; i++) {
+    for (int i = 5; i >= 0; i--) {
         ImGui::PushFont(font7Segment);
         ImGui::BeginGroup();
         ImGui::Dummy(ImVec2(2, 0));
         ImGui::SameLine();
-        ImGui::Text("%d", emulator->getSevenSegmentDisplay(i) & 0xF);
+        ImGui::Text("%x", emulator->getSevenSegmentDisplay(i) & 0xF);
         ImGui::EndGroup();
         ImGui::PopFont();
         ImGui::NextColumn();

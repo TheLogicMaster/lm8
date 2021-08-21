@@ -5,8 +5,11 @@ The Jetbrains plugin adds support for the custom assembly language used by this 
 - Syntax highlighting
 - Run configuration generation
 - Auto-complete
+- Code reformatting
 - Program Structure View support
-- Label Goto and Usages support
+- Label navigation and usages
+- Instruction and label documentation
+- Color customization
 
 ## Installation
 Either PyCharm or another Jetbrains IDE with the Python plugin is required. To install the plugin,
@@ -32,3 +35,13 @@ either in the project settings or in each run configuration.
 The generated run configuration passes parameters directly to the assembler script for program
 assembly and execution. See [Assembly](ASSEMBLER.md) to view all of the available options. This
 allows customizing the run configurations to allow for directly deploying to the FPGA.
+
+## Development
+### Updating Generated Files 
+- Update the Parser by selecting `Generate Parser Code` in the context menu 
+  for `Assembly.bnf`
+- Update the Lexer by selecting `Run JFlex Generator` in the context menu for
+  `Assembly.flex`
+
+### Testing
+- The gradle `runIde` task will spin up an IntelliJ instance with the plugin loaded

@@ -17,35 +17,35 @@ click from the IDE.
 This method of deploying to the dev board is the simplest, but doesn't allow for using Intel FPGA
 IPs, so it isn't posible to use the ADC and UART components.
 1. Ensure Logisim-evolution, Quartus Prime, Python 3.8, and Perl are installed.
-2. Set the `QUARTUS_DIR` variable in `env.sh` to the Quartus Prime `bin` directory path.
-3. Set the `Altera\Intel Quartus toolpath` setting in Logisim to the Quartus `bin` dir.
-4. Under `FPGA Commander Settings` in Logisim, add the `DE10-LITE.xml` board descriptor file and
+2. Set the `Altera\Intel Quartus toolpath` setting in Logisim to the Quartus `bin` dir.
+3. Under `FPGA Commander Settings` in Logisim, add the `DE10-LITE.xml` board descriptor file and
    set the `Hardware description language` to `VHDL`.
-5. Open the `simulation.circ` project file in Logisim.
-6. There will be `Incompatible Widths` errors initially, since the `Port I/O` components 
+4. Open the `simulation.circ` project file in Logisim.
+5. There will be `Incompatible Widths` errors initially, since the `Port I/O` components 
    currently loose their state upon reloading the project. Simply reconfigure each component
    with the pin number and port type specified by the label below each. 
-7. If the VHDL components are missing from the circuit, just place them in where they go.
-8. Right-click on the `Program` ROM component and select `Load Image...`. Select the program ROM
+6. If the VHDL components are missing from the circuit, just place them in where they go.
+7. Right-click on the `Program` ROM component and select `Load Image...`. Select the program ROM
    that you want to deploy.
-9. Under `FPGA` in Logisim, select `Synthesize and Download`.
-10. From the new window, set the frequency to the highest one available for around 2 MHz. It's
+8. Under `FPGA` in Logisim, select `Synthesize and Download`.
+9. From the new window, set the frequency to the highest one available for around 2 MHz. It's
    possible to further increase this by changing the divider value to as low as 2, but it's not
    necessary. This can also be lowered substantially for debugging.
-11. Select `Annotate` to ensure that all components have labels.
-12. Ensure `Toplevel` is `main` and select `Synthesize and Download`.
-13. Press `Execute` to start deploying to the board, which should be connected.
-14. Press `done` in the component mapping window that pops up to proceed with the deployment.
+10. Select `Annotate` to ensure that all components have labels.
+11. Ensure `Toplevel` is `main` and select `Synthesize and Download`.
+12. Press `Execute` to start deploying to the board, which should be connected.
+13. Press `done` in the component mapping window that pops up to proceed with the deployment.
 
 ## Patched Deployment
 This method picks up right after the previous method, except you select `Generate HDL only` to
 only generate the Quartus project files without compiling and deploying to the board. At this
 point, the project isn't usable and scripts are necessary to fully set it up and patch the
-files to add the ADC and UART features. To set up the Quartus project and patch the files,
-run the `synthesize.sh` script. At this point, you could just open the project in Quartus and
-deploy like normal. If you want to deploy without opening Quartus, run the `compile_and_flash.sh`
-script. To update the program without re-generating the whole project, run the `patch_rom.sh`
-script to update the VHDL code with the new program ROM.
+files to add the ADC and UART features. Set the `QUARTUS_DIR` variable in `env.sh` to the 
+Quartus Prime `bin` directory path to set up your local environment. To set up the Quartus 
+project and patch the files, run the `synthesize.sh` script. At this point, you could just 
+open the project in Quartus and deploy like normal. If you want to deploy without opening 
+Quartus, run the `compile_and_flash.sh`script. To update the program without re-generating 
+the whole project, run the `patch_rom.sh` script to update the VHDL code with the new program ROM.
 
 ## Debugging
 It's possible to debug programs on the FPGA using the normal Quartus tools. The `debug.sh` script

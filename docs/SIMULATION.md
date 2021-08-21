@@ -15,6 +15,14 @@ to unexpected behavior, especially in the generated VHDL code.
 - Programs that read from GPIO won't work at all since the `Port I/O` components read an undefined
   state, so it results in errors propagating throughout the circuit.
   
+## Simulation-only Features
+- TTY Output: The Logisim `TTY` component can be added where labeled to enable displaying
+  any characters output to the Serial port.
+- Video Output: The Logisim `RGB Video` component allows for basic output of program graphics,
+  though the color palette is completely wrong since it doesn't support RGB332, so it's only
+  suitable for debugging. The Simulation is also just far too slow to render more than a few
+  sprites in a reasonable amount of time. 
+
 ## Updating Microcode and ROM
 - The microcode and program ROM can easily be updated by right-clicking on the respective
 component and loading the generated binary files.

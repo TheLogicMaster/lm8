@@ -41,3 +41,6 @@
     jsr $4567
     ret
     halt
+    lsl
+    lsr
+    asr

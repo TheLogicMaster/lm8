@@ -90,7 +90,7 @@ public class AssemblyAnnotator implements Annotator {
 					.highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
 					.create();
 
-		if (Pattern.matches("^(nop|ina|dea|ret|halt|data)$", mnemonic)) {
+		if (Pattern.matches("^(nop|ina|dea|ret|halt|data|lsl|lsr|asr)$", mnemonic)) {
 			ensureOperandsOrder(instruction, holder, operands, evaluated, INHERENT_OPERANDS);
 		} else if (Pattern.matches("^(inc|dec|push|pop)$", mnemonic)) {
 			ensureOperandsOrder(instruction, holder, operands, evaluated, REGISTER_OPERANDS);

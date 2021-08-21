@@ -168,6 +168,21 @@ void Emulator::run() {
             break;
         case 0b101000: // HALT
             throw HaltException();
+        case 0b101001: // LSL
+            setFlag(FLAG_C, regA & 0x80);
+            regA <<= 1;
+            setFlag(FLAG_Z, !regA);
+            break;
+        case 0b101010: // LSR
+            setFlag(FLAG_C, regA & 0x1);
+            regA >>= 1;
+            setFlag(FLAG_Z, !regA);
+            break;
+        case 0b101011: // ASR
+            setFlag(FLAG_C, regA & 0x1);
+            regA = (regA & 0x80) | (regA >> 1);
+            setFlag(FLAG_Z, !regA);
+            break;
     }
 }
 

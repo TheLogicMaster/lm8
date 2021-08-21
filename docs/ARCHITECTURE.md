@@ -1,9 +1,11 @@
 # LM-8 Architecture
+The architectural design of this computer was heavily influenced by classic 8-bit processors
+like the 6502. 
 
 ## Specifications
 - 8-bit (Obviously)
 - 16-bit big-endian addressing
-- Only 28 unique instructions
+- Only 31 unique instructions
 - 4 program registers
 - Programmable CPU microcode
 
@@ -70,6 +72,9 @@ currently active in the CPU. There are 64 possible instructions, with each instr
 |JSR addr|100110**|SP = SP - 2, [SP] = PC|****|6|
 |RET|100111**|PC = [SP], SP = SP + 2|****|6|
 |HALT|101000**|Halt CPU|****|2|
+|LSL|101001**|C <-- reg <-- 0|ZC**|1|
+|LSR|101010**|0 --> reg --> C|ZC**|1|
+|ASR|101011**|reg[7] --> reg --> C|ZC**|1|
 ### Key:
 - __*__: Unused
 - __rr__: Register (__A__, __B__, __H__, or __L__)

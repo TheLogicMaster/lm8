@@ -55,6 +55,9 @@ ALU_AND = 4
 ALU_OR = 5
 ALU_XOR = 6
 ALU_CMP = 7
+ALU_ASL = 8
+ALU_LSR = 9
+ALU_ASR = 10
 
 # Instruction end conditions
 COND_FLAG = 0
@@ -77,24 +80,23 @@ def instr(opcode):
 
 # Add a state to the current instruction
 def state(addr_mode=0, write_op=0, read_sel=0, write_sel=0, mode=0, sp_en=False, sp_inc=False, write=False, f_write=False,
-          condition=False, halt=False, pc_inc=False, pc_write=False, instr_done=False, _=False):
+          condition=False, halt=False, pc_inc=False, pc_write=False, instr_done=False):
     global instruction_state
     value = 0
     value |= addr_mode & 0x3
     value |= (write_op & 0x3) << 2
     value |= (read_sel & 0xF) << 4
     value |= (write_sel & 0x7) << 8
-    value |= (mode & 0x7) << 11
-    value |= sp_en << 14
-    value |= sp_inc << 15
-    value |= write << 16
-    value |= f_write << 17
-    value |= condition << 18
-    value |= halt << 19
-    value |= pc_inc << 20
-    value |= pc_write << 21
-    value |= instr_done << 22
-    value |= _ << 23
+    value |= (mode & 0xF) << 11
+    value |= sp_en << 15
+    value |= sp_inc << 16
+    value |= write << 17
+    value |= f_write << 18
+    value |= condition << 19
+    value |= halt << 20
+    value |= pc_inc << 21
+    value |= pc_write << 22
+    value |= instr_done << 23
 
     states[instruction * INSTR_STATES + instruction_state] = value
     instruction_state += 1
@@ -324,6 +326,18 @@ def main():
     instr(0b101000)
     state()
     state(halt=True)
+
+    # LSL
+    instr(0b101001)
+    state(write=True, write_op=OP_ALU, write_sel=WRITE_A, read_sel=READ_REG, mode=ALU_ASL, f_write=True, instr_done=True)
+
+    # LSR
+    instr(0b101010)
+    state(write=True, write_op=OP_ALU, write_sel=WRITE_A, read_sel=READ_REG, mode=ALU_LSR, f_write=True, instr_done=True)
+
+    # ASR
+    instr(0b101011)
+    state(write=True, write_op=OP_ALU, write_sel=WRITE_A, read_sel=READ_REG, mode=ALU_ASR, f_write=True, instr_done=True)
 
     output = bytearray(len(states) * STATE_SIZE)
     for i in range(len(states)):
