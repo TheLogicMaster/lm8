@@ -60,7 +60,7 @@ not_btn:
     jr check_buttons,nz ; If not Zero GOTO check_buttons
 
 ; 7-segment counter
-    ldr {seven_segment_5},a ; A = {seven_segment_5}
+    ldr {seven_segment_0},a ; A = {seven_segment_0}
 counter:
     str [temp],a ; [temp] = A
     in a ; A = port[A]
@@ -72,10 +72,10 @@ counter:
     jr counter_done,c ; GOTO counter_done if Carry
     ldr #0,b ; B = 0
     out b ; port[A] = B
-    dec a ; A--
-    cmp {seven_segment_0} ; Compare A with {seven_segment_0}
-    jr counter,nc ; GOTO counter if not Carry
     inc a ; A++
+    cmp #8 ; Compare A with {seven_segment_5} + 1
+    jr counter,c ; GOTO counter if not Carry
+    dec a ; A--
 counter_done:
     out b ; port[A] = B
 
