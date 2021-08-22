@@ -2,11 +2,15 @@
 
     jmp main
 
+    include "libraries/Serial.asm"
+
 failed_text: db "Test failed\n", $0
 success_text: db "All tests passed!\n", $0
 test_bytes: db $1, $2, $3, $4
 
 main:
+    jsr setup_serial
+
 ; Test 1 --- Load instructions
     ; Todo: Check flags changed
     ldr #1,A
@@ -202,16 +206,16 @@ var_jump_target:
 
 
 ; End of tests
-    ldr =success_text,A
-    out {print_string},A
+    ldr =success_text,L
+    jsr print_string
     halt
 
 ; Prints the test failed message and outputs the test ID to HEX0
 failed:
     ldr [test],A
     out {seven_segment_0},A
-    ldr =failed_text,A
-    out {print_string},A
+    ldr =failed_text,L
+    jsr print_string
     ldr $1,A
     out {led_0},A
     halt

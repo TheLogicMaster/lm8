@@ -16,7 +16,7 @@ buffer is upscaled 3x to fit most of the 640x480 resolution VGA output. The spri
 is implemented in the Logisim circuit and is a bit buggy but mostly works. Writing to the
 `draw_sprite` port takes around 64 cycles to draw an entire sprite at the current graphics
 register coorinates. The `draw_pixel` port is simpler and doesn't take additional cycles to
-simply write a single byte to the display register.
+simply write a single pixel to the display buffer.
 
 ## Audio
 There is no dedicated audio hardware, so only CPU driven square wave based audio is 
@@ -28,8 +28,10 @@ for each note.
 UART communication is accomplished using an Intel IP core. A dummy VHDL component exists in
 the Logisim circuit which is later patched by the `synthesize.sh` script. The actual 
 implementation simply instantiates the UART component and interfaces it with the rest of the
-computer. To avoid dealing with buffers, only the last received byte is stored in the 
-component. This means that the computer is limited to receiving simple commands over Serial.
+computer. A dual-clock FIFO buffer is present in the VHDL implementation that interfaces with 
+the UART IP core and allows the running program to access the buffer at any processor speed.
+The first byte transmitted in a program tends to get corrupted for some reason, but sending
+a null byte seems to harmlessly prevent this.
 
 ## Pulse Width Modulation
 There are 6 PWM drivers on the Arduino Uno header pins in the typical Uno locations of pins

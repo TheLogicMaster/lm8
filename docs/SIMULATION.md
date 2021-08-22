@@ -14,6 +14,9 @@ to unexpected behavior, especially in the generated VHDL code.
   the undo/redo features, so just use an external editor.
 - Programs that read from GPIO won't work at all since the `Port I/O` components read an undefined
   state, so it results in errors propagating throughout the circuit.
+- Outputs from VHDL components will be undefined, causing any components connected to error, 
+  quickly contaminating the entire simulation. To get around this, connect an OR gate directly
+  to the VHDL component to prevent leaving any dangling wires and "or" it with a zero constant.
   
 ## Simulation-only Features
 - TTY Output: The Logisim `TTY` component can be added where labeled to enable displaying

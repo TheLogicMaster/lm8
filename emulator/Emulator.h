@@ -2,6 +2,7 @@
 #define EMULATOR_EMULATOR_H
 
 #include <cstdint>
+#include <queue>
 
 #define DISPLAY_WIDTH 160
 #define DISPLAY_HEIGHT 128
@@ -47,7 +48,7 @@ public:
 
     uint8_t* getDisplayBuffer();
     std::string &getPrintBuffer();
-    uint8_t &getUartIn();
+    void uartReceive(char* bytes, uint8_t length);
     bool& getSwitch(int id);
     bool& getButton(int id);
     bool getLight(int id);
@@ -98,7 +99,7 @@ private:
     uint8_t analogDigitalConverters[6]{};
     uint8_t graphicsX = 0;
     uint8_t graphicsY = 0;
-    uint8_t uartIn{};
+    std::queue<uint8_t> uartInBuffer{};
     std::string printBuffer{};
 
     uint8_t rom[0x8000]{};

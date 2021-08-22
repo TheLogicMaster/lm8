@@ -24,11 +24,20 @@ public class AssemblyDocumentationProvider extends AbstractDocumentationProvider
 
 		ArrayList<String> docs = new ArrayList<>();
 		PsiElement previous = element.getPrevSibling();
+		boolean prevCRLF = false;
 		while (previous != null) {
-			if (previous instanceof PsiComment)
-				docs.add(previous.getText().split(";")[1]);
-			else if (previous.getNode().getElementType() != AssemblyTypes.CRLF)
-				break;
+			if (previous instanceof PsiComment) {
+				if (previous.getText().length() > 1)
+					docs.add(previous.getText().split(";")[1]);
+				prevCRLF = false;
+			} else {
+				if (previous.getNode().getElementType() == AssemblyTypes.CRLF) {
+					if (prevCRLF)
+						break;
+					prevCRLF = true;
+				} else
+					break;
+			}
 			previous = previous.getPrevSibling();
 		}
 		if (docs.size() == 0)
@@ -40,8 +49,14 @@ public class AssemblyDocumentationProvider extends AbstractDocumentationProvider
 		builder.append(element.getName());
 		builder.append(DocumentationMarkup.DEFINITION_END);
 		builder.append(DocumentationMarkup.CONTENT_START);
-		for (String line: docs)
+		builder.append(DocumentationMarkup.SECTIONS_START);
+		for (String line: docs) {
+			builder.append(DocumentationMarkup.SECTION_HEADER_START);
+			builder.append(DocumentationMarkup.SECTION_START);
 			builder.append(line);
+			builder.append(DocumentationMarkup.SECTION_END);
+		}
+		builder.append(DocumentationMarkup.SECTIONS_END);
 		builder.append(DocumentationMarkup.CONTENT_END);
 		return builder.toString();
 	}

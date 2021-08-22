@@ -9,7 +9,7 @@ import re
 # Constants to be substituted during assembly
 constants = {
     "serial":            0,
-    "print_string":      1,
+    "serial_available":  1,
     "graphics_x":        30,
     "graphics_y":        31,
     "draw_pixel":        32,

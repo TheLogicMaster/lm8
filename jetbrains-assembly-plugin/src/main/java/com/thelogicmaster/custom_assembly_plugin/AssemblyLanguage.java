@@ -41,7 +41,7 @@ public class AssemblyLanguage extends Language {
 	static {
 		PORTS = new HashMap<>();
 		PORTS.put("serial", 0);
-		PORTS.put("print_string", 1);
+		PORTS.put("serial_available", 1);
 		PORTS.put("graphics_x", 30);
 		PORTS.put("graphics_y", 31);
 		PORTS.put("draw_pixel", 32);

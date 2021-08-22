@@ -65,6 +65,7 @@ static bool stepBreakpoint = false;
 static bool enableBreakpoints = false;
 static std::set<uint16_t> breakpoints{};
 static char breakpointText[5]{};
+char uartText[255]{};
 
 // Todo: Give colors better names
 static ImFont *font7Segment;
@@ -304,6 +305,15 @@ static void displayPrintLog() {
     ImGui::EndChild();
     if (ImGui::Button("Clear"))
         emulator->getPrintBuffer().clear();
+    ImGui::SameLine();
+
+    ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - 120);
+    ImGui::InputText("", uartText, 255);
+    ImGui::SameLine();
+    if (ImGui::Button("Send")) {
+        emulator->uartReceive(uartText, strlen(uartText));
+        uartText[0] = 0;
+    }
     ImGui::End();
 }
 

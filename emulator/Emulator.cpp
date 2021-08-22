@@ -211,6 +211,7 @@ void Emulator::reset() {
     memset(pwmDutyCycles, 0, 6);
     pwmCount = 0;
     uartEnable = false;
+    std::queue<uint8_t>().swap(uartInBuffer);
     memset(timerCounts, 0, TIMER_COUNT);
     memset(timerModes, 0, TIMER_COUNT);
     memset(timerValues, 0, TIMER_COUNT);
@@ -226,8 +227,12 @@ std::string &Emulator::getPrintBuffer() {
     return printBuffer;
 }
 
-uint8_t &Emulator::getUartIn() {
-    return uartIn;
+void Emulator::uartReceive(char* bytes, uint8_t length) {
+    for (int i = 0; i < length; i++) {
+        if (uartInBuffer.size() >= 255)
+            break;
+        uartInBuffer.push(bytes[i]);
+    }
 }
 
 bool &Emulator::getSwitch(int id) {
@@ -399,7 +404,9 @@ bool Emulator::checkCondition(uint8_t instruction) const {
 uint8_t Emulator::readPort(uint8_t port) {
     switch (port) {
         case 0:
-            return uartIn;
+            return uartInBuffer.front();
+        case 1:
+            return uartInBuffer.size();
         case 2 ... 7: // Seven Segment Displays
             return sevenSegmentDisplays[port - 2];
         case 8 ... 9: // I/O Panel Buttons
@@ -436,16 +443,15 @@ uint8_t Emulator::readPort(uint8_t port) {
 void Emulator::writePort(uint8_t port, uint8_t value) {
     switch (port) {
         case 0: // Print Char
+            if (value == 0)
+                break;
             std::cout << value << std::flush;
             printBuffer.push_back(*(char*)&value);
             if (printBuffer.length() > PRINT_BUFFER)
                 printBuffer.erase(0, 1);
             break;
-        case 1: // Print String
-            std::cout << (char*)&rom[value] << std::flush;
-            printBuffer.append((char*)&rom[value]);
-            if (printBuffer.length() > PRINT_BUFFER)
-                printBuffer.erase(0, printBuffer.length() - PRINT_BUFFER);
+        case 1: // Pop first UART read value
+            uartInBuffer.pop();
             break;
         case 2 ... 7: // Seven Segment Displays
             sevenSegmentDisplays[port - 2] = value;

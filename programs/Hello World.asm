@@ -1,24 +1,21 @@
-; This demonstrates manually printing out a string using Print
+; Hello World --- The classic "Hello World" program using 8-bit and 16-bit string addressing
 
     jmp program ; Program entry point
 
+    include "libraries/Serial.asm"
+
 message: db "Hello World!\n",$0 ; Message to print
+message_extended: db "Extended Hello!\n",$0
 
 program:
-    ; Enable Serial output
-    ldr $1,A
-    out {arduino_output},A
-    out {serial_enable},A
+    jsr setup_serial ; Enable Serial output
 
-    ldr #0,h ; Zero High address register
+; Print message from 8-bit address
     ldr =message,l ; Load message address into L
+    jsr print_string ; Print message
 
-print:
-    ldr [hl],a ; Load character into A
-    jr done,z ; Jump to "done" if A is zero, i.e. end of string
-    out {serial},a ; Print character in A
-    ina ; Increment HL register
-    jr print ; Jump to print
+; Print message from 16-bit address
+    lda message_extended ; Load message address into HL
+    jsr print_string_extended ; Print message
 
-done:
     halt ; Halt execution

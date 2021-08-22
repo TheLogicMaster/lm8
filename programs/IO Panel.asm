@@ -1,8 +1,13 @@
 ; This demonstrates using DE10-Lite I/O or the emulator I/O panel
 
-    jmp loop ; Program entry point
+    jmp main ; Program entry point
+
+    include "libraries/Serial.asm"
 
 message: db "Pressed Button ",$0 ; Message to print
+
+main:
+    jsr setup_serial
 
 ; Program loop
 loop:
@@ -42,8 +47,10 @@ check_buttons:
     jr not_btn,z ; If Zero GOTO not_btn
     ldr [hl],b ; B = [hl]
     jr not_btn,nz ; If not Zero GOTO not_btn
-    ldr =message,b ; B = message
-    out {print_string},b ; Print message
+    push L
+    ldr =message,L ; L = message
+    jsr print_string ; Print message
+    pop L
     str [temp],a ; [temp] = A
     ldr [temp],b ; B = [temp]
     ldr '0',a ; A = '0'

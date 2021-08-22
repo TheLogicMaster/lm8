@@ -94,7 +94,7 @@ For binary ports, reading will return a 0 or 1 and writing anything but a 0 is s
 |Port|Id(s)|Function|
 |----|-----|--------|
 |serial|0|Output a character to the console or UART, read to get UART input|
-|print_string|1|Print a null terminated string at the provided address|
+|serial_available|1|Read to get available UART bytes, write to pop a value|
 |seven_segment_n|2-7|Access seven segment display register n (0-5)|
 |button_n|8-9|Read the binary state of button n (0-1)|
 |led_n|10-19|Read or write to LED n (0-9)|
