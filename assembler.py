@@ -51,6 +51,7 @@ constants.update({"timer_" + str(i): i + 112 for i in range(2)})
 
 line_number = 0
 file = ""
+memory = False
 output = bytearray()
 address = 0
 data_address = 0x8000
@@ -490,6 +491,7 @@ def parse_file():
 
 def main():
     global file
+    global memory
 
     parser = argparse.ArgumentParser(description='Assemble a program. Assumed to be in the <project>/programs directory by default')
     parser.add_argument('program', help='The program file to assemble')
@@ -497,9 +499,12 @@ def main():
     parser.add_argument('-f', '--fpga', default='none', choices=['none', 'patch', 'flash'], type=str.lower, help="Whether to patch or run for FPGA (Linux only)")
     parser.add_argument('-e', '--emulator', help='The path to the emulator if not "../emulator/build/Emulator"')
     parser.add_argument('-s', '--simulator', help='The path to the simulator if not "../simulator"')
+    parser.add_argument('-m', '--memory', action='store_true', help='Assemble for being run by bootloader')
     args = parser.parse_args()
 
+    memory = args.memory
     file = args.program
+
     parse_file()
 
     # Substitute labels for addresses
@@ -507,7 +512,13 @@ def main():
         label = label_addresses[addr]
         if label not in labels:
             error("No such label: " + label, -1)
-        temp = labels[label].to_bytes(2, 'big')
+        offset = 0
+        if memory:
+            if labels[label] < 0x8000:
+                offset = 0x8000
+            else:
+                offset = 0x4000
+        temp = (labels[label] + offset).to_bytes(2, 'big')
         ensure_output_size(addr + 2)
         output[addr] = temp[0]
         output[addr + 1] = temp[1]
@@ -527,6 +538,8 @@ def main():
 
     # Substitute labels for immediate values
     for addr in label_imm_addresses:
+        if memory:
+            error("Immediate labels aren't available in memory mode", -1)
         label = label_imm_addresses[addr]
         if label not in labels:
             error("No such label: " + label, -1)
@@ -535,8 +548,17 @@ def main():
         ensure_output_size(addr + 1)
         output[addr] = labels[label]
 
+    # Ensure ROM size
+    if memory:
+        ensure_output_size(0x4000)
+        if address > 0x4000:
+            error("In-memory program size exceeded", -1)
+    else:
+        if address > 0x8000:
+            error("Program size exceeded", -1)
+
     # Save machine code results
-    rom_name = os.path.splitext(os.path.basename(args.program))[0] + ".bin"
+    rom_name = os.path.splitext(os.path.basename(args.program))[0] + (".img" if memory else ".bin")
     rom_path = os.path.join("./build", rom_name)
     os.makedirs("./build", exist_ok=True)
     f = open(rom_path, "wb")

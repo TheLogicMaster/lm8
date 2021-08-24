@@ -29,7 +29,9 @@ Jetbrains IDE language support plugin, a Logisim-Evolution simulation, and an FP
 - [Hardware Interfaces](HARDWARE.md)
 - [Simulation](SIMULATION.md)
 - [FPGA](FPGA.md)
+- [FPGA Bootloader](BOOTLOADER.md)
 - [Jetbrains Plugin](PLUGIN.md)
+- [Assembly Libraries](LIBRARIES.md)
 
 ## Attributions
 - [ImGui](https://github.com/ocornut/imgui)

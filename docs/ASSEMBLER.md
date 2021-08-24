@@ -25,7 +25,8 @@ the program will fail to assemble.
 Hexadecimal, decimal, and binary values can be used for immediate parameters using the prefixes `$`, `#`, 
 and `%`, respectively. Character literals can also be used for immediate operands. Using `=` before a 
 label with an address of `$FF` or less will provide the address of said label, primarily for printing 
-strings. Decimal immediates can also be negative and the value will be stored correctly.
+strings, but doesn't work for programs running memory. Decimal immediates can also be negative and the 
+value will be stored correctly in 2's compliment form.
 #### Registers
 The four program registers can be specified using their respective letters: `A`, `B`, `H`, and `L`.
 #### Addresses
@@ -101,3 +102,4 @@ plugin can automatically generate run configurations that assemble and run progr
 - --fpga (-f) <none|patch|flash>: Patch the FPGA ROM code with the assembled binary and or flash the FPGA.
 - --emulator (-e): Specify the path to the compiled emulator if not using the default project structure
 - --simulator (-s): Specify the path to the `simulation` directory if not using the default project structure
+- --memory (-m): Assemble the program for being run by the bootloader from an SD card in memory.

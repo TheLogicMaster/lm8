@@ -84,10 +84,10 @@ public class AssemblyLanguage extends Language {
 			PORTS.put("timer_" + i, 112 + i);
 
 		CONSTANTS = new HashMap<>(PORTS);
-		CONSTANTS.put("controller_up", 0);
-		CONSTANTS.put("controller_down", 1);
-		CONSTANTS.put("controller_left", 2);
-		CONSTANTS.put("controller_right", 3);
+		CONSTANTS.put("controller_up", 35);
+		CONSTANTS.put("controller_down", 36);
+		CONSTANTS.put("controller_left", 37);
+		CONSTANTS.put("controller_right", 38);
 		CONSTANTS.put("microseconds", 0);
 		for (int i = 0; i < TIMER_UNITS.length; i++)
 			CONSTANTS.put(TIMER_UNITS[i], i);
@@ -309,19 +309,26 @@ public class AssemblyLanguage extends Language {
 	 * @return String of parsed operand
 	 */
 	public static String evaluateOperandConstant(ASTNode operand) {
-		Matcher constantMatcher = Pattern.compile("\\{(\\w+)}").matcher(operand.getText());
-		if (!constantMatcher.matches())
-			return operand.getText();
-		String constant = constantMatcher.group(1);
+		Pattern pattern = Pattern.compile("\\{(\\w+)}");
 
 		HashMap<String, String> constants = new HashMap<>();
 		for (Map.Entry<String, Integer> entry: CONSTANTS.entrySet())
 			constants.put(entry.getKey(), "#" + entry.getValue());
 		collectVisibleConstants(operand.getPsi().getContainingFile(), operand.getPsi().getParent(), constants, 0);
 
-		if (!constants.containsKey(constant))
-			return operand.getText();
-		return constants.get(constant);
+		String current = operand.getText();
+
+		for (int i = 0; i < 10; i++) {
+			Matcher matcher = pattern.matcher(current);
+			if (!matcher.matches())
+				break;
+			String constant = matcher.group(1);
+			if (!constants.containsKey(constant))
+				break;
+			current = constants.get(constant);
+		}
+
+		return current;
 	}
 
 	private static void collectVisibleLabels(PsiFile file, Collection<AssemblyLabelDefinition> definitions, Set<String> collected, Set<String> duplicates, int depth) {

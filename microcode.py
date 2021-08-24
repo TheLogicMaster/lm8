@@ -4,7 +4,7 @@
 
 # CPU constants
 INSTR_COUNT = 64
-INSTR_STATES = 6
+INSTR_STATES = 8
 STATE_SIZE = 3
 
 # Addressing modes
@@ -104,6 +104,7 @@ def state(addr_mode=0, write_op=0, read_sel=0, write_sel=0, mode=0, sp_en=False,
 
 def alu_imm_states(mode, write=True):
     state()
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C0, read_sel=READ_MEM, pc_inc=True)
     state(write=write, write_op=OP_ALU, write_sel=WRITE_A, read_sel=READ_C0, mode=mode, f_write=True, instr_done=True)
 
@@ -120,12 +121,15 @@ def main():
     # LDR imm,reg
     instr(0b000001)
     state()
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_REG, read_sel=READ_MEM, pc_inc=True, f_write=True, instr_done=True)
 
     # LDR [addr],reg
     instr(0b000010)
     state()
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C0, read_sel=READ_MEM, pc_inc=True)
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C1, read_sel=READ_MEM, pc_inc=True)
     state(addr_mode=ADDR_CACHE)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_REG, read_sel=READ_MEM, addr_mode=ADDR_CACHE, f_write=True, instr_done=True)
@@ -139,7 +143,9 @@ def main():
     # STR [addr],reg
     instr(0b000100)
     state()
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C0, read_sel=READ_MEM, pc_inc=True)
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C1, read_sel=READ_MEM, pc_inc=True)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_MEM, read_sel=READ_REG, addr_mode=ADDR_CACHE, instr_done=True)
 
@@ -151,17 +157,21 @@ def main():
     # LDA addr
     instr(0b000110)
     state()
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_H, read_sel=READ_MEM, pc_inc=True)
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_L, read_sel=READ_MEM, pc_inc=True, instr_done=True)
 
     # IN imm,reg
     instr(0b000111)
+    state()
     state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C0, read_sel=READ_MEM, pc_inc=True)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_REG, read_sel=READ_PORT, f_write=True, instr_done=True)
 
     # OUT imm,reg
     instr(0b001000)
+    state()
     state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C0, read_sel=READ_MEM, pc_inc=True)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_PORT, read_sel=READ_REG, instr_done=True)
@@ -253,7 +263,9 @@ def main():
     # JMP addr
     instr(0b011101)
     state()
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C0, read_sel=READ_MEM, pc_inc=True)
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C1, read_sel=READ_MEM, pc_inc=True)
     state(pc_write=True, mode=PC_CACHE, instr_done=True)
 
@@ -264,11 +276,13 @@ def main():
     # JR imm
     instr(0b011111)
     state()
+    state()
     state(read_sel=READ_MEM, write_op=OP_PASS, pc_write=True, mode=PC_ADD)
     state(pc_inc=True, instr_done=True)
 
     # JR imm,cc
     instr(0b100000)
+    state()
     state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C0, read_sel=READ_MEM, pc_inc=True)
     state(condition=True, mode=COND_NOT_FLAG)
@@ -276,6 +290,7 @@ def main():
 
     # JR imm,nn
     instr(0b100001)
+    state()
     state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C0, read_sel=READ_MEM, pc_inc=True)
     state(condition=True, mode=COND_FLAG)
@@ -307,7 +322,9 @@ def main():
     # JSR addr
     instr(0b100110)
     state()
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C0, read_sel=READ_MEM, pc_inc=True)
+    state()
     state(write=True, write_op=OP_PASS, write_sel=WRITE_C1, read_sel=READ_MEM, pc_inc=True, sp_en=True)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_MEM, read_sel=READ_PC_LOW, addr_mode=ADDR_SP, sp_en=True)
     state(write=True, write_op=OP_PASS, write_sel=WRITE_MEM, read_sel=READ_PC_HIGH, addr_mode=ADDR_SP)

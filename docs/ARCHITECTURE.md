@@ -32,44 +32,44 @@ currently active in the CPU. There are 64 possible instructions, with each instr
 |DB "HI",'\n',$0|N/A|Define bytes|N/A|N/A|
 |BIN|N/A|Inject a binary file|N/A|N/A|
 |NOP|000000**|No operation|****|1|
-|LDR imm,reg|000001rr|reg = imm|Z***|2|
-|LDR [addr],reg|000010rr|reg = [addr]|Z***|5|
+|LDR imm,reg|000001rr|reg = imm|Z***|3|
+|LDR [addr],reg|000010rr|reg = [addr]|Z***|7|
 |LDR [HL],reg|000011rr|reg = [HL]|Z***|3|
-|STR [addr],reg|000100rr|[addr] = reg|****|4|
+|STR [addr],reg|000100rr|[addr] = reg|****|6|
 |STR [HL],reg|000101rr|[HL] = reg|****|2|
-|LDA addr|000110**|HL = addr|****|3|
-|IN imm,reg|000111rr|reg = PORT[imm]|Z***|3|
-|OUT imm,reg|001000rr|PORT[imm] = reg|****|3+|
+|LDA addr|000110**|HL = addr|****|5|
+|IN imm,reg|000111rr|reg = PORT[imm]|Z***|4|
+|OUT imm,reg|001000rr|PORT[imm] = reg|****|4+|
 |INC reg|001001rr|reg = reg + 1|ZC**|1|
 |DEC reg|001010rr|reg = reg - 1|ZC**|1|
 |INA|001011**|HL = HL + 1|****|2 or 3|
 |DEA|001100**|HL = HL - 1|****|2 or 3|
-|ADD imm|001101**|A = A + imm|ZCNV|3|
+|ADD imm|001101**|A = A + imm|ZCNV|4|
 |ADD reg|001110rr|A = A + reg|ZCNV|1|
-|ADC imm|001111**|A = A + imm + C|ZCNV|3|
+|ADC imm|001111**|A = A + imm + C|ZCNV|4|
 |ADC reg|010000rr|A = A + reg + C|ZCNV|1|
-|SUB imm|010001**|A = A - imm|ZCNV|3|
+|SUB imm|010001**|A = A - imm|ZCNV|4|
 |SUB reg|010010rr|A = A - reg|ZCNV|1|
-|SBC imm|010011**|A = A - imm - C|ZCNV|3|
+|SBC imm|010011**|A = A - imm - C|ZCNV|4|
 |SBC reg|010100rr|A = A - reg - C|ZCNV|1|
-|AND imm|010101**|A = A & imm|Z***|3|
+|AND imm|010101**|A = A & imm|Z***|4|
 |AND reg|010110rr|A = A & reg|Z***|1|
-|OR imm|010111**|A = A &#124; imm|Z***|3|
+|OR imm|010111**|A = A &#124; imm|Z***|4|
 |OR reg|011000rr|A = A &#124; reg|Z***|1|
-|XOR imm|011001**|A = A ^ imm|Z***|3|
+|XOR imm|011001**|A = A ^ imm|Z***|4|
 |XOR reg|011010rr|A = A ^ reg|Z***|1|
-|CMP imm|011011**|A - imm|ZCNV|3|
+|CMP imm|011011**|A - imm|ZCNV|4|
 |CMP reg|011100rr|A - reg|ZCNV|1|
-|JMP addr|011101**|PC = addr|****|4|
+|JMP addr|011101**|PC = addr|****|6|
 |JMP HL|011110**|PC = HL|****|1|
-|JR rel|011111**|PC = PC + rel|****|3|
-|JR rel,cc|100000cc|If cc, PC = PC + rel|****|3 or 4|
-|JR rel,nn|100001nn|If nn, PC = PC + rel|****|3 or 4|
+|JR rel|011111**|PC = PC + rel|****|4|
+|JR rel,cc|100000cc|If cc, PC = PC + rel|****|4 or 5|
+|JR rel,nn|100001nn|If nn, PC = PC + rel|****|4 or 5|
 |IN reg|100010rr|reg = PORT[A]|Z***|3|
 |OUT reg|100011rr|PORT[A] = reg|****|3+|
 |PUSH reg|100100rr|[--SP] = reg|****|2|
 |POP reg|100101rr|reg = [SP++]|****|3|
-|JSR addr|100110**|SP = SP - 2, [SP] = PC|****|6|
+|JSR addr|100110**|SP = SP - 2, [SP] = PC|****|8|
 |RET|100111**|PC = [SP], SP = SP + 2|****|6|
 |HALT|101000**|Halt CPU|****|2|
 |LSL|101001**|C <-- reg <-- 0|ZC**|1|
