@@ -8,6 +8,7 @@ like the 6502.
 - Only 31 unique instructions
 - 4 program registers
 - Programmable CPU microcode
+- 32 KB of both ROM and RAM
 
 ## Memory Map
 - 0x0000 - 0x7FFF: Program ROM
@@ -84,8 +85,8 @@ currently active in the CPU. There are 64 possible instructions, with each instr
 - __rel__: Relative Distance (Label or signed 8-bit immediate)
 - __addr__: Address (Label or 16-bit immediate)
 ### Cycle Exceptions
-- `OUT` instructions can take any number more than 3 cycles based on the port selected.
-- `JR` instructions with conditions take 3 if the condition failed and 4 otherwise.
+- `OUT` instructions can take any number more than 4 cycles based on the port selected.
+- `JR` instructions with conditions take 4 if the condition failed and 5 otherwise.
 - `INA` and `DEA` instructions take an extra cycle if `L` rolls around and changes `H`.
 
 ## I/O Ports
