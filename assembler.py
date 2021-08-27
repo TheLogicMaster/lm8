@@ -569,8 +569,7 @@ def main():
     if args.fpga == "patch":
         os.system(f'/bin/bash "{os.path.join(simulation_dir, "patch_rom.sh")}" "{os.path.abspath(rom_path)}"')
     elif args.fpga == "flash":
-        os.system(f'/bin/bash "{os.path.join(simulation_dir, "patch_rom.sh")}" "{os.path.abspath(rom_path)}"')
-        os.system(f'/bin/bash "{os.path.join(simulation_dir, "compile_and_flash.sh")}"')
+        os.system(f'/bin/bash "{os.path.join(simulation_dir, "incremental_flash.sh")}" "{os.path.abspath(rom_path)}"')
 
     if args.run:
         os.chdir('./build')

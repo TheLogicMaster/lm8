@@ -5,6 +5,9 @@
     def mosi={gpio_6}
 
 
+; Todo: Remove delay NOPs if not needed
+
+
 ; Setup the pins for SPI communication
 setup_spi:
     push A
@@ -49,6 +52,7 @@ spi_receive_byte_loop:
 
 ; Send a single byte to the currently enabled SPI slave from A
 spi_send_byte:
+    push A
     push B
     nop
     nop
@@ -71,6 +75,7 @@ spi_send_byte_bit:
     nop
     nop
     pop B
+    pop A
     ret
 
 

@@ -46,6 +46,9 @@ project and patch the files, run the `synthesize.sh` script. At this point, you 
 open the project in Quartus and deploy like normal. If you want to deploy without opening 
 Quartus, run the `compile_and_flash.sh`script. To update the program without re-generating 
 the whole project, run the `patch_rom.sh` script to update the VHDL code with the new program ROM.
+Typically, you should just use the `incremental_flash.sh` script to compile and flash with a ROM
+because it only compiles the project if it hasn't yet been compiled. This drastically cuts down
+on build times when testing programs and not changing the circuit.
 
 ## Debugging
 It's possible to debug programs on the FPGA using the normal Quartus tools. The `debug.sh` script
@@ -66,6 +69,7 @@ display their respective values for debugging the computer's state.
 - `compile_and_flash.sh`: Compiles the synthesized project then flashes the board.
 - `debug.sh`: Sets up the project for debugging and opens Quartus.
 - `flash.sh`: Flashes the compiled SOF file to the dev board.
+- `incremental_flash.sh`: Patches the project with the ROM and flashes without a full project compile.
 - `persisten_flash.sh`: Converts the compiled SOF file to a POF file and flashes it.
 - `patch_rom.sh`: Patches the program VHDL ROM with the specified ROM file.
 - `patch_microcode.sh`: Patches the microcode VHDL ROM with `microcode.bin`.

@@ -193,7 +193,7 @@ void Emulator::reset() {
     pc = 0;
     sp = 0;
     status = 0;
-    fillScreen(RGB888{0, 0, 0});
+    memset(displayBuffers, 0, DISPLAY_HEIGHT * DISPLAY_WIDTH * 3 * 2);
     renderingBuffer = displayBuffers[0];
     drawingBuffer = displayBuffers[1];
     memset(ram, 0, 0x8000);

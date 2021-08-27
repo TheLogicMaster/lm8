@@ -54,7 +54,7 @@ title_screen_draw:
     ina
     jsr multiply
     out {graphics_y},a
-    ldr #13,a
+    ldr #14,a
     out {draw_sprite},a
     pop b
     dec b
@@ -63,13 +63,13 @@ title_screen_draw:
     out {graphics_x},a
     ldr #16,a
     out {graphics_y},a
-    ldr #12,a
+    ldr #13,a
     out {draw_sprite},a
     ldr #120,a
     out {graphics_x},a
     ldr #24,a
     out {graphics_y},a
-    ldr #14,a
+    ldr #15,a
     out {draw_sprite},a
     out {swap_display},a
 title_screen_wait_release:
@@ -128,7 +128,7 @@ draw_apple:
     out {graphics_x},a
     ldr [apple_y],a
     out {graphics_y},a
-    ldr #14,a
+    ldr #15,a
     out {draw_sprite},a
     pop a
     ret
@@ -142,7 +142,7 @@ draw_snake_head:
     out {graphics_x},a
     ldr [y],a
     out {graphics_y},a
-    ldr #12,a
+    ldr #13,a
     out {draw_sprite},a
     pop a
     ret
@@ -219,7 +219,7 @@ draw_snake_body_next:
     out {graphics_x},a
     ldr [body_y],a
     out {graphics_y},a
-    ldr #13,a
+    ldr #14,a
     out {draw_sprite},a
     ina
     dec b
@@ -501,7 +501,7 @@ get_opposite_direction:
     ret
 
 
-    org $300 ; Start sprites at ID 12
+    org $340 ; Start sprites at ID 12
     bin "sprites/snake_head.bin"
     bin "sprites/snake_body.bin"
     bin "sprites/apple.bin"

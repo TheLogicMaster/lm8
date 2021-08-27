@@ -13,6 +13,4 @@ then
     exit -1
 fi
 
-SWITCH=$(python3 "${SCRIPT_DIR}/rom_to_vhdl.py" "$1" 15 1)
-
-perl -0777 -i -pe "s/CASE[\w\W]*END CASE/CASE (Address) IS\n${SWITCH}\n         END CASE/g" "${PROJECT}/vhdl/memory/ROMCONTENTS_Program_behavior.vhd"
+python3 "${SCRIPT_DIR}/rom_to_mif.py" "$1" "${PROJECT}/rom.mif"
