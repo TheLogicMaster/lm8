@@ -11,6 +11,6 @@ source "${SCRIPT_DIR}/env.sh"
     cd "${PROJECT}"
 
     # Flash dev board
-    CABLE=$([[ $("${QUARTUS_DIR}/quartus_pgm" --list) =~ ^([0-9]\)\ )(.+\]) ]] && echo ${BASH_REMATCH[2]})
-    "${QUARTUS_DIR}/quartus_pgm" -c \"${CABLE}\" -m jtag -o "P;LogisimToplevelShell.sof@1"
+    CABLE="$([[ $("${QUARTUS_DIR}/quartus_pgm${EXT}" --list) =~ ^([0-9]\)\ )(.+\]) ]] && echo ${BASH_REMATCH[2]})"
+    "${QUARTUS_DIR}/quartus_pgm${EXT}" -c "${CABLE}" -m jtag -o "P;LogisimToplevelShell.sof@1"
 )

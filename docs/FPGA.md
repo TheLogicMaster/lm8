@@ -62,6 +62,14 @@ while stepping through the program cycle by cycle. The extra hardware components
 also for debugging. The seven segment displays and LEDs can be re-mapped to physical ones to
 display their respective values for debugging the computer's state.
 
+## Windows Subsystem for Linux
+- Install [Ubuntu WSL](https://ubuntu.com/wsl) to get the ability the batch scripts from Windows.
+- Set the path to the Quartus bin directory in the Windows section of the `env.sh` file.
+- Navigate to the project simulation directory in a WSL terminal(If in Windows Documents directory: 
+  `cd /mnt/c/Users/<User>/Documents/<project>/simulation`).
+- Run the scripts normally but with `sudo` to prevent Windows permission issues(To compile:
+  `sudo ./compile.sh`).
+
 ## Scripts
 - `env.sh`: Used to configure the environment variables for all the other scripts.
 - `synthesize.sh`: Sets up and patches the Quartus project with generated IP components.

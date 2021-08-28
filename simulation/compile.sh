@@ -10,6 +10,6 @@ source "${SCRIPT_DIR}/env.sh"
 (
     cd "${PROJECT}"
 
-    "${QUARTUS_DIR}/quartus_map" LogisimToplevelShell --optimize=area
-    "${QUARTUS_DIR}/quartus_sh" --flow compile LogisimToplevelShell
+    "${QUARTUS_DIR}/quartus_map${EXT}" LogisimToplevelShell --optimize=area
+    "${QUARTUS_DIR}/quartus_sh${EXT}" --flow compile LogisimToplevelShell
 )

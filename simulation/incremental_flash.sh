@@ -20,8 +20,8 @@ if [ ! -f "${PROJECT}/LogisimToplevelShell.sof" ]; then
 else
     (
         cd "${PROJECT}"
-        "${QUARTUS_DIR}/quartus_cdb" LogisimToplevelShell -c LogisimToplevelShell --update_mif
-        "${QUARTUS_DIR}/quartus_asm" LogisimToplevelShell
+        "${QUARTUS_DIR}/quartus_cdb${EXT}" LogisimToplevelShell -c LogisimToplevelShell --update_mif
+        "${QUARTUS_DIR}/quartus_asm${EXT}" LogisimToplevelShell
     )
 fi
 
