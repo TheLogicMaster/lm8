@@ -41,3 +41,7 @@ parameter using a 128x64 image and will use 1 KB of ROM space each.
 ## Graphics
 This library is responsible for graphics utility subroutines corresponding to the VGA/emulator display
 output. Currently, only provides a software sprite drawing routine.
+
+## Utilities
+Utility routines that didn't fit other categories. Has a subroutine for testing whether running in RAM or
+not.

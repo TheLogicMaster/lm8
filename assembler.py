@@ -5,6 +5,8 @@
 import argparse
 import os
 import re
+import subprocess
+import shlex
 
 # Constants to be substituted during assembly
 constants = {
@@ -573,7 +575,8 @@ def main():
 
     if args.run:
         os.chdir('./build')
-        os.system(f"\"{args.emulator if args.emulator else os.path.join(os.pardir, os.pardir, 'emulator/build/Emulator')}\" \"{rom_name}\"")
+        cmd = f"\"{args.emulator if args.emulator else os.path.join(os.pardir, os.pardir, 'emulator/build/Emulator')}\" \"{rom_name}\""
+        subprocess.run(shlex.split(cmd))
 
 
 if __name__ == "__main__":

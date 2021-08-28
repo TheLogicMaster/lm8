@@ -30,7 +30,8 @@ IPs, so it isn't posible to use the ADC and UART components.
 8. Under `FPGA` in Logisim, select `Synthesize and Download`.
 9. From the new window, set the frequency to the highest one available for around 2 MHz. It's
    possible to further increase this by changing the divider value to as low as 2, but it's not
-   necessary. This can also be lowered substantially for debugging.
+   necessary. This can also be lowered substantially for debugging. On Windows there seems to be an
+   issue if you don't manually specify the divider value as 2 where the clock doesn't work.
 10. Select `Annotate` to ensure that all components have labels.
 11. Ensure `Toplevel` is `main` and select `Synthesize and Download`.
 12. Press `Execute` to start deploying to the board, which should be connected.
