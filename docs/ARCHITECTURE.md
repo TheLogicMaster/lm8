@@ -5,10 +5,12 @@ like the 6502.
 ## Specifications
 - 8-bit (Obviously)
 - 16-bit big-endian addressing
-- Only 31 unique instructions
-- 4 program registers
+- Only 27 unique instructions
+- 4 8-bit general program registers
+- 4-bit status register
 - Programmable CPU microcode
 - 32 KB of both ROM and RAM
+- 160x128 display output with sprite rendering and double buffering
 
 ## Memory Map
 - 0x0000 - 0x7FFF: Program ROM
@@ -20,6 +22,12 @@ The `microcode.py` script generates the `microcode.bin` binary which controls th
 by specifying which wires should be high or low based on which state of which instruction is
 currently active in the CPU. There are 64 possible instructions, with each instruction having upto
 6 states, with each state occupying 3 bytes or 24 wires.
+
+## CPU Flags
+- `Z`: The Zero flag, set if the result of an instruction is zero.
+- `C`: The Carry flag, set if there is a carry or borrow during an instruction.
+- `N`: The Negative flag, set if the signed result of an instruction is negative.
+- `V`: The Overflow flag, set if a signed overflow takes place during an instruction.
 
 ## Instructions
 |Instruction|Machine Code|Function|Flags (ZCNV)|Cycles|

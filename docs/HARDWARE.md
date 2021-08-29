@@ -12,8 +12,7 @@ count isn't readable and only the state of being triggered or not is visible to 
 ## Graphics
 The VGA driver is implemented entirely in a VHDL file in Logisim. The driver has a single
 display buffer that stores RGB332 color data for all pixels of the 160x128 display. The
-buffer is upscaled 3x to fit most of the 640x480 resolution VGA output. The sprite renderer
-is implemented in the Logisim circuit and is a bit buggy but mostly works. Writing to the
+buffer is upscaled 3x to fit most of the 640x480 resolution VGA output. Writing to the
 `draw_sprite` port takes around 64 cycles to draw an entire sprite at the current graphics
 register coorinates. The `draw_pixel` port is simpler and doesn't take additional cycles to
 simply write a single pixel to the display buffer.
