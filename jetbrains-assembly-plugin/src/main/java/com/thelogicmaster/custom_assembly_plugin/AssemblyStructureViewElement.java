@@ -64,7 +64,8 @@ public class AssemblyStructureViewElement implements StructureViewTreeElement, S
 			List<AssemblyLabelElement> properties = PsiTreeUtil.getChildrenOfTypeAsList(element, AssemblyLabelElement.class);
 			List<TreeElement> treeElements = new ArrayList<>(properties.size());
 			for (AssemblyLabelElement property : properties)
-				treeElements.add(new AssemblyStructureViewElement((AssemblyLabelElementImpl)property));
+				if (property.getName() != null && !property.getName().endsWith("_"))
+					treeElements.add(new AssemblyStructureViewElement((AssemblyLabelElementImpl)property));
 			return treeElements.toArray(new TreeElement[0]);
 		}
 		return EMPTY_ARRAY;
