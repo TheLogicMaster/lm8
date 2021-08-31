@@ -413,7 +413,7 @@ lcd_expander_write:
     pop B
 
     ldr [lcd_addr],A
-    jsr i2c_start
+    jsr i2c_start_write
 
     ldr [lcd_backlight_state],A
     or B

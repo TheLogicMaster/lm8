@@ -13,7 +13,7 @@ setup_ssd1306:
 
     ldr [ssd1306_address],A
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $AE,B
@@ -26,14 +26,14 @@ setup_ssd1306:
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $3F,B
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $D3,B
@@ -46,14 +46,14 @@ setup_ssd1306:
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $14,B
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $20,B
@@ -66,49 +66,49 @@ setup_ssd1306:
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $DA,B
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $12,B
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $81,B
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $CF,B
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $D9,B
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $F1,B
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $DB,B
@@ -357,7 +357,7 @@ ssd1306_display:
     ldr [ssd1306_address],A
 
 ; Set display start address
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $22,B
@@ -371,14 +371,14 @@ ssd1306_display:
     ldr $0,B
     jsr i2c_send_byte
     jsr i2c_stop
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $0,B
     jsr i2c_send_byte
     ldr $7F,B
     jsr i2c_send_byte
     jsr i2c_stop
 
-    jsr i2c_start
+    jsr i2c_start_write
     ldr $40,B
     jsr i2c_send_byte
 

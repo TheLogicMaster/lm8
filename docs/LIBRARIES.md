@@ -42,6 +42,14 @@ parameter using a 128x64 image and will use 1 KB of ROM space each.
 This adds support for interfacing with 4 row I2C driven LCDs. It's based off of the Adafruit Arduino
 library, so the same basic functionality is provided. Doesn't support creating custom characters.
 
+## PCA9685 PWM Expander
+The PCA9685 is an I2C controlled 12-channel PWM driver used by common Arduino PWM expander boards. The
+library allows using all of the basic functionality provided by the chip. See `Servo Wave` for an example
+on calculating and setting the board frequency and controlling pin duty cycles. Though the PCA9685 has
+12-bit duty cycle control, only the top 8 most significant bits are used for simplicity. The library
+doesn't allow explicitly setting the on/off ticks for channels, instead taking just the duty cycle as
+a parameter, since that should cover most applications.
+
 ## Graphics
 This library is responsible for graphics utility subroutines corresponding to the VGA/emulator display
 output. Currently, only provides a software sprite drawing routine.

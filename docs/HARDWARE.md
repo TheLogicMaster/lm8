@@ -30,7 +30,7 @@ implementation simply instantiates the UART component and interfaces it with the
 computer. A dual-clock FIFO buffer is present in the VHDL implementation that interfaces with 
 the UART IP core and allows the running program to access the buffer at any processor speed.
 The first byte transmitted in a program tends to get corrupted for some reason, but sending
-a null byte seems to harmlessly prevent this.
+a null byte seems to harmlessly prevent this. Uses 115200 baud rate. 
 
 ## Pulse Width Modulation
 There are 6 PWM drivers on the Arduino Uno header pins in the typical Uno locations of pins

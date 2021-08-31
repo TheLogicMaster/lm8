@@ -4,22 +4,46 @@
     def sda=#5
 
 
-; Begin I2C transmission to address A
+; Starts an I2C write mode transmission to address A
+; Sets Zero flag if not ACKnowldged and clears it otherwise
+i2c_start_write:
+    push B
+    ldr $0,B
+    jsr i2c_start
+    pop B
+    ret
+
+
+; Starts an I2C read mode transmission to address A
+; Sets Zero flag if not ACKnowldged and clears it otherwise
+i2c_start_read:
+    push B
+    ldr $1,B
+    jsr i2c_start
+    pop B
+    ret
+
+
+; Begin I2C transmission to address A with mode B
+; Set B to a 0 for write mode and 1 for read, anything else is undefined behavior
 ; Sets Zero flag if not ACKnowldged and clears it otherwise
 i2c_start:
     push A
     push B
 
 ; Start
+    push B
     ldr {sda},B
     out {arduino_output},B
     ldr {scl},B
     out {arduino_input},B
     ldr {scl},B
     out {arduino_output},B
+    pop B
 
 ; Address byte
     lsl
+    or B
     push A
     pop B
     jsr i2c_send_byte
@@ -62,14 +86,14 @@ i2c_send_byte_loop:
 i2c_send_bit_1:
     ldr $1,A
 i2c_send_byte_bit:
-    jsr send_bit
+    jsr i2c_send_bit
     pop A
     dec B
     jr i2c_send_byte_loop,nZ
 
 ; Data ACK
     ldr $1,B
-    jsr send_bit
+    jsr i2c_send_bit
     jr i2c_send_byte_ack,nZ
     ldr $0,B
 i2c_send_byte_ack:
@@ -79,9 +103,35 @@ i2c_send_byte_ack:
     ret
 
 
+; Receive a byte into A in the current I2C transmission
+i2c_receive_byte:
+    push B
+    push H
+
+    ldr $0,A
+    ldr #8,H
+i2c_receive_byte_loop:
+    lsl
+    ldr $1,B
+    jsr i2c_send_bit
+    jr i2c_receive_byte_0,nZ
+    or $1
+i2c_receive_byte_0:
+    dec H
+    jr i2c_receive_byte_loop,nZ
+
+    ; ACK
+    ldr $1,B
+    jsr i2c_send_bit
+
+    pop H
+    pop B
+    ret
+
+
 ; Sends a single bit based on the Zero Flag.
 ; Sets Zero Flag based on read value on SCL rise
-send_bit:
+i2c_send_bit:
     push A
 
 ; Set SDA pin
