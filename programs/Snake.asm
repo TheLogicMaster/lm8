@@ -43,7 +43,7 @@ title_screen:
     out {clear_screen},a
     lda title_snake
     ldr #50,b
-title_screen_draw:
+title_screen_draw_:
     push b
     ldr [HL],a
     ina
@@ -58,7 +58,7 @@ title_screen_draw:
     out {draw_sprite},a
     pop b
     dec b
-    jr title_screen_draw,nz
+    jr title_screen_draw_,nz
     ldr #24,a
     out {graphics_x},a
     ldr #16,a
@@ -72,12 +72,12 @@ title_screen_draw:
     ldr #15,a
     out {draw_sprite},a
     out {swap_display},a
-title_screen_wait_release:
+title_screen_wait_release_:
     jsr get_input
-    jr title_screen_wait_release,nz
-title_screen_wait_press:
+    jr title_screen_wait_release_,nz
+title_screen_wait_press_:
     jsr get_input
-    jr title_screen_wait_press,z
+    jr title_screen_wait_press_,z
     ldr #32,a
     str [x],a
     str [y],a
@@ -96,13 +96,13 @@ title_screen_wait_press:
 delay:
     push A
     out {timer_0},A
-delay_wait:
+delay_wait_:
     jsr get_input
-    jr delay_no_input,z
+    jr delay_no_input_,z
     str [input],a
-delay_no_input:
+delay_no_input_:
     in {timer_0},A
-    jr delay_wait,Z
+    jr delay_wait_,Z
     pop A
     ret
 
@@ -158,38 +158,38 @@ get_snake_segment:
     ldr [body_x],h
     ldr [body_y],l
     cmp #0
-    jr get_snake_segment_not_right,nz
+    jr get_snake_segment_not_right_,nz
     push h
     pop a
     add #8
     push a
     pop h
-    jr get_snake_segment_add
-get_snake_segment_not_right:
+    jr get_snake_segment_add_
+get_snake_segment_not_right_:
     cmp #1
-    jr get_snake_segment_not_down,nz
+    jr get_snake_segment_not_down_,nz
     push l
     pop a
     add #8
     push a
     pop l
-    jr get_snake_segment_add
-get_snake_segment_not_down:
+    jr get_snake_segment_add_
+get_snake_segment_not_down_:
     cmp #2
-    jr get_snake_segment_not_left,nz
+    jr get_snake_segment_not_left_,nz
     push h
     pop a
     sub #8
     push a
     pop h
-    jr get_snake_segment_add
-get_snake_segment_not_left:
+    jr get_snake_segment_add_
+get_snake_segment_not_left_:
     push l
     pop a
     sub #8
     push a
     pop l
-get_snake_segment_add:
+get_snake_segment_add_:
     str [body_x],h
     str [body_y],l
     pop l
@@ -212,8 +212,8 @@ draw_snake_body:
     str [body_y],a
     lda snake
     ldr [score],b
-draw_snake_body_next:
-    jr draw_snake_body_done,z
+draw_snake_body_next_:
+    jr draw_snake_body_done_,z
     jsr get_snake_segment
     ldr [body_x],a
     out {graphics_x},a
@@ -223,8 +223,8 @@ draw_snake_body_next:
     out {draw_sprite},a
     ina
     dec b
-    jr draw_snake_body_next
-draw_snake_body_done:
+    jr draw_snake_body_next_
+draw_snake_body_done_:
     pop l
     pop h
     pop b
@@ -243,8 +243,8 @@ shift_snake_body:
     push l
     lda snake
     ldr [score],b
-shift_snake_body_shift:
-    jr shift_snake_body_done,z
+shift_snake_body_shift_:
+    jr shift_snake_body_done_,z
     ldr [HL],a
     push a
     ldr [body_shift],a
@@ -253,8 +253,8 @@ shift_snake_body_shift:
     pop a
     str [body_shift],a
     dec b
-    jr shift_snake_body_shift
-shift_snake_body_done:
+    jr shift_snake_body_shift_
+shift_snake_body_done_:
     pop l
     pop h
     pop b
@@ -277,16 +277,16 @@ check_snake_collision:
     str [body_y],a
     lda snake
     ldr [score],b
-check_snake_collision_next:
+check_snake_collision_next_:
     push b
     ldr [check_x],a
     ldr [body_x],b
     cmp b
-    jr check_snake_collision_not,nz
+    jr check_snake_collision_not_,nz
     ldr [check_y],a
     ldr [body_y],b
     cmp b
-    jr check_snake_collision_not,nz
+    jr check_snake_collision_not_,nz
     pop b
     pop l
     pop h
@@ -294,12 +294,12 @@ check_snake_collision_next:
     pop a
     ldr #1,a
     ret
-check_snake_collision_not:
+check_snake_collision_not_:
     pop b
     jsr get_snake_segment
     ina
     dec b
-    jr check_snake_collision_next,nc
+    jr check_snake_collision_next_,nc
     pop l
     pop h
     pop b
@@ -314,7 +314,7 @@ generate_apple:
     push a
     push b
     push h
-generate_apple_next:
+generate_apple_next_:
     ldr #8,b
     in {rand},a ; Todo: Improve X random with modulus?
     and $F
@@ -337,21 +337,21 @@ generate_apple_next:
 ; Ensure apple isn't in same position
     ldr [new_y],b
     cmp b
-    jr generate_apple_not_head,nz
+    jr generate_apple_not_head_,nz
     push a
     ldr [new_x],a
     cmp h
     pop a
-    jr generate_apple_not_head,nz
-    jr generate_apple_next
-generate_apple_not_head:
+    jr generate_apple_not_head_,nz
+    jr generate_apple_next_
+generate_apple_not_head_:
 ; Ensure apple isn't in snake
     str [check_x],h
     str [check_y],a
     push a
     jsr check_snake_collision
     pop a
-    jr generate_apple_next,nz
+    jr generate_apple_next_,nz
     str [apple_x],h
     str [apple_y],a
     pop h
@@ -366,19 +366,19 @@ generate_apple_not_head:
 check_new_position:
     ldr [new_x],a
     cmp #160
-    jr check_new_position_collided,nc
+    jr check_new_position_collided_,nc
     ldr [new_y],a
     cmp #128
-    jr check_new_position_collided,nc
+    jr check_new_position_collided_,nc
     ldr [new_x],a
     str [check_x],a
     ldr [new_y],a
     str [check_y],a
     jsr check_snake_collision
-    jr check_new_position_collided,nz
+    jr check_new_position_collided_,nz
     ldr #0,a
     ret
-check_new_position_collided:
+check_new_position_collided_:
     ldr #1,a
     ret
 
@@ -392,16 +392,16 @@ check_apple:
     ldr [new_x],a
     ldr [apple_x],b
     cmp b
-    jr check_apple_done,nz
+    jr check_apple_done_,nz
     ldr [new_y],a
     ldr [apple_y],b
     cmp b
-    jr check_apple_done,nz
+    jr check_apple_done_,nz
     ldr [score],a
     inc a
     str [score],a
     jsr generate_apple
-check_apple_done:
+check_apple_done_:
     pop b
     pop a
     ret
@@ -412,49 +412,49 @@ move_snake:
     push a
     push b
     ldr [input],a
-    jr move_snake_no_input,z
+    jr move_snake_no_input_,z
     dec a
     ldr [snake],b
     cmp b
-    jr move_snake_dir,nz
-move_snake_no_input:
+    jr move_snake_dir_,nz
+move_snake_no_input_:
     ldr [snake],a
     jsr get_opposite_direction
-move_snake_dir:
+move_snake_dir_:
     push a
     cmp #0
-    jr move_snake_not_right,nz
+    jr move_snake_not_right_,nz
     ldr [x],a
     add #8
     str [new_x],a
     ldr [y],a
     str [new_y],a
-    jr move_snake_move
-move_snake_not_right:
+    jr move_snake_move_
+move_snake_not_right_:
     cmp #1
-    jr move_snake_not_down,nz
+    jr move_snake_not_down_,nz
     ldr [x],a
     str [new_x],a
     ldr [y],a
     add #8
     str [new_y],a
-    jr move_snake_move
-move_snake_not_down:
+    jr move_snake_move_
+move_snake_not_down_:
     cmp #2
-    jr move_snake_not_left,nz
+    jr move_snake_not_left_,nz
     ldr [x],a
     sub #8
     str [new_x],a
     ldr [y],a
     str [new_y],a
-    jr move_snake_move
-move_snake_not_left:
+    jr move_snake_move_
+move_snake_not_left_:
     ldr [x],a
     str [new_x],a
     ldr [y],a
     sub #8
     str [new_y],a
-move_snake_move:
+move_snake_move_:
     pop a
     jsr get_opposite_direction
     str [body_shift],a
@@ -469,24 +469,24 @@ move_snake_move:
 ; Only modifies register A
 get_input: ; Todo: Make iterative if not difficult
     in {controller_right},a
-    jr get_input_not_right,z
+    jr get_input_not_right_,z
     ldr #1,a
     ret
-get_input_not_right:
+get_input_not_right_:
     in {controller_down},a
-    jr get_input_not_down,z
+    jr get_input_not_down_,z
     ldr #2,a
     ret
-get_input_not_down:
+get_input_not_down_:
     in {controller_left},a
-    jr get_input_not_left,z
+    jr get_input_not_left_,z
     ldr #3,a
     ret
-get_input_not_left:
+get_input_not_left_:
     in {controller_up},a
-    jr get_input_not_up,z
+    jr get_input_not_up_,z
     ldr #4,a
-get_input_not_up:
+get_input_not_up_:
     ret
 
 

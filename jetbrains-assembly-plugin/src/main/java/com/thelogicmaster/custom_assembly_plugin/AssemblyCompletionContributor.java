@@ -54,7 +54,7 @@ public class AssemblyCompletionContributor extends CompletionContributor {
 				AssemblyLanguage.collectVisibleLabels(parameters.getOriginalFile(), labels);
 				for (AssemblyLabelDefinition label: labels) {
 					String name = label.getName();
-					if (name == null)
+					if (name == null || name.endsWith("_"))
 						continue;
 					if (loadOrStore)
 						name = "[" + name + "]";

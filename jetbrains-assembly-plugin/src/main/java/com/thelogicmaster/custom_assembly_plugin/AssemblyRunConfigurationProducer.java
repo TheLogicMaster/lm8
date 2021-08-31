@@ -28,7 +28,7 @@ public class AssemblyRunConfigurationProducer extends LazyRunConfigurationProduc
 		if (!settings.assemblerPath.isEmpty())
 			configuration.setScriptName(settings.assemblerPath);
 
-		if (sourceElement.get().getContainingFile() == null)
+		if (sourceElement.get().getContainingFile() == null || sourceElement.get().getContainingFile().getVirtualFile().getParent() == null)
 			return false;
 
 		configuration.setWorkingDirectory(sourceElement.get().getContainingFile().getVirtualFile().getParent().getPath());

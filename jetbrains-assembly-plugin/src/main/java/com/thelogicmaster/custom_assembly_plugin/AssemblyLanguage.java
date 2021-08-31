@@ -274,7 +274,7 @@ public class AssemblyLanguage extends Language {
 		constants.put(matcher.group(1), matcher.group(2));
 	}
 
-	private static void collectVisibleConstants(PsiElement file, PsiElement operand, Map<String, String> constants, int depth) {
+	private static void collectVisibleConstants(PsiElement file, PsiElement operand, Map<String, String> constants, Set<String> includes, int depth) {
 		if (depth > MAX_INCLUDE_DEPTH)
 			return;
 
@@ -293,10 +293,12 @@ public class AssemblyLanguage extends Language {
 					continue;
 				String include = includeNode.getText().replace("\"", "");
 				String includePath = Paths.get(operand.getContainingFile().getVirtualFile().getParent().getPath(), include).toAbsolutePath().toString();
+				if (!includes.add(includePath))
+					continue;
 
 				for (AssemblyFile assemblyFile : getProjectFiles(operand.getProject()))
 					if (includePath.equals(assemblyFile.getVirtualFile().getPath()))
-						collectVisibleConstants(assemblyFile, operand, constants, depth + 1);
+						collectVisibleConstants(assemblyFile, operand, constants, includes, depth + 1);
 			} else if ("def".equals(mnemonic))
 				extractDefinition(instruction, constants);
 		}
@@ -314,7 +316,7 @@ public class AssemblyLanguage extends Language {
 		HashMap<String, String> constants = new HashMap<>();
 		for (Map.Entry<String, Integer> entry: CONSTANTS.entrySet())
 			constants.put(entry.getKey(), "#" + entry.getValue());
-		collectVisibleConstants(operand.getPsi().getContainingFile(), operand.getPsi().getParent(), constants, 0);
+		collectVisibleConstants(operand.getPsi().getContainingFile(), operand.getPsi().getParent(), constants, new HashSet<>(), 0);
 
 		String current = operand.getText();
 
@@ -331,7 +333,7 @@ public class AssemblyLanguage extends Language {
 		return current;
 	}
 
-	private static void collectVisibleLabels(PsiFile file, Collection<AssemblyLabelDefinition> definitions, Set<String> collected, Set<String> duplicates, int depth) {
+	private static void collectVisibleLabels(PsiFile file, Collection<AssemblyLabelDefinition> definitions, Set<String> collected, Set<String> duplicates, Set<String> includes, int depth) {
 		if (depth > MAX_INCLUDE_DEPTH)
 			return;
 
@@ -355,10 +357,12 @@ public class AssemblyLanguage extends Language {
 					continue;
 				String includeText = include.getText().replace("\"", "");
 				String includePath = Paths.get(file.getVirtualFile().getParent().getPath(), includeText).toAbsolutePath().toString();
+				if (!includes.add(includePath))
+					continue;
 
 				for (AssemblyFile assemblyFile : getProjectFiles(file.getProject()))
 					if (includePath.equals(assemblyFile.getVirtualFile().getPath()))
-						collectVisibleLabels(assemblyFile, definitions, collected, duplicates, depth + 1);
+						collectVisibleLabels(assemblyFile, definitions, collected, duplicates, includes, depth + 1);
 			}
 	}
 
@@ -370,7 +374,7 @@ public class AssemblyLanguage extends Language {
 	 */
 	public static Set<String> collectVisibleLabels(PsiFile file, Collection<AssemblyLabelDefinition> definitions) {
 		Set<String> duplicates = new HashSet<>();
-		collectVisibleLabels(file, definitions, new HashSet<>(), duplicates, 0);
+		collectVisibleLabels(file, definitions, new HashSet<>(), duplicates, new HashSet<>(), 0);
 		return duplicates;
 	}
 

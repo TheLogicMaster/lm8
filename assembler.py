@@ -57,6 +57,7 @@ memory = False
 output = bytearray()
 address = 0
 data_address = 0x8000
+includes = []
 labels = {}
 label_addresses = {}
 label_jumps = {}
@@ -317,7 +318,11 @@ def parse_file():
             match = re.search(r"^\"(.+)\"$", params[0])
             if not match:
                 error("Invalid include file")
-            file = os.path.join(os.path.dirname(file), match[1])
+            file_path = os.path.join(os.path.dirname(file), match[1])
+            if file_path in includes:
+                continue
+            includes.append(file_path)
+            file = file_path
             try:
                 parse_file()
             except RecursionError:

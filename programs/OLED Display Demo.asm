@@ -8,7 +8,7 @@ jmp main
 main:
 ; Initialize display with address 0x3C
     ldr $3C,A
-    str [ssd1306_address],A
+    str [ssd1306_addr],A
     jsr setup_ssd1306
 
 loop:

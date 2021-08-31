@@ -26,6 +26,7 @@ Jetbrains IDE language support plugin, a Logisim-Evolution simulation, and an FP
 ## Documentation
 - [Architecture](ARCHITECTURE.md)
 - [Assembler](ASSEMBLER.md)
+- [Assembly Programming](PROGRAMMING.md)
 - [Emulator](EMULATOR.md)
 - [Hardware Interfaces](HARDWARE.md)
 - [Simulation](SIMULATION.md)

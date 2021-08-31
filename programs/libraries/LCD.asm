@@ -16,9 +16,9 @@ lcd_init:
     ldr #50,A
     out {timer_count_1},A
     out {timer_1},A
-lcd_init_delay_0:
+lcd_init_delay_0_:
     in {timer_1},A
-    jr lcd_init_delay_0,Z
+    jr lcd_init_delay_0_,Z
 
 ; Reset expander
     ldr $0,A
@@ -30,9 +30,9 @@ lcd_init_delay_0:
     ldr #1,A
     out {timer_count_1},A
     out {timer_1},A
-lcd_init_delay_1:
+lcd_init_delay_1_:
     in {timer_1},A
-    jr lcd_init_delay_1,Z
+    jr lcd_init_delay_1_,Z
 
     ldr {milliseconds},A
     out {timer_unit_1},A
@@ -44,17 +44,17 @@ lcd_init_delay_1:
     jsr lcd_write_4_bits
 
     out {timer_1},A
-lcd_init_delay_2:
+lcd_init_delay_2_:
     in {timer_1},A
-    jr lcd_init_delay_2,Z
+    jr lcd_init_delay_2_,Z
 
     ldr $30,A
     jsr lcd_write_4_bits
 
     out {timer_1},A
-lcd_init_delay_3:
+lcd_init_delay_3_:
     in {timer_1},A
-    jr lcd_init_delay_3,Z
+    jr lcd_init_delay_3_,Z
 
     ldr $30,A
     jsr lcd_write_4_bits
@@ -64,9 +64,9 @@ lcd_init_delay_3:
     ldr #150,A
     out {timer_count_1},A
     out {timer_1},A
-lcd_init_delay_4:
+lcd_init_delay_4_:
     in {timer_1},A
-    jr lcd_init_delay_4,Z
+    jr lcd_init_delay_4_,Z
 
 ; Set to 4-bit interface
     ldr $20,A
@@ -79,14 +79,14 @@ lcd_init_delay_4:
 
 ; Set default control mode
     ldr $4,A
-    str [lcd_control_state],A
+    str [lcd_control_state_],A
     jsr lcd_control_command
 
     jsr lcd_clear
 
 ; Set default display mode
     ldr $2,A
-    str [lcd_mode_state],A
+    str [lcd_mode_state_],A
     jsr lcd_mode_command
 
     jsr lcd_home
@@ -127,9 +127,9 @@ lcd_long_command_delay:
     ldr #2,A
     out {timer_count_1},A
     out {timer_1},A
-lcd_long_command_delay_loop:
+lcd_long_command_delay_loop_:
     in {timer_1},A
-    jr lcd_long_command_delay_loop,Z
+    jr lcd_long_command_delay_loop_,Z
 
     pop A
     ret
@@ -141,19 +141,19 @@ lcd_set_cursor:
 
 ; Get row start address
     cmp #0
-    jr lcd_set_cursor_got_row,Z
+    jr lcd_set_cursor_got_row_,Z
     cmp #1
-    jr lcd_set_cursor_not_row_1,nZ
+    jr lcd_set_cursor_not_row_1_,nZ
     ldr $40,A
-    jr lcd_set_cursor_got_row
-lcd_set_cursor_not_row_1:
+    jr lcd_set_cursor_got_row_
+lcd_set_cursor_not_row_1_:
     cmp #2
-    jr lcd_set_cursor_not_row_2,nZ
+    jr lcd_set_cursor_not_row_2_,nZ
     ldr $14,A
-    jr lcd_set_cursor_got_row
-lcd_set_cursor_not_row_2:
+    jr lcd_set_cursor_got_row_
+lcd_set_cursor_not_row_2_:
     ldr $54,A
-lcd_set_cursor_got_row:
+lcd_set_cursor_got_row_:
 
     add B
     or $80 ; Set DRAM address command
@@ -184,9 +184,9 @@ lcd_scroll_right:
 ; Turn LCD display on
 lcd_display_on:
     push A
-    ldr [lcd_control_state],A
+    ldr [lcd_control_state_],A
     or $04
-    str [lcd_control_state],A
+    str [lcd_control_state_],A
     jsr lcd_control_command
     pop A
     ret
@@ -195,9 +195,9 @@ lcd_display_on:
 ; Turn LCD display off
 lcd_display_off:
     push A
-    ldr [lcd_control_state],A
+    ldr [lcd_control_state_],A
     and $FB
-    str [lcd_control_state],A
+    str [lcd_control_state_],A
     jsr lcd_control_command
     pop A
     ret
@@ -206,9 +206,9 @@ lcd_display_off:
 ; Turn LCD cursor on
 lcd_cursor_on:
     push A
-    ldr [lcd_control_state],A
+    ldr [lcd_control_state_],A
     or $02
-    str [lcd_control_state],A
+    str [lcd_control_state_],A
     jsr lcd_control_command
     pop A
     ret
@@ -217,9 +217,9 @@ lcd_cursor_on:
 ; Turn LCD cursor off
 lcd_cursor_off:
     push A
-    ldr [lcd_control_state],A
+    ldr [lcd_control_state_],A
     and $FD
-    str [lcd_control_state],A
+    str [lcd_control_state_],A
     jsr lcd_control_command
     pop A
     ret
@@ -228,9 +228,9 @@ lcd_cursor_off:
 ; Turn LCD cursor blinking on
 lcd_cursor_blink_on:
     push A
-    ldr [lcd_control_state],A
+    ldr [lcd_control_state_],A
     or $01
-    str [lcd_control_state],A
+    str [lcd_control_state_],A
     jsr lcd_control_command
     pop A
     ret
@@ -239,9 +239,9 @@ lcd_cursor_blink_on:
 ; Turn LCD cursor blinking off
 lcd_cursor_blink_off:
     push A
-    ldr [lcd_control_state],A
+    ldr [lcd_control_state_],A
     and $FE
-    str [lcd_control_state],A
+    str [lcd_control_state_],A
     jsr lcd_control_command
     pop A
     ret
@@ -250,9 +250,9 @@ lcd_cursor_blink_off:
 ; Set LCD text direction to left to right
 lcd_left_to_right:
     push A
-    ldr [lcd_mode_state],A
+    ldr [lcd_mode_state_],A
     or $02
-    str [lcd_mode_state],A
+    str [lcd_mode_state_],A
     jsr lcd_mode_command
     pop A
     ret
@@ -261,9 +261,9 @@ lcd_left_to_right:
 ; Set LCD text direction to right to left
 lcd_right_to_left:
     push A
-    ldr [lcd_mode_state],A
+    ldr [lcd_mode_state_],A
     and $FD
-    str [lcd_mode_state],A
+    str [lcd_mode_state_],A
     jsr lcd_mode_command
     pop A
     ret
@@ -272,9 +272,9 @@ lcd_right_to_left:
 ; Set LCD to 'right justify' from cursor
 lcd_autoscroll_on:
     push A
-    ldr [lcd_mode_state],A
+    ldr [lcd_mode_state_],A
     or $01
-    str [lcd_mode_state],A
+    str [lcd_mode_state_],A
     jsr lcd_mode_command
     pop A
     ret
@@ -283,9 +283,9 @@ lcd_autoscroll_on:
 ; Set LCD to 'left justify' from cursor
 lcd_autoscroll_off:
     push A
-    ldr [lcd_mode_state],A
+    ldr [lcd_mode_state_],A
     and $FE
-    str [lcd_mode_state],A
+    str [lcd_mode_state_],A
     jsr lcd_mode_command
     pop A
     ret
@@ -295,7 +295,7 @@ lcd_autoscroll_off:
 lcd_backlight_on:
     push A
     ldr $8,A
-    str [lcd_backlight_state],A
+    str [lcd_backlight_state_],A
     ldr $0,A
     jsr lcd_expander_write
     pop A
@@ -306,7 +306,7 @@ lcd_backlight_on:
 lcd_backlight_off:
     push A
     ldr $0,A
-    str [lcd_backlight_state],A
+    str [lcd_backlight_state_],A
     jsr lcd_expander_write
     pop A
     ret
@@ -315,7 +315,7 @@ lcd_backlight_off:
 ; Sends a display control command with the current control state
 lcd_control_command:
     push A
-    ldr [lcd_control_state],A
+    ldr [lcd_control_state_],A
     or $08 ; Display control command
     jsr lcd_command
     pop A
@@ -325,7 +325,7 @@ lcd_control_command:
 ; Sends a display mode command with the current mode
 lcd_mode_command:
     push A
-    ldr [lcd_mode_state],A
+    ldr [lcd_mode_state_],A
     or $04 ; Display mode command
     jsr lcd_command
     pop A
@@ -345,13 +345,13 @@ lcd_command:
 lcd_print_string:
     push A
 
-lcd_print_string_loop:
+lcd_print_string_loop_:
     ldr [hl],a
-    jr lcd_print_string_done,z
+    jr lcd_print_string_done_,z
     jsr lcd_print
     ina
-    jr lcd_print_string_loop
-lcd_print_string_done:
+    jr lcd_print_string_loop_
+lcd_print_string_done_:
 
     pop A
     ret
@@ -415,7 +415,7 @@ lcd_expander_write:
     ldr [lcd_addr],A
     jsr i2c_start_write
 
-    ldr [lcd_backlight_state],A
+    ldr [lcd_backlight_state_],A
     or B
     push A
     pop B
@@ -431,9 +431,6 @@ lcd_expander_write:
 ; The I2C address of the LCD, set before initializing
 lcd_addr: var
 
-; The backlight state boolean, don't manually set
-lcd_backlight_state: var
-; The control state of the LCD for the cursor and such, don't manually set
-lcd_control_state: var
-; The display mode state of the LCD for justify and direction control, don't manually set
-lcd_mode_state: var
+lcd_backlight_state_: var
+lcd_control_state_: var
+lcd_mode_state_: var

@@ -25,12 +25,12 @@ print_string:
 ; Print a null terminated string from [HL]
 print_string_extended:
     push A
-print_string_extended_loop:
+print_string_extended_loop_:
     ldr [hl],a
-    jr print_string_extended_done,z
+    jr print_string_extended_done_,z
     out {serial},a
     ina
-    jr print_string_extended_loop
-print_string_extended_done:
+    jr print_string_extended_loop_
+print_string_extended_done_:
     pop A
     ret

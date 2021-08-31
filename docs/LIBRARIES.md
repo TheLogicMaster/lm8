@@ -56,4 +56,4 @@ output. Currently, only provides a software sprite drawing routine.
 
 ## Utilities
 Utility routines that didn't fit other categories. Has a subroutine for testing whether running in RAM or
-not.
+not. Provides convenience subroutines for delaying using a specified timer.

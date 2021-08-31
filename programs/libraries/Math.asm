@@ -5,10 +5,10 @@
 ; Only register A is modified
 modulus:
     cmp b
-    jr modulus_done,c
+    jr modulus_done_,c
     sub b
     jr modulus
-modulus_done:
+modulus_done_:
     ret
 
 
@@ -16,13 +16,13 @@ modulus_done:
 divide:
     push H
     ldr $0,H
-divide_loop:
+divide_loop_:
     cmp B
-    jr divide_done,C
+    jr divide_done_,C
     sub B
     inc H
-    jr divide_loop
-divide_done:
+    jr divide_loop_
+divide_done_:
     push H
     pop A
     pop H
@@ -38,12 +38,12 @@ multiply:
     pop h
     ldr #0,a
     cmp b
-multiply_next:
-    jr multiply_done,z
+multiply_next_:
+    jr multiply_done_,z
     add h
     dec b
-    jr multiply_next
-multiply_done:
+    jr multiply_next_
+multiply_done_:
     pop b
     pop h
     ret
@@ -56,8 +56,8 @@ multiply_extended:
 
     lda $0
     cmp $0
-multiply_extended_loop:
-    jr multiply_extended_done,Z
+multiply_extended_loop_:
+    jr multiply_extended_done_,Z
     push A
 
     push L
@@ -65,14 +65,14 @@ multiply_extended_loop:
     add B
     push A
     pop L
-    jr multiply_extended_no_carry,nC
+    jr multiply_extended_no_carry_,nC
     inc H
-multiply_extended_no_carry:
+multiply_extended_no_carry_:
 
     pop A
     dec A
-    jr multiply_extended_loop
-multiply_extended_done:
+    jr multiply_extended_loop_
+multiply_extended_done_:
 
     pop B
     pop A
@@ -84,9 +84,9 @@ add_extended:
     push A
 
     add L
-    jr add_extended_no_carry,nC
+    jr add_extended_no_carry_,nC
     inc H
-add_extended_no_carry:
+add_extended_no_carry_:
     push A
     pop L
 
@@ -106,9 +106,9 @@ add_double_extended:
     add L
     push A
     pop L
-    jr add_double_extended_no_carry,nC
+    jr add_double_extended_no_carry_,nC
     inc H
-add_double_extended_no_carry:
+add_double_extended_no_carry_:
 
     pop A
     ret

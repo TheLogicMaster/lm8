@@ -10,9 +10,9 @@ draw_sprite_software:
     push H
     push L
 
-    str [graphics_temp],B
+    str [graphics_temp_],B
     ldr $0,B
-draw_sprite_software_loop:
+draw_sprite_software_loop_:
     push A
 
 ; Calculate Y
@@ -36,7 +36,7 @@ draw_sprite_software_loop:
     pop A
     ldr $8,B
     jsr modulus
-    ldr [graphics_temp],B
+    ldr [graphics_temp_],B
     add B
     push A
     pop B
@@ -55,7 +55,7 @@ draw_sprite_software_loop:
     ldr #64,A
     cmp B
     pop A
-    jr draw_sprite_software_loop,nZ
+    jr draw_sprite_software_loop_,nZ
 
     pop L
     pop H
@@ -66,4 +66,4 @@ draw_sprite_software_loop:
 
     data
 ; Temporary variable for graphics subroutines
-graphics_temp: var
+graphics_temp_: var

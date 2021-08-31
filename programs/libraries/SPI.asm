@@ -32,7 +32,7 @@ spi_receive_byte:
     out {mosi},H
     ldr $0,A
     ldr $8,B
-spi_receive_byte_loop:
+spi_receive_byte_loop_:
     ldr $1,H
     out {clk},H
     nop
@@ -44,7 +44,7 @@ spi_receive_byte_loop:
     ldr $0,H
     out {clk},H
     dec B
-    jr spi_receive_byte_loop,nZ
+    jr spi_receive_byte_loop_,nZ
     pop H
     pop B
     ret
@@ -58,19 +58,19 @@ spi_send_byte:
     nop
     nop
     ldr $8,B
-spi_send_byte_loop:
+spi_send_byte_loop_:
     lsl
     push A
-    jr spi_send_bit_1,C
+    jr spi_send_bit_1_,C
     ldr $0,A
-    jr spi_send_byte_bit
-spi_send_bit_1:
+    jr spi_send_byte_bit_
+spi_send_bit_1_:
     ldr $1,A
-spi_send_byte_bit:
+spi_send_byte_bit_:
     jsr spi_send_bit
     pop A
     dec B
-    jr spi_send_byte_loop,nZ
+    jr spi_send_byte_loop_,nZ
     nop
     nop
     nop

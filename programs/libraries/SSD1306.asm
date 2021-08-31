@@ -6,12 +6,12 @@
 
 
 ; Initialize I2C SSD1306 display
-; Set [ssd1306_address] to the display's I2C address before calling
+; Set [ssd1306_addr] to the display's I2C address before calling
 setup_ssd1306:
     push A
     push B
 
-    ldr [ssd1306_address],A
+    ldr [ssd1306_addr],A
 
     jsr i2c_start_write
     ldr $0,B
@@ -131,15 +131,16 @@ setup_ssd1306:
 
 
 ; Draws sprite from [HL] at (B,A)
+; Modifies [ssd1306_color]
 ssd1306_draw_sprite:
     push A
     push B
     push H
     push L
 
-    str [ssd1306_temp],B
+    str [ssd1306_temp_1_],B
     ldr $0,B
-ssd1306_draw_sprite_loop:
+ssd1306_draw_sprite_loop_:
     push A
 
 ; Set color
@@ -170,7 +171,7 @@ ssd1306_draw_sprite_loop:
     pop A
     ldr $8,B
     jsr modulus
-    ldr [ssd1306_temp],B
+    ldr [ssd1306_temp_1_],B
     add B
     push A
     pop B
@@ -185,7 +186,7 @@ ssd1306_draw_sprite_loop:
     ldr #64,A
     cmp B
     pop A
-    jr ssd1306_draw_sprite_loop,nZ
+    jr ssd1306_draw_sprite_loop_,nZ
 
     pop L
     pop H
@@ -228,26 +229,26 @@ ssd1306_draw_pixel:
     ldr $0,A
     cmp B
     pop A
-ssd1306_draw_pixel_shift:
-    jr ssd1306_draw_pixel_shift_done,Z
+ssd1306_draw_pixel_shift_:
+    jr ssd1306_draw_pixel_shift_done_,Z
     lsl
     dec B
-    jr ssd1306_draw_pixel_shift
-ssd1306_draw_pixel_shift_done:
+    jr ssd1306_draw_pixel_shift_
+ssd1306_draw_pixel_shift_done_:
     ldr [ssd1306_color],B
-    jr ssd1306_draw_pixel_0,Z
+    jr ssd1306_draw_pixel_0_,Z
     push A
     pop B
     ldr [HL],A
     or B
-    jr ssd1306_draw_pixel_store
-ssd1306_draw_pixel_0:
+    jr ssd1306_draw_pixel_store_
+ssd1306_draw_pixel_0_:
     xor $FF
     push A
     pop B
     ldr [HL],A
     and B
-ssd1306_draw_pixel_store:
+ssd1306_draw_pixel_store_:
     str [HL],A
 
     pop L
@@ -266,23 +267,23 @@ ssd1306_clear:
 
     ldr $0,B
     ldr [ssd1306_color],A
-    jr ssd1306_clear_0,Z
+    jr ssd1306_clear_0_,Z
     ldr $FF,B
-ssd1306_clear_0:
-    str [ssd1306_temp],B
+ssd1306_clear_0_:
+    str [ssd1306_temp_1_],B
     ldr #4,A
     ldr $0,B
     lda ssd1306_buffer
-ssd1306_clear_loop:
+ssd1306_clear_loop_:
     push B
-    ldr [ssd1306_temp],B
+    ldr [ssd1306_temp_1_],B
     str [HL],B
     ina
     pop B
     dec B
-    jr ssd1306_clear_loop,nZ
+    jr ssd1306_clear_loop_,nZ
     dec A
-    jr ssd1306_clear_loop,nZ
+    jr ssd1306_clear_loop_,nZ
 
     pop L
     pop H
@@ -311,23 +312,23 @@ ssd1306_draw_image:
     push H
     push L
 
-    str [ssd1306_temp],H
-    str [ssd1306_temp_2],L
+    str [ssd1306_temp_1_],H
+    str [ssd1306_temp_2_],L
     lda ssd1306_buffer
     ldr #4,A
     ldr $0,B
-ssd1306_draw_image_loop:
+ssd1306_draw_image_loop_:
     push A
 
 ; Read byte
     push H
     push L
-    ldr [ssd1306_temp],H
-    ldr [ssd1306_temp_2],L
+    ldr [ssd1306_temp_1_],H
+    ldr [ssd1306_temp_2_],L
     ldr [HL],A
     ina
-    str [ssd1306_temp],H
-    str [ssd1306_temp_2],L
+    str [ssd1306_temp_1_],H
+    str [ssd1306_temp_2_],L
     pop L
     pop H
 
@@ -338,9 +339,9 @@ ssd1306_draw_image_loop:
 
     ina
     dec B
-    jr ssd1306_draw_image_loop,nZ
+    jr ssd1306_draw_image_loop_,nZ
     dec A
-    jr ssd1306_draw_image_loop,nZ
+    jr ssd1306_draw_image_loop_,nZ
 
     pop L
     pop H
@@ -354,7 +355,7 @@ ssd1306_display:
     push A
     push B
 
-    ldr [ssd1306_address],A
+    ldr [ssd1306_addr],A
 
 ; Set display start address
     jsr i2c_start_write
@@ -384,16 +385,16 @@ ssd1306_display:
 
     ldr #4,A
     ldr $0,B
-ssd1306_display_loop:
+ssd1306_display_loop_:
     push B
     ldr [HL],B
     ina
     jsr i2c_send_byte
     pop B
     dec B
-    jr ssd1306_display_loop,nZ
+    jr ssd1306_display_loop_,nZ
     dec A
-    jr ssd1306_display_loop,nZ
+    jr ssd1306_display_loop_,nZ
 
     jsr i2c_stop
 
@@ -403,8 +404,11 @@ ssd1306_display_loop:
 
 
     data
-ssd1306_address: var
+; The I2C address of the display
+ssd1306_addr: var
+; The current color to draw with
 ssd1306_color: var
-ssd1306_temp: var
-ssd1306_temp_2: var
+
+ssd1306_temp_1_: var
+ssd1306_temp_2_: var
 ssd1306_buffer: var[1024]
