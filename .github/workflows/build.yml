@@ -57,7 +57,7 @@ jobs:
           cp ./programs/build/*.bin ./Emulator
           cp ./assembler.py ./Emulator
           cp ./image_convert.py ./Emulator
-          cp ./README.md ./Emulator
+          cp -r ./docs ./Emulator
 
       - name: Zip Linux Release
         uses: papeloto/action-zip@v1
@@ -71,7 +71,7 @@ jobs:
           mkdir ./Emulator
           cp ./emulator/Emscripten/web/* ./Emulator
           cp ./programs/build/*.bin ./Emulator
-          cp ./README.md ./Emulator
+          cp -r ./docs ./Emulator
 
       - name: Zip HTML Release
         uses: papeloto/action-zip@v1
@@ -166,7 +166,7 @@ jobs:
           cp programs/build/*.bin ./build
           cp assembler.py ./build
           cp image_convert.py ./build
-          cp README.md ./build
+          cp -r docs ./build
 
       - name: Zip Windows Release
         uses: papeloto/action-zip@v1
