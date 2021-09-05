@@ -451,7 +451,8 @@ void Emulator::writePort(uint8_t port, uint8_t value) {
                 printBuffer.erase(0, 1);
             break;
         case 1: // Pop first UART read value
-            uartInBuffer.pop();
+            if (!uartInBuffer.empty())
+                uartInBuffer.pop();
             break;
         case 2 ... 7: // Seven Segment Displays
             sevenSegmentDisplays[port - 2] = value;

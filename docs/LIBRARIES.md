@@ -57,3 +57,16 @@ output. Currently, only provides a software sprite drawing routine.
 ## Utilities
 Utility routines that didn't fit other categories. Has a subroutine for testing whether running in RAM or
 not. Provides convenience subroutines for delaying using a specified timer.
+
+## ESP-01 Modem
+This library provides routines for interacting with an ESP8266/ESP32 microcontroller with a stock
+firmware, acting as an AT command compatible modem. Only supports interacting with a single client for
+simplicity. Using the modem occupies the serial port, so standard serial monitor usage is limited,
+though telnet is supported over the modem. Since it is using a stock firmware to act just as a simple
+modem over UART, I feel that it's still in the spirit of the project to use a microcontroller. See
+`Telnet Display` for example telnet communication and general modem usage.
+
+## Wii Nunchuk
+This allows querying the state of Wii expansion controllers over I2C. Currently only supports the Nunchuk.
+A logic level converter is required to safely interact with the 3.3V Nunchuk I2C interface from the dev
+board's 5V I2C bus.

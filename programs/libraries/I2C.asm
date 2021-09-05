@@ -104,15 +104,16 @@ i2c_send_byte_ack_:
 
 
 ; Receive a byte into A in the current I2C transmission
+; Set B to 0 if this is the final byte to be received
 i2c_receive_byte:
-    push B
     push H
+    push L
 
     ldr $0,A
     ldr #8,H
 i2c_receive_byte_loop_:
     lsl
-    ldr $1,B
+    ldr $1,L
     jsr i2c_send_bit
     jr i2c_receive_byte_0_,nZ
     or $1
@@ -121,11 +122,20 @@ i2c_receive_byte_0_:
     jr i2c_receive_byte_loop_,nZ
 
     ; ACK
-    ldr $1,B
+    push A
+    ldr $0,A
+    cmp B
+    pop A
+    jr i2c_receive_byte_final_,Z
+    ldr $0,H
+    jr i2c_receive_byte_ack_
+i2c_receive_byte_final_:
+    ldr $1,H
+i2c_receive_byte_ack_:
     jsr i2c_send_bit
 
+    pop L
     pop H
-    pop B
     ret
 
 
@@ -144,7 +154,7 @@ send_set_sda_0_:
     out {arduino_output},A
 send_set_sda_done_:
 
-    ; Read SDA and invert value
+; Read SDA and invert value
     in {arduino_5},A
     xor $1
     push A
@@ -157,6 +167,7 @@ send_set_sda_done_:
     ldr {scl},A
     out {arduino_output},A
 
+; Set Zero flag based on read value
     pop A
     cmp $0
 

@@ -344,15 +344,19 @@ lcd_command:
 ; Print a null terminated string at [HL] to the LCD
 lcd_print_string:
     push A
+    push H
+    push L
 
 lcd_print_string_loop_:
-    ldr [hl],a
-    jr lcd_print_string_done_,z
+    ldr [hl],A
+    jr lcd_print_string_done_,Z
     jsr lcd_print
     ina
     jr lcd_print_string_loop_
 lcd_print_string_done_:
 
+    pop L
+    pop H
     pop A
     ret
 

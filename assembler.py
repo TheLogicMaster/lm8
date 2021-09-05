@@ -277,7 +277,8 @@ def parse_file():
         line = line[len(match[0]):]
 
         # Get parameters
-        params = line.split(",")
+        # Magic splitting regex: https://stackoverflow.com/a/64333329
+        params = re.split(r",(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)", line)
         if re.sub(r"\s+", "", params[0]) == "":
             params = []
 

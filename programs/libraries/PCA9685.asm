@@ -163,13 +163,18 @@ pwm_expander_set_pin_done_:
 
 ; Reads a byte from expander's address in B into A
 pwm_expander_read_byte:
+    push B
+
     ldr [pwm_expander_addr],A
     jsr i2c_start_write
     jsr i2c_send_byte
     jsr i2c_stop
     jsr i2c_start_read
+    ldr $0,B
     jsr i2c_receive_byte
     jsr i2c_stop
+
+    pop B
     ret
 
 
