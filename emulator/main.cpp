@@ -167,12 +167,12 @@ static bool loadRom(const std::string &path) {
     attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
     attr.onsuccess = [](auto fetch) {
         auto len = fetch->numBytes;
-        memory = new uint8_t[len];
-        memcpy(memory, fetch->data, len);
+        rom = new uint8_t[len];
+        memcpy(rom, fetch->data, len);
         emscripten_fetch_close(fetch);
-        emulator->load(memory, len);
+        emulator->load(rom, len);
         delete disassembler;
-        disassembler = new Disassembler(memory, len);
+        disassembler = new Disassembler(emulator->getMemory());
         halted = false;
         breakpoints.clear();
         enableBreakpoints = false;
