@@ -5,6 +5,11 @@ written. The project was developed specifically for the DE10-Lite FPGA developme
 it's what I had lying around. Since the whole deployment process is built around Bash scripts, only
 Linux is supported for deploying with ADC and UART support.
 
+## VHDL Port
+The direct VHDL port of the Logisim schematic makes most of the Logisim deployment process obsolete.
+This is a full port that supports all LM-8 functionality and doesn't require the use of most of the
+bash scripts. 
+
 ## Build Process
 The build process to go from writing an assembly program to deploying was originally quite involved
 and tedious, but the newly automated process greatly simplified everything. To summarize
