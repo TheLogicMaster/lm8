@@ -159,7 +159,7 @@ static bool loadRom(const std::string &path) {
     input.close();
     emulator->load(rom, len);
     delete disassembler;
-    disassembler = new Disassembler(rom, len);
+    disassembler = new Disassembler(emulator->getMemory());
 #else
     emscripten_fetch_attr_t attr;
     emscripten_fetch_attr_init(&attr);
@@ -167,12 +167,12 @@ static bool loadRom(const std::string &path) {
     attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
     attr.onsuccess = [](auto fetch) {
         auto len = fetch->numBytes;
-        rom = new uint8_t[len];
-        memcpy(rom, fetch->data, len);
+        memory = new uint8_t[len];
+        memcpy(memory, fetch->data, len);
         emscripten_fetch_close(fetch);
-        emulator->load(rom, len);
+        emulator->load(memory, len);
         delete disassembler;
-        disassembler = new Disassembler(rom, len);
+        disassembler = new Disassembler(memory, len);
         halted = false;
         breakpoints.clear();
         enableBreakpoints = false;
@@ -193,9 +193,9 @@ static void displayMainMenuBar() {
                 exited = true;
 #else
             static const char *roms[] {"Hello World", "Hello World 2", "Snake", "IO Panel"};
-            for (auto &rom: roms)
-                if (ImGui::MenuItem(rom))
-                    loadRom(rom + std::string(".bin"));
+            for (auto &memory: roms)
+                if (ImGui::MenuItem(memory))
+                    loadRom(memory + std::string(".bin"));
 #endif
             ImGui::EndMenu();
         }
@@ -289,7 +289,7 @@ static void displayMemoryViewers() {
     if (ramEditor->Open) {
         ImGui::SetNextWindowSize(ImVec2(0, 218), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowPos(ImVec2(506, 248), ImGuiCond_FirstUseEver);
-        ramEditor->DrawWindow("RAM Editor", emulator->getMemory(), 0x8000);
+        ramEditor->DrawWindow("RAM Editor", emulator->getRAM(), 0x8000);
     }
 }
 

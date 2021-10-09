@@ -290,8 +290,8 @@ def parse_file():
                     params[i] = params[i].replace("{" + constant + "}", ("" if type(constants[constant]) is str else "#") + str(constants[constant]))
             params[i] = re.sub(r"^\s+|\s+$", "", params[i])
 
-        if data_section and instr != "var" and instr != "org":
-            error("Only VAR and ORG are permitted in the data section")
+        if data_section and instr != "var" and instr != "org" and instr != "rodata":
+            error("Only VAR, ORG, and RODATA are permitted in the data section")
 
         if instr == "org":
             ensure_params(params, 1)
@@ -334,6 +334,10 @@ def parse_file():
         elif instr == "data":
             ensure_params(params, 0)
             data_section = True
+
+        elif instr == "rodata":
+            ensure_params(params, 0)
+            data_section = False
 
         elif instr == "var":
             if not data_section:

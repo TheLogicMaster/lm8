@@ -34,6 +34,7 @@ Jetbrains IDE language support plugin, a Logisim-Evolution simulation, and an FP
 - [FPGA Bootloader](BOOTLOADER.md)
 - [Jetbrains Plugin](PLUGIN.md)
 - [Assembly Libraries](LIBRARIES.md)
+- [C Compiler](COMPILER.md)
 
 ## Attributions
 See [Attributions](ATTRIBUTIONS.md) for the libraries and software used by the project.

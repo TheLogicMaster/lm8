@@ -89,18 +89,17 @@ const InstructionType INSTRUCTIONS[64]{
 
 class Disassembler {
 public:
-    Disassembler(uint8_t *rom, long romSize);
+    explicit Disassembler(uint8_t *memory);
     const std::vector<Instruction> &getDisassembled() const;
     void update(uint16_t address, uint16_t hl);
 
 private:
-    uint8_t *rom;
-    long romSize;
+    uint8_t *memory;
     std::list<InstructionData> instructions{};
     std::vector<Instruction> disassembled{};
     std::vector<uint16_t> variableJumps{};
 
-    void disassemble(uint16_t address = 0, uint8_t depth = 0);
+    void disassemble(uint32_t address = 0, uint8_t depth = 0);
     InstructionData disassembleInstruction(uint16_t address) const;
     void build();
 };

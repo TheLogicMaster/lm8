@@ -365,6 +365,15 @@ def main():
     f.write(output)
     f.close()
 
+    output = bytearray(len(states) * STATE_SIZE)
+    for i in range(len(states)):
+        output[i * 3 + 2] = states[i] >> 16
+        output[i * 3 + 1] = (states[i] & 0xFF00) >> 8
+        output[i * 3] = states[i] & 0xFF
+    f = open('microcode-LE.bin', 'wb')
+    f.write(output)
+    f.close()
+
 
 if __name__ == '__main__':
     main()

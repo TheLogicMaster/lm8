@@ -64,7 +64,7 @@ delay_decaseconds:
     ret
 
 
-; Wait for B secondsseconds using timer [delay_timer]
+; Wait for B seconds using timer [delay_timer]
 delay_seconds:
     push A
     ldr {seconds},A

@@ -68,6 +68,7 @@ public:
     void updateTimers(int delta);
 
     uint8_t* getMemory();
+    uint8_t* getRAM();
     uint8_t* getROM();
     uint8_t getRegA() const;
     uint8_t getRegB() const;
@@ -102,8 +103,9 @@ private:
     std::queue<uint8_t> uartInBuffer{};
     std::string printBuffer{};
 
-    uint8_t rom[0x8000]{};
-    uint8_t ram[0x8000]{};
+    uint8_t memory[0x10000]{};
+    uint8_t *rom;
+    uint8_t *ram;
 
     uint8_t regA = 0;
     uint8_t regB = 0;

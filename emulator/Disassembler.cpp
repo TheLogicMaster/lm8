@@ -2,7 +2,7 @@
 
 #include "StringFormat.h"
 
-Disassembler::Disassembler(uint8_t *rom, long romSize) : rom(rom), romSize(romSize) {
+Disassembler::Disassembler(uint8_t *memory) : memory(memory) {
     disassemble();
     build();
 }
@@ -20,14 +20,14 @@ void Disassembler::update(uint16_t address, uint16_t hl) {
         }
 }
 
-void Disassembler::disassemble(uint16_t address, uint8_t depth) {
+void Disassembler::disassemble(uint32_t address, uint8_t depth) {
     if (depth > 100)
         return;
 
-    while (address < romSize) {
+    while (address <= 0xFFFF) {
         auto instruction = disassembleInstruction(address);
         uint16_t end = address + instruction.size - 1;
-        if (instruction.size == 0 or end >= romSize)
+        if (instruction.size == 0 or address + instruction.size - 1 > 0xFFFF)
             return;
 
         auto it = instructions.end();
@@ -65,14 +65,14 @@ void Disassembler::disassemble(uint16_t address, uint8_t depth) {
 }
 
 InstructionData Disassembler::disassembleInstruction(uint16_t address) const {
-    uint8_t instr = rom[address];
+    uint8_t instr = memory[address];
     auto type = INSTRUCTIONS[instr >> 2];
     if (type.text == nullptr)
         return InstructionData{address, "Invalid"};
     uint8_t conditionOrRegister = instr & 0x3;
     InstructionData instruction{address, type.text, ADDRESSING_MODE_SIZES[type.mode]};
     for (int i = 0; i < instruction.size; i++)
-        instruction.data[i] = rom[address + i];
+        instruction.data[i] = memory[address + i];
 
     switch (type.mode) {
         case Implied:

@@ -111,7 +111,7 @@ For binary ports, reading will return a 0 or 1 and writing anything but a 0 is s
 |graphics_x|30|Access the graphics X register|
 |graphics_y|31|Access the graphics Y register|
 |draw_pixel|32|Draws a single RGB332 pixel at (X,Y)|
-|draw_sprite|33|Draws an 8x8 RGB332 sprite from the address (value * 64) at (X,Y)|
+|draw_sprite|33|Draws an 8x8 RGB332 sprite from the address (HL) at (X,Y)|
 |clear_screen|34|Clears the screen with the specified RGB332 color|
 |gpio_n|35-70|Access GPIO pin n (0-35)|
 |arduino_n|71-86|Access Arduino header I/O pin n (0-15)|

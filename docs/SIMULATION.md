@@ -1,5 +1,7 @@
-# LM-8 Logisim-evolution Simulation
+# LM-8 Logisim-evolution and Digital Simulations
 The simulation part of the project is used for developing and debugging the CPU circuit design. 
+Logisim was used for the initial CPU design then it was later ported to VHDL directly and a Digital
+simulation. The Digital simulation only supports basic I/O functionality but the main CPU is functional.
 
 ## Issues
 - Logisim-evolution can be buggy when it comes to messing around too much with splitters, leading
@@ -27,5 +29,6 @@ to unexpected behavior, especially in the generated VHDL code.
   sprites in a reasonable amount of time. 
 
 ## Updating Microcode and ROM
-- The microcode and program ROM can easily be updated by right-clicking on the respective
+- The microcode and program ROM can easily be updated in Logisim by right-clicking on the respective
 component and loading the generated binary files.
+- In Digital, the `microcode-LE.bin` file is required so the data is little-endian formatted.

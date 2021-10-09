@@ -179,34 +179,6 @@ end TCL_Generic;
       <mc key="/LED_8" map="365,79"/>
     </boardmap>
     <boardmap boardname="DE10-LITE">
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
-      <mc/>
       <mc key="/Arduino_port" map="173,56"/>
       <mc key="/Button_1" map="688,247"/>
       <mc key="/Button_2" map="687,286"/>
@@ -917,13 +889,6 @@ end TCL_Generic;
       <a name="label" val="Arduino_in"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(2430,2260)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="uart_en"/>
-    </comp>
-    <comp lib="0" loc="(2430,2330)" name="Constant">
-      <a name="width" val="4"/>
-    </comp>
     <comp lib="0" loc="(2430,2740)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="clk"/>
@@ -960,10 +925,6 @@ end TCL_Generic;
       <a name="label" val="port_in"/>
       <a name="width" val="8"/>
     </comp>
-    <comp lib="0" loc="(2480,2260)" name="Bit Extender">
-      <a name="in_width" val="1"/>
-      <a name="type" val="zero"/>
-    </comp>
     <comp lib="0" loc="(2490,750)" name="Constant">
       <a name="value" val="0xee"/>
       <a name="width" val="8"/>
@@ -984,13 +945,6 @@ end TCL_Generic;
     <comp lib="0" loc="(2500,110)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="read_sel"/>
-      <a name="width" val="4"/>
-    </comp>
-    <comp lib="0" loc="(2500,2220)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="tx"/>
-    </comp>
-    <comp lib="0" loc="(2510,2350)" name="Constant">
       <a name="width" val="4"/>
     </comp>
     <comp lib="0" loc="(2510,2480)" name="Tunnel">
@@ -1029,10 +983,6 @@ end TCL_Generic;
     <comp lib="0" loc="(2540,1340)" name="Tunnel">
       <a name="label" val="seven_seg"/>
       <a name="width" val="24"/>
-    </comp>
-    <comp lib="0" loc="(2560,2280)" name="Bit Extender">
-      <a name="in_width" val="1"/>
-      <a name="type" val="zero"/>
     </comp>
     <comp lib="0" loc="(2560,2480)" name="Bit Extender">
       <a name="out_width" val="4"/>
@@ -1095,6 +1045,13 @@ end TCL_Generic;
       <a name="label" val="gfx_y"/>
       <a name="width" val="8"/>
     </comp>
+    <comp lib="0" loc="(2630,2130)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="ws2812_en"/>
+    </comp>
+    <comp lib="0" loc="(2630,2200)" name="Constant">
+      <a name="width" val="4"/>
+    </comp>
     <comp lib="0" loc="(2640,190)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="mode"/>
@@ -1103,19 +1060,52 @@ end TCL_Generic;
     <comp lib="0" loc="(2650,390)" name="Constant">
       <a name="width" val="8"/>
     </comp>
+    <comp lib="0" loc="(2680,2130)" name="Bit Extender">
+      <a name="in_width" val="1"/>
+      <a name="type" val="zero"/>
+    </comp>
     <comp lib="0" loc="(2680,2520)" name="Constant">
       <a name="value" val="0xe68"/>
       <a name="width" val="16"/>
     </comp>
+    <comp lib="0" loc="(2700,2090)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="ws2812"/>
+    </comp>
+    <comp lib="0" loc="(2710,2220)" name="Constant">
+      <a name="width" val="4"/>
+    </comp>
+    <comp lib="0" loc="(2760,2150)" name="Bit Extender">
+      <a name="in_width" val="1"/>
+      <a name="type" val="zero"/>
+    </comp>
     <comp lib="0" loc="(2760,2590)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="clk"/>
+    </comp>
+    <comp lib="0" loc="(2780,2270)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="uart_en"/>
+    </comp>
+    <comp lib="0" loc="(2780,2340)" name="Constant">
+      <a name="width" val="4"/>
+    </comp>
+    <comp lib="0" loc="(2830,2270)" name="Bit Extender">
+      <a name="in_width" val="1"/>
+      <a name="type" val="zero"/>
     </comp>
     <comp lib="0" loc="(2840,2800)" name="Tunnel">
       <a name="label" val="timer_out_0"/>
     </comp>
     <comp lib="0" loc="(2840,3050)" name="Tunnel">
       <a name="label" val="timer_out_1"/>
+    </comp>
+    <comp lib="0" loc="(2850,2230)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="tx"/>
+    </comp>
+    <comp lib="0" loc="(2860,2360)" name="Constant">
+      <a name="width" val="4"/>
     </comp>
     <comp lib="0" loc="(2870,360)" name="Constant">
       <a name="value" val="0x0"/>
@@ -1125,6 +1115,10 @@ end TCL_Generic;
       <a name="facing" val="east"/>
       <a name="label" val="mode_2"/>
       <a name="width" val="2"/>
+    </comp>
+    <comp lib="0" loc="(2910,2290)" name="Bit Extender">
+      <a name="in_width" val="1"/>
+      <a name="type" val="zero"/>
     </comp>
     <comp lib="0" loc="(2960,430)" name="Splitter">
       <a name="appear" val="right"/>
@@ -1837,11 +1831,6 @@ end TCL_Generic;
       <a name="label" val="port_in"/>
       <a name="width" val="8"/>
     </comp>
-    <comp lib="0" loc="(420,3150)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="data"/>
-      <a name="width" val="8"/>
-    </comp>
     <comp lib="0" loc="(440,1460)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="halt"/>
@@ -1890,13 +1879,6 @@ end TCL_Generic;
       <a name="bit7" val="1"/>
       <a name="incoming" val="8"/>
     </comp>
-    <comp lib="0" loc="(470,3150)" name="Bit Extender">
-      <a name="type" val="zero"/>
-    </comp>
-    <comp lib="0" loc="(470,3190)" name="Constant">
-      <a name="value" val="0x40"/>
-      <a name="width" val="16"/>
-    </comp>
     <comp lib="0" loc="(490,310)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="clk"/>
@@ -1904,6 +1886,16 @@ end TCL_Generic;
     <comp lib="0" loc="(500,270)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="mem"/>
+      <a name="width" val="8"/>
+    </comp>
+    <comp lib="0" loc="(510,3170)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="H"/>
+      <a name="width" val="8"/>
+    </comp>
+    <comp lib="0" loc="(510,3200)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="L"/>
       <a name="width" val="8"/>
     </comp>
     <comp lib="0" loc="(520,1690)" name="Tunnel">
@@ -1915,6 +1907,25 @@ end TCL_Generic;
       <a name="label" val="clk"/>
     </comp>
     <comp lib="0" loc="(530,420)" name="Constant"/>
+    <comp lib="0" loc="(540,3160)" name="Splitter">
+      <a name="bit0" val="1"/>
+      <a name="bit10" val="0"/>
+      <a name="bit11" val="0"/>
+      <a name="bit12" val="0"/>
+      <a name="bit13" val="0"/>
+      <a name="bit14" val="0"/>
+      <a name="bit15" val="0"/>
+      <a name="bit2" val="1"/>
+      <a name="bit3" val="1"/>
+      <a name="bit4" val="1"/>
+      <a name="bit5" val="1"/>
+      <a name="bit6" val="1"/>
+      <a name="bit7" val="1"/>
+      <a name="bit8" val="0"/>
+      <a name="bit9" val="0"/>
+      <a name="facing" val="west"/>
+      <a name="incoming" val="16"/>
+    </comp>
     <comp lib="0" loc="(540,3450)" name="Constant">
       <a name="facing" val="west"/>
       <a name="value" val="0x0"/>
@@ -2315,32 +2326,42 @@ end TCL_Generic;
     </comp>
     <comp lib="1" loc="(2400,2450)" name="AND Gate">
       <a name="facing" val="south"/>
-      <a name="inputs" val="3"/>
+      <a name="inputs" val="4"/>
       <a name="size" val="30"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="1" loc="(2410,2350)" name="NOT Gate">
+    <comp lib="1" loc="(2440,2280)" name="NOT Gate">
       <a name="facing" val="west"/>
       <a name="size" val="20"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="1" loc="(2410,2510)" name="OR Gate">
+    <comp lib="1" loc="(2440,2310)" name="AND Gate">
+      <a name="facing" val="west"/>
+      <a name="size" val="30"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="1" loc="(2440,2510)" name="OR Gate">
       <a name="facing" val="south"/>
-      <a name="inputs" val="3"/>
+      <a name="inputs" val="4"/>
       <a name="size" val="30"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="1" loc="(2440,2400)" name="NOT Gate">
+    <comp lib="1" loc="(2470,2340)" name="NOT Gate">
       <a name="facing" val="west"/>
       <a name="size" val="20"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="1" loc="(2440,2430)" name="AND Gate">
+    <comp lib="1" loc="(2470,2370)" name="AND Gate">
       <a name="facing" val="west"/>
       <a name="size" val="30"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="1" loc="(2450,2370)" name="AND Gate">
+    <comp lib="1" loc="(2470,2400)" name="NOT Gate">
+      <a name="facing" val="west"/>
+      <a name="size" val="20"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="1" loc="(2470,2430)" name="AND Gate">
       <a name="facing" val="west"/>
       <a name="size" val="30"/>
       <a name="width" val="16"/>
@@ -2684,20 +2705,26 @@ end TCL_Generic;
     <comp lib="3" loc="(2220,2380)" name="Shifter">
       <a name="width" val="16"/>
     </comp>
-    <comp lib="3" loc="(2480,2320)" name="Shifter">
-      <a name="width" val="16"/>
-    </comp>
-    <comp lib="3" loc="(2560,2340)" name="Shifter">
-      <a name="width" val="16"/>
-    </comp>
     <comp lib="3" loc="(2640,2540)" name="Shifter">
       <a name="width" val="16"/>
     </comp>
     <comp lib="3" loc="(2650,2470)" name="Shifter">
       <a name="width" val="16"/>
     </comp>
+    <comp lib="3" loc="(2680,2190)" name="Shifter">
+      <a name="width" val="16"/>
+    </comp>
     <comp lib="3" loc="(2710,380)" name="Adder"/>
     <comp lib="3" loc="(2710,450)" name="Subtractor"/>
+    <comp lib="3" loc="(2760,2210)" name="Shifter">
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="3" loc="(2830,2330)" name="Shifter">
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="3" loc="(2910,2350)" name="Shifter">
+      <a name="width" val="16"/>
+    </comp>
     <comp lib="3" loc="(2920,350)" name="Comparator">
       <a name="mode" val="unsigned"/>
     </comp>
@@ -2762,9 +2789,6 @@ end TCL_Generic;
       <a name="width" val="4"/>
     </comp>
     <comp lib="3" loc="(460,150)" name="Adder">
-      <a name="width" val="16"/>
-    </comp>
-    <comp lib="3" loc="(530,3160)" name="Multiplier">
       <a name="width" val="16"/>
     </comp>
     <comp lib="3" loc="(600,3170)" name="Adder">
@@ -2963,7 +2987,206 @@ end TCL_Generic;
       <a name="addrWidth" val="15"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="contents">addr/data: 15 8
-74 80
+4 5 20 6c 4 2 20 6e
+74 2 cc 71 81 3 49 7c
+fa 9c 92 6 0 71 81 4
+49 26 7c f9 92 94 96 9c
+92 91 90 96 4 0 71 80
+4 3a 29 7c fa 95 96 9c
+90 91 18 0 0 6c 0 80
+d 90 93 94 39 90 97 85
+1 26 94 28 7c f1 95 94
+9c 90 3b 85 1 26 90 97
+94 9c 90 91 92 93 72 81
+b 84 c 90 91 94 73 94
+81 2 7c 3 74 0 e4 90
+91 92 93 90 91 92 93 95
+94 97 96 98 1 45 92 94
+6c 0 97 96 95 94 82 58
+6c 0 86 16 90 92 94 6c
+0 94 86 e 90 4 80 10
+80 3 4 80 10 80 4 94
+7c c 90 4 0 10 80 3
+4 0 10 80 4 94 90 91
+92 93 90 91 92 93 95 94
+97 96 98 1 45 90 92 94
+6c 0 94 84 e 90 93 94
+6c 0 94 84 6 97 96 95
+94 7c 60 97 96 95 94 8
+80 3 24 10 80 3 7c 53
+4 80 10 80 3 4 0 10
+80 4 7c 47 90 91 92 93
+90 91 92 93 95 94 97 96
+98 1 45 92 94 6c 0 97
+96 95 94 82 c 4 0 10
+80 3 4 c0 10 80 4 7c
+22 6c 0 82 14 90 92 94
+6c 0 94 82 c 4 fe 10
+80 3 4 ff 10 80 4 7c
+a 4 7f 10 80 3 4 80
+10 80 4 8 80 3 9 80
+4 71 97 96 95 94 9c 90
+3a 90 96 91 94 3b 90 97
+85 1 26 94 9c 90 90 92
+94 96 4a 90 96 93 94 49
+90 97 85 1 2a 94 9c 93
+2b 81 11 90 91 94 a4 90
+95 94 81 3 a4 7c f1 a4
+5c 1 7c ec 97 9c 93 2b
+81 17 a8 81 9 90 91 94
+a8 90 95 94 7c f1 90 91
+94 a8 5c 80 90 95 94 7c
+e6 97 9c 90 91 54 80 90
+92 94 54 80 90 95 94 69
+10 80 2 95 92 94 54 80
+80 d 92 94 64 ff 90 96
+93 94 64 ff 90 97 2c 94
+90 54 80 94 80 13 92 93
+64 ff 90 91 94 64 ff 90
+97 96 2c 92 94 93 95 97
+96 9c 90 91 92 94 9 80
+2 61 90 96 95 94 9c 90
+4 0 10 80 0 10 80 1
+94 92 93 a 80 0 b 80
+1 98 1 37 12 80 0 13
+80 1 97 96 30 90 4 0
+72 94 84 e5 90 4 0 73
+94 84 de a 80 0 b 80
+1 9c 98 1 8b 98 1 d7
+98 1 ca 9c 90 91 90 4
+0 10 80 0 10 80 1 94
+98 0 52 81 22 90 91 92
+93 95 94 97 96 98 1 45
+90 91 92 93 95 94 a 80
+0 b 80 1 2c 12 80 0
+13 80 1 97 96 7c d9 95
+94 a 80 0 b 80 1 9c
+98 1 8b 98 2 14 98 1
+ca 9c 90 91 98 0 52 81
+15 90 91 92 93 95 94 97
+96 98 1 45 90 91 92 93
+95 94 97 96 7c e6 90 96
+91 97 95 94 9c 90 91 90
+91 98 1 8b 98 2 5a 95
+94 54 80 90 92 94 54 80
+90 95 94 69 80 d 92 94
+64 ff 90 96 93 94 64 ff
+90 97 2c 95 94 9c 98 3
+3d 98 4 f0 98 4 aa 80
+3 74 2 cc 98 4 cf 8
+80 11 10 80 a 8 80 10
+10 80 9 98 4 1 98 3
+4e 74 2 a6 4 25 20 22
+18 6 3f 5 32 91 c 2c
+5 8 98 0 20 20 1e c
+2c 98 0 20 20 1f 92 93
+18 5 bf 20 21 97 96 95
+29 84 e2 4 18 20 1e 4
+10 20 1f 92 93 18 5 7f
+20 21 97 96 4 78 20 1e
+4 18 20 1f 92 93 18 5
+ff 20 21 97 96 20 5e 98
+5 59 84 fb 98 5 59 80
+fb 4 20 10 80 9 10 80
+a 4 2 10 80 5 18 80
+12 14 2c 14 98 4 60 98
+3 4e 74 2 a6 90 20 70
+98 5 59 80 3 10 80 6
+1c 70 80 f4 94 9c 90 4
+25 20 22 98 3 60 98 3
+76 98 3 ca 20 5e 94 9c
+90 8 80 7 20 1e 8 80
+8 20 1f 92 93 18 5 ff
+20 21 97 96 94 9c 90 8
+80 9 20 1e 8 80 a 20
+1f 92 93 18 5 7f 20 21
+97 96 94 9c 90 c 92 93
+a 80 b b 80 c 6c 0
+84 8 92 94 34 8 90 96
+7c 1e 6c 1 84 8 93 94
+34 8 90 97 7c 12 6c 2
+84 8 92 94 44 8 90 96
+7c 6 93 94 44 8 90 97
+12 80 b 13 80 c 97 96
+94 9c 90 91 92 93 8 80
+9 10 80 b 8 80 a 10
+80 c 18 80 12 9 80 5
+80 1a 98 3 8c 8 80 b
+20 1e 8 80 c 20 1f 92
+93 18 5 bf 20 21 97 96
+2c 29 7c e4 97 96 95 94
+9c 90 91 92 93 18 80 12
+9 80 5 80 e c 90 8
+80 d 14 2c 94 10 80 d
+29 7c f0 97 96 95 94 9c
+90 91 92 93 8 80 9 10
+80 b 8 80 a 10 80 c
+18 80 12 9 80 5 91 8
+80 e 9 80 b 71 84 11
+8 80 f 9 80 c 71 84
+8 95 97 96 95 94 4 1
+9c 95 98 3 8c 2c 29 85
+dd 97 96 95 94 4 0 9c
+90 91 92 5 8 1c 5d 54
+f 90 96 1c 5d 54 3 3a
+90 96 1c 5d 54 1 3a 98
+0 20 90 96 1c 5d 54 f
+98 0 20 9 80 11 71 84
+a 90 8 80 10 72 94 84
+2 7c d0 12 80 e 10 80
+f 90 98 4 20 94 84 c3
+12 80 7 10 80 8 96 95
+94 9c 8 80 10 6c a0 85
+1b 8 80 11 6c 80 85 14
+8 80 10 10 80 e 8 80
+11 10 80 f 98 4 20 84
+3 4 0 9c 4 1 9c 90
+91 8 80 10 9 80 7 71
+84 13 8 80 11 9 80 8
+71 84 a 8 80 5 24 10
+80 5 98 4 60 95 94 9c
+90 91 8 80 6 80 7 28
+9 80 12 71 84 6 8 80
+12 98 5 75 90 6c 0 84
+10 8 80 9 34 8 10 80
+10 8 80 a 10 80 11 7c
+36 6c 1 84 10 8 80 9
+10 80 10 8 80 a 34 8
+10 80 11 7c 22 6c 2 84
+10 8 80 9 44 8 10 80
+10 8 80 a 10 80 11 7c
+e 8 80 9 10 80 10 8
+80 a 44 8 10 80 11 94
+98 5 75 10 80 d 95 94
+9c 1c 26 80 3 4 1 9c
+1c 24 80 3 4 2 9c 1c
+25 80 3 4 3 9c 1c 23
+80 2 4 4 9c 91 5 4
+34 2 98 0 b 95 9c 9*c
+6*38 c c 38 0 38 38 0
+38 c c 38 38 38 e0 38
+38 c c 38 38 38 e0 38
+38 c c 38 38 38 e0 38
+38 c c 38 38 e0 38 e0
+38 18*c 6*38 c c 6*38 c c
+6*38 c c 6*38 c c 6*38 c
+c 6*38 9*c 0 14 14 0 0
+14 14 0 0 e0 14 14 14
+e0 e0 0 4*e0 14 4*e0 ff 6*e0
+ff 15*e0 0 6*e0 0 0 0 4*e0
+0 0 0 6 1 7 2 7
+3 6 3 5 2 4 1 4
+0 3 0 2 1 1 2 1
+5 7 5 6 5 5 5 4
+5 3 6 4 7 5 7 6
+7 7 9 7 9 6 9 5
+9 4 a 5 a 3 b 7
+b 6 b 5 b 4 d 2
+d 3 d 4 d 5 d 6
+d 7 e 6 f 7 f 5
+f 4 11 3 11 4 11 5
+11 6 11 7 12 3 13 3
+12 5 12 7 13 7
 </a>
       <a name="label" val="Program"/>
       <a name="labelvisible" val="true"/>
@@ -3028,96 +3251,95 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
       <a name="labelvisible" val="true"/>
     </comp>
     <comp lib="5" loc="(1010,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@f0459b8"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1b923780"/>
       <a name="label" val="instruction_state"/>
     </comp>
     <comp lib="5" loc="(1070,1990)" name="DipSwitch">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2c01d937"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4f2a1506"/>
       <a name="facing" val="south"/>
       <a name="label" val="DipSwitch_1"/>
       <a name="labelvisible" val="false"/>
       <a name="number" val="10"/>
     </comp>
     <comp lib="5" loc="(1110,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4c28f7f4"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7d2c64f0"/>
       <a name="label" val="C0_0"/>
     </comp>
     <comp lib="5" loc="(1150,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1e73a992"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7adab5fe"/>
       <a name="label" val="C0_1"/>
     </comp>
     <comp lib="5" loc="(1170,1830)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3317fa7d"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@70fea312"/>
       <a name="label" val="HEX5"/>
     </comp>
     <comp lib="5" loc="(1210,1830)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@117d4549"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6fe30a2e"/>
       <a name="label" val="HEX4"/>
     </comp>
     <comp lib="5" loc="(1240,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1ae187c5"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7176f8c6"/>
       <a name="label" val="C1_0"/>
     </comp>
     <comp lib="5" loc="(1250,1830)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@195d8232"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5eacc653"/>
       <a name="label" val="HEX3"/>
     </comp>
     <comp lib="5" loc="(1280,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@15954776"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5bcf08a7"/>
       <a name="label" val="C1_1"/>
     </comp>
     <comp lib="5" loc="(1290,1830)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6e390f80"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2c8acb8a"/>
       <a name="label" val="HEX2"/>
     </comp>
+    <comp lib="5" loc="(1300,3730)" name="RGB Video">
+      <a name="color" val="XTerm256 (8 bit)"/>
+      <a name="width" val="256"/>
+    </comp>
     <comp lib="5" loc="(1330,1830)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@78f0722d"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6afca615"/>
       <a name="label" val="HEX1"/>
     </comp>
     <comp lib="5" loc="(1370,1830)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@dc92313"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@52da6b47"/>
       <a name="label" val="HEX0"/>
     </comp>
     <comp lib="5" loc="(1380,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@32587b2b"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7173cb8b"/>
       <a name="label" val="gfx_x0"/>
     </comp>
     <comp lib="5" loc="(1420,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@14bb37ef"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@b5f98b4"/>
       <a name="label" val="gfx_x1"/>
     </comp>
     <comp lib="5" loc="(1500,2640)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6f215e4f"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@41c5bc4"/>
       <a name="label" val="adc0"/>
     </comp>
     <comp lib="5" loc="(1510,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2bb43903"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@59d9853"/>
       <a name="label" val="gfx_y0"/>
     </comp>
     <comp lib="5" loc="(1510,3360)" name="PortIO">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5a722cdd"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6add34f8"/>
       <a name="label" val="VGA_port"/>
-      <a name="number" val="14"/>
     </comp>
     <comp lib="5" loc="(1540,2640)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5ac49e7d"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1db08b2f"/>
       <a name="label" val="adc1"/>
     </comp>
     <comp lib="5" loc="(1550,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@178dce85"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7b143126"/>
       <a name="label" val="gfx_y1"/>
     </comp>
     <comp lib="5" loc="(2360,2150)" name="PortIO">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@723b291d"/>
-      <a name="direction" val="IOMultiEnable"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@12226117"/>
       <a name="label" val="GPIO_port"/>
-      <a name="number" val="36"/>
     </comp>
     <comp lib="5" loc="(2380,2550)" name="PortIO">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@78cd6a78"/>
-      <a name="direction" val="IOMultiEnable"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@115bed5f"/>
       <a name="label" val="Arduino_port"/>
-      <a name="number" val="16"/>
     </comp>
     <comp lib="5" loc="(270,2360)" name="LED">
       <a name="label" val="halted_led"/>
@@ -3128,63 +3350,63 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
       <a name="offcolor" val="#750014"/>
     </comp>
     <comp lib="5" loc="(290,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@604246a"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@82bf5a8"/>
       <a name="label" val="PC_0"/>
     </comp>
     <comp lib="5" loc="(330,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7f042bc9"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@526c788a"/>
       <a name="label" val="PC_1"/>
     </comp>
     <comp lib="5" loc="(340,2920)" name="PortIO">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@545c96f5"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@53478109"/>
       <a name="label" val="clocks_port"/>
-      <a name="number" val="2"/>
     </comp>
     <comp lib="5" loc="(370,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@47d1a8ac"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1db8af2b"/>
       <a name="label" val="PC_2"/>
     </comp>
+    <comp lib="5" loc="(410,1910)" name="TTY"/>
     <comp lib="5" loc="(410,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6051f348"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4ae98f81"/>
       <a name="label" val="PC_3"/>
     </comp>
     <comp lib="5" loc="(460,1660)" name="Button">
       <a name="label" val="clk_btn"/>
     </comp>
     <comp lib="5" loc="(490,2630)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3e55d6e8"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7b70067e"/>
       <a name="label" val="H_0"/>
     </comp>
     <comp lib="5" loc="(500,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@e0e14e9"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@14508fd0"/>
       <a name="label" val="A_0"/>
     </comp>
     <comp lib="5" loc="(530,2630)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4450494c"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4cc9bb86"/>
       <a name="label" val="H_1"/>
     </comp>
     <comp lib="5" loc="(540,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2bf4293d"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4a5aa019"/>
       <a name="label" val="A_1"/>
     </comp>
     <comp lib="5" loc="(630,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3b06483d"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@31e21cda"/>
       <a name="label" val="B_0"/>
     </comp>
     <comp lib="5" loc="(630,2630)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@45d1aae8"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@215c2b39"/>
       <a name="label" val="L_0"/>
     </comp>
     <comp lib="5" loc="(670,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@38d8137"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2048b11f"/>
       <a name="label" val="B_1"/>
     </comp>
     <comp lib="5" loc="(670,2630)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@93aedba"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3f8d8767"/>
       <a name="label" val="L_1"/>
     </comp>
     <comp lib="5" loc="(770,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@f41b00"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1e285880"/>
       <a name="label" val="instr_0"/>
     </comp>
     <comp lib="5" loc="(790,1850)" name="LED">
@@ -3200,7 +3422,7 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
       <a name="offcolor" val="#750014"/>
     </comp>
     <comp lib="5" loc="(810,2500)" name="Hex Digit Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@483a771c"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5eedbd9f"/>
       <a name="label" val="instr_1"/>
     </comp>
     <comp lib="5" loc="(820,1980)" name="Button">
@@ -3320,10 +3542,6 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     </comp>
     <comp loc="(3310,3040)" name="PWM_driver">
       <a name="label" val="PWM_driver_5"/>
-    </comp>
-    <comp loc="(910,2890)" name="UART_dummy">
-      <a name="appearance" val="logisim_evolution"/>
-      <a name="label" val="uart_dummy_1"/>
     </comp>
     <wire from="(1000,1990)" to="(1000,2000)"/>
     <wire from="(1000,2520)" to="(1010,2520)"/>
@@ -4102,7 +4320,7 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2380,2140)" to="(2380,2150)"/>
     <wire from="(2380,2140)" to="(2390,2140)"/>
     <wire from="(2380,2350)" to="(2380,2410)"/>
-    <wire from="(2380,2410)" to="(2390,2410)"/>
+    <wire from="(2380,2410)" to="(2380,2420)"/>
     <wire from="(2380,2840)" to="(2380,2940)"/>
     <wire from="(2380,2940)" to="(2470,2940)"/>
     <wire from="(2380,640)" to="(2380,770)"/>
@@ -4110,7 +4328,8 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2390,1010)" to="(2400,1010)"/>
     <wire from="(2390,1740)" to="(2390,1790)"/>
     <wire from="(2390,1740)" to="(2400,1740)"/>
-    <wire from="(2390,2410)" to="(2390,2420)"/>
+    <wire from="(2390,2280)" to="(2390,2420)"/>
+    <wire from="(2390,2280)" to="(2440,2280)"/>
     <wire from="(2390,2530)" to="(2390,2550)"/>
     <wire from="(2390,2530)" to="(2410,2530)"/>
     <wire from="(2390,2770)" to="(2400,2770)"/>
@@ -4124,9 +4343,8 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2400,1820)" to="(2560,1820)"/>
     <wire from="(2400,210)" to="(2400,470)"/>
     <wire from="(2400,210)" to="(2500,210)"/>
-    <wire from="(2400,2350)" to="(2400,2420)"/>
-    <wire from="(2400,2350)" to="(2410,2350)"/>
-    <wire from="(2400,2450)" to="(2400,2480)"/>
+    <wire from="(2400,2450)" to="(2400,2470)"/>
+    <wire from="(2400,2470)" to="(2420,2470)"/>
     <wire from="(2400,2540)" to="(2400,2550)"/>
     <wire from="(2400,2540)" to="(2420,2540)"/>
     <wire from="(2400,2770)" to="(2400,2790)"/>
@@ -4141,34 +4359,27 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2400,630)" to="(2510,630)"/>
     <wire from="(2400,660)" to="(2400,1010)"/>
     <wire from="(2400,660)" to="(2510,660)"/>
-    <wire from="(2410,2400)" to="(2410,2420)"/>
-    <wire from="(2410,2400)" to="(2440,2400)"/>
-    <wire from="(2410,2460)" to="(2410,2480)"/>
-    <wire from="(2410,2460)" to="(2420,2460)"/>
-    <wire from="(2410,2510)" to="(2410,2530)"/>
+    <wire from="(2410,2340)" to="(2410,2420)"/>
+    <wire from="(2410,2340)" to="(2470,2340)"/>
+    <wire from="(2410,2520)" to="(2410,2530)"/>
+    <wire from="(2410,2520)" to="(2440,2520)"/>
     <wire from="(2420,1390)" to="(2420,1440)"/>
     <wire from="(2420,1390)" to="(2510,1390)"/>
-    <wire from="(2420,2370)" to="(2420,2460)"/>
-    <wire from="(2420,2370)" to="(2450,2370)"/>
+    <wire from="(2420,2400)" to="(2420,2420)"/>
+    <wire from="(2420,2400)" to="(2470,2400)"/>
     <wire from="(2420,2470)" to="(2420,2480)"/>
-    <wire from="(2420,2470)" to="(2430,2470)"/>
     <wire from="(2430,140)" to="(2430,470)"/>
     <wire from="(2430,1460)" to="(2430,1560)"/>
     <wire from="(2430,1460)" to="(2440,1460)"/>
-    <wire from="(2430,2260)" to="(2440,2260)"/>
-    <wire from="(2430,2290)" to="(2430,2310)"/>
-    <wire from="(2430,2290)" to="(2490,2290)"/>
+    <wire from="(2430,2310)" to="(2430,2480)"/>
     <wire from="(2430,2310)" to="(2440,2310)"/>
-    <wire from="(2430,2330)" to="(2440,2330)"/>
-    <wire from="(2430,2350)" to="(2490,2350)"/>
-    <wire from="(2430,2430)" to="(2430,2470)"/>
-    <wire from="(2430,2430)" to="(2440,2430)"/>
     <wire from="(2430,2740)" to="(2440,2740)"/>
     <wire from="(2430,2800)" to="(2430,3050)"/>
     <wire from="(2430,2800)" to="(2470,2800)"/>
     <wire from="(2430,3050)" to="(2470,3050)"/>
     <wire from="(2440,1400)" to="(2440,1440)"/>
     <wire from="(2440,1480)" to="(2440,1510)"/>
+    <wire from="(2440,2510)" to="(2440,2520)"/>
     <wire from="(2440,2740)" to="(2440,2840)"/>
     <wire from="(2440,2840)" to="(2440,2960)"/>
     <wire from="(2440,2840)" to="(2470,2840)"/>
@@ -4177,28 +4388,27 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2440,3090)" to="(2440,3210)"/>
     <wire from="(2440,3090)" to="(2470,3090)"/>
     <wire from="(2440,3210)" to="(2470,3210)"/>
+    <wire from="(2450,2370)" to="(2450,2480)"/>
+    <wire from="(2450,2370)" to="(2470,2370)"/>
     <wire from="(2450,490)" to="(2480,490)"/>
     <wire from="(2460,1720)" to="(2470,1720)"/>
-    <wire from="(2460,2400)" to="(2480,2400)"/>
+    <wire from="(2460,2280)" to="(2480,2280)"/>
+    <wire from="(2460,2430)" to="(2460,2480)"/>
+    <wire from="(2460,2430)" to="(2470,2430)"/>
     <wire from="(2460,690)" to="(2470,690)"/>
-    <wire from="(2470,2420)" to="(2930,2420)"/>
-    <wire from="(2470,2440)" to="(2480,2440)"/>
+    <wire from="(2470,2300)" to="(2480,2300)"/>
+    <wire from="(2470,2320)" to="(2700,2320)"/>
     <wire from="(2470,530)" to="(2470,620)"/>
     <wire from="(2470,620)" to="(2510,620)"/>
     <wire from="(2470,720)" to="(2480,720)"/>
-    <wire from="(2480,2260)" to="(2490,2260)"/>
-    <wire from="(2480,2320)" to="(2490,2320)"/>
-    <wire from="(2480,2360)" to="(2490,2360)"/>
-    <wire from="(2480,2380)" to="(2570,2380)"/>
-    <wire from="(2480,2400)" to="(2480,2440)"/>
-    <wire from="(2480,2440)" to="(2830,2440)"/>
+    <wire from="(2480,2280)" to="(2480,2300)"/>
+    <wire from="(2480,2300)" to="(2690,2300)"/>
     <wire from="(2480,490)" to="(2480,610)"/>
     <wire from="(2480,610)" to="(2510,610)"/>
     <wire from="(2480,690)" to="(2480,720)"/>
     <wire from="(2480,690)" to="(2510,690)"/>
-    <wire from="(2490,2260)" to="(2490,2290)"/>
-    <wire from="(2490,2320)" to="(2490,2350)"/>
-    <wire from="(2490,2350)" to="(2490,2360)"/>
+    <wire from="(2490,2340)" to="(2510,2340)"/>
+    <wire from="(2490,2400)" to="(2510,2400)"/>
     <wire from="(2490,670)" to="(2510,670)"/>
     <wire from="(2490,680)" to="(2510,680)"/>
     <wire from="(2490,750)" to="(2500,750)"/>
@@ -4210,7 +4420,10 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2500,1400)" to="(2510,1400)"/>
     <wire from="(2500,210)" to="(2500,600)"/>
     <wire from="(2500,210)" to="(2640,210)"/>
-    <wire from="(2500,2220)" to="(2510,2220)"/>
+    <wire from="(2500,2360)" to="(2510,2360)"/>
+    <wire from="(2500,2380)" to="(2920,2380)"/>
+    <wire from="(2500,2420)" to="(2930,2420)"/>
+    <wire from="(2500,2440)" to="(2510,2440)"/>
     <wire from="(2500,600)" to="(2510,600)"/>
     <wire from="(2500,700)" to="(2500,710)"/>
     <wire from="(2500,700)" to="(2510,700)"/>
@@ -4223,12 +4436,10 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2500,740)" to="(2500,750)"/>
     <wire from="(2500,740)" to="(2510,740)"/>
     <wire from="(2500,750)" to="(2510,750)"/>
-    <wire from="(2510,2220)" to="(2510,2280)"/>
-    <wire from="(2510,2280)" to="(2520,2280)"/>
-    <wire from="(2510,2310)" to="(2510,2330)"/>
-    <wire from="(2510,2310)" to="(2570,2310)"/>
-    <wire from="(2510,2330)" to="(2520,2330)"/>
-    <wire from="(2510,2350)" to="(2520,2350)"/>
+    <wire from="(2510,2340)" to="(2510,2360)"/>
+    <wire from="(2510,2360)" to="(2840,2360)"/>
+    <wire from="(2510,2400)" to="(2510,2440)"/>
+    <wire from="(2510,2440)" to="(2830,2440)"/>
     <wire from="(2510,2480)" to="(2520,2480)"/>
     <wire from="(2530,110)" to="(2530,600)"/>
     <wire from="(2530,1340)" to="(2540,1340)"/>
@@ -4246,10 +4457,8 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2550,1740)" to="(2560,1740)"/>
     <wire from="(2550,680)" to="(2560,680)"/>
     <wire from="(2560,1760)" to="(2560,1820)"/>
-    <wire from="(2560,2280)" to="(2570,2280)"/>
     <wire from="(2560,230)" to="(2560,310)"/>
     <wire from="(2560,230)" to="(2640,230)"/>
-    <wire from="(2560,2340)" to="(2570,2340)"/>
     <wire from="(2560,2480)" to="(2590,2480)"/>
     <wire from="(2560,310)" to="(2560,370)"/>
     <wire from="(2560,310)" to="(3060,310)"/>
@@ -4259,8 +4468,6 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2560,440)" to="(2670,440)"/>
     <wire from="(2560,660)" to="(2560,680)"/>
     <wire from="(2560,660)" to="(2570,660)"/>
-    <wire from="(2570,2280)" to="(2570,2310)"/>
-    <wire from="(2570,2340)" to="(2570,2380)"/>
     <wire from="(2570,2820)" to="(2570,2920)"/>
     <wire from="(2570,2820)" to="(2610,2820)"/>
     <wire from="(2570,2920)" to="(2620,2920)"/>
@@ -4301,6 +4508,11 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2620,420)" to="(2620,490)"/>
     <wire from="(2620,420)" to="(2940,420)"/>
     <wire from="(2620,490)" to="(2940,490)"/>
+    <wire from="(2630,2130)" to="(2640,2130)"/>
+    <wire from="(2630,2160)" to="(2630,2180)"/>
+    <wire from="(2630,2160)" to="(2690,2160)"/>
+    <wire from="(2630,2180)" to="(2640,2180)"/>
+    <wire from="(2630,2200)" to="(2640,2200)"/>
     <wire from="(2640,2540)" to="(2660,2540)"/>
     <wire from="(2650,2470)" to="(2660,2470)"/>
     <wire from="(2650,2560)" to="(2650,2610)"/>
@@ -4310,7 +4522,11 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2660,390)" to="(2660,460)"/>
     <wire from="(2660,390)" to="(2670,390)"/>
     <wire from="(2660,460)" to="(2670,460)"/>
+    <wire from="(2680,2130)" to="(2690,2130)"/>
+    <wire from="(2680,2190)" to="(2690,2190)"/>
     <wire from="(2680,2520)" to="(2690,2520)"/>
+    <wire from="(2690,2130)" to="(2690,2160)"/>
+    <wire from="(2690,2190)" to="(2690,2300)"/>
     <wire from="(2690,2470)" to="(2700,2470)"/>
     <wire from="(2690,2520)" to="(2690,2530)"/>
     <wire from="(2690,2530)" to="(2710,2530)"/>
@@ -4321,7 +4537,16 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2690,410)" to="(2940,410)"/>
     <wire from="(2690,470)" to="(2690,480)"/>
     <wire from="(2690,480)" to="(2940,480)"/>
+    <wire from="(2700,2090)" to="(2710,2090)"/>
+    <wire from="(2700,2240)" to="(2700,2320)"/>
+    <wire from="(2700,2240)" to="(2770,2240)"/>
     <wire from="(2700,2470)" to="(2700,2600)"/>
+    <wire from="(2710,2090)" to="(2710,2150)"/>
+    <wire from="(2710,2150)" to="(2720,2150)"/>
+    <wire from="(2710,2180)" to="(2710,2200)"/>
+    <wire from="(2710,2180)" to="(2770,2180)"/>
+    <wire from="(2710,2200)" to="(2720,2200)"/>
+    <wire from="(2710,2220)" to="(2720,2220)"/>
     <wire from="(2710,380)" to="(3000,380)"/>
     <wire from="(2710,450)" to="(3010,450)"/>
     <wire from="(2720,2570)" to="(2720,2640)"/>
@@ -4329,14 +4554,34 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(2740,2540)" to="(2750,2540)"/>
     <wire from="(2750,2540)" to="(2750,2550)"/>
     <wire from="(2750,2550)" to="(2760,2550)"/>
+    <wire from="(2760,2150)" to="(2770,2150)"/>
+    <wire from="(2760,2210)" to="(2770,2210)"/>
+    <wire from="(2770,2150)" to="(2770,2180)"/>
+    <wire from="(2770,2210)" to="(2770,2240)"/>
+    <wire from="(2780,2270)" to="(2790,2270)"/>
+    <wire from="(2780,2300)" to="(2780,2320)"/>
+    <wire from="(2780,2300)" to="(2840,2300)"/>
+    <wire from="(2780,2320)" to="(2790,2320)"/>
+    <wire from="(2780,2340)" to="(2790,2340)"/>
     <wire from="(280,710)" to="(290,710)"/>
     <wire from="(2820,2550)" to="(2830,2550)"/>
+    <wire from="(2830,2270)" to="(2840,2270)"/>
+    <wire from="(2830,2330)" to="(2840,2330)"/>
     <wire from="(2830,2440)" to="(2830,2550)"/>
     <wire from="(2830,2550)" to="(2830,2620)"/>
     <wire from="(2830,2800)" to="(2840,2800)"/>
     <wire from="(2830,3050)" to="(2840,3050)"/>
+    <wire from="(2840,2270)" to="(2840,2300)"/>
+    <wire from="(2840,2330)" to="(2840,2360)"/>
+    <wire from="(2850,2230)" to="(2860,2230)"/>
     <wire from="(2860,190)" to="(3050,190)"/>
     <wire from="(2860,210)" to="(2930,210)"/>
+    <wire from="(2860,2230)" to="(2860,2290)"/>
+    <wire from="(2860,2290)" to="(2870,2290)"/>
+    <wire from="(2860,2320)" to="(2860,2340)"/>
+    <wire from="(2860,2320)" to="(2920,2320)"/>
+    <wire from="(2860,2340)" to="(2870,2340)"/>
+    <wire from="(2860,2360)" to="(2870,2360)"/>
     <wire from="(2870,150)" to="(2870,340)"/>
     <wire from="(2870,150)" to="(3110,150)"/>
     <wire from="(2870,340)" to="(2880,340)"/>
@@ -4347,6 +4592,10 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(290,710)" to="(290,720)"/>
     <wire from="(290,710)" to="(330,710)"/>
     <wire from="(290,720)" to="(300,720)"/>
+    <wire from="(2910,2290)" to="(2920,2290)"/>
+    <wire from="(2910,2350)" to="(2920,2350)"/>
+    <wire from="(2920,2290)" to="(2920,2320)"/>
+    <wire from="(2920,2350)" to="(2920,2380)"/>
     <wire from="(2920,350)" to="(2930,350)"/>
     <wire from="(2930,210)" to="(2930,270)"/>
     <wire from="(2930,2370)" to="(2930,2420)"/>
@@ -5040,7 +5289,6 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(4150,1620)" to="(4160,1620)"/>
     <wire from="(420,1920)" to="(420,1950)"/>
     <wire from="(420,240)" to="(420,330)"/>
-    <wire from="(420,3150)" to="(430,3150)"/>
     <wire from="(420,590)" to="(510,590)"/>
     <wire from="(420,700)" to="(560,700)"/>
     <wire from="(430,430)" to="(430,850)"/>
@@ -5073,8 +5321,6 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(460,3570)" to="(480,3570)"/>
     <wire from="(460,90)" to="(460,120)"/>
     <wire from="(470,150)" to="(470,190)"/>
-    <wire from="(470,3150)" to="(490,3150)"/>
-    <wire from="(470,3190)" to="(480,3190)"/>
     <wire from="(470,3330)" to="(470,3440)"/>
     <wire from="(470,3330)" to="(480,3330)"/>
     <wire from="(470,3440)" to="(500,3440)"/>
@@ -5083,8 +5329,6 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(470,3640)" to="(500,3640)"/>
     <wire from="(480,2650)" to="(490,2650)"/>
     <wire from="(480,2660)" to="(530,2660)"/>
-    <wire from="(480,3170)" to="(480,3190)"/>
-    <wire from="(480,3170)" to="(490,3170)"/>
     <wire from="(480,400)" to="(480,560)"/>
     <wire from="(480,400)" to="(530,400)"/>
     <wire from="(480,560)" to="(490,560)"/>
@@ -5100,12 +5344,15 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(500,440)" to="(530,440)"/>
     <wire from="(510,290)" to="(510,410)"/>
     <wire from="(510,290)" to="(530,290)"/>
+    <wire from="(510,3170)" to="(520,3170)"/>
+    <wire from="(510,3200)" to="(520,3200)"/>
     <wire from="(510,410)" to="(510,520)"/>
     <wire from="(510,520)" to="(670,520)"/>
     <wire from="(510,580)" to="(510,590)"/>
     <wire from="(520,210)" to="(520,270)"/>
     <wire from="(520,210)" to="(590,210)"/>
     <wire from="(520,270)" to="(530,270)"/>
+    <wire from="(520,3180)" to="(520,3200)"/>
     <wire from="(520,3460)" to="(520,3470)"/>
     <wire from="(520,3470)" to="(650,3470)"/>
     <wire from="(520,3660)" to="(520,3670)"/>
@@ -5115,7 +5362,6 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(530,1450)" to="(540,1450)"/>
     <wire from="(530,1490)" to="(540,1490)"/>
     <wire from="(530,2630)" to="(530,2660)"/>
-    <wire from="(530,3160)" to="(560,3160)"/>
     <wire from="(530,3430)" to="(610,3430)"/>
     <wire from="(530,3450)" to="(540,3450)"/>
     <wire from="(530,3630)" to="(630,3630)"/>
@@ -5123,6 +5369,7 @@ c00800 0 0 c00000 9*0 401064 a00000 6*0
     <wire from="(530,550)" to="(530,610)"/>
     <wire from="(530,610)" to="(550,610)"/>
     <wire from="(540,2500)" to="(540,2530)"/>
+    <wire from="(540,3160)" to="(560,3160)"/>
     <wire from="(540,3330)" to="(550,3330)"/>
     <wire from="(540,3530)" to="(550,3530)"/>
     <wire from="(540,540)" to="(540,570)"/>

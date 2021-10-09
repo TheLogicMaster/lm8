@@ -11,6 +11,9 @@ The `ORG` assembler directive tells the assembler where to place generated machi
 ROM binary. There are no checks to ensure that later origin changes in the program don't overwrite 
 previously generate machine code, so verify the resulting binary in the emulator using the ROM viewer and 
 the disassembler.
+### Code Sections
+The `DATA` and `RODATA` directives switch between the RAM section for variables and the read-only section
+for code and other constant data.
 ### Label Definitions
 Labels are defined simply by a chain of word characters (numbers, letters, and underscores) followed by 
 a colon. Label definitions must be unique, but can be defined after usages in instruction operands. Labels

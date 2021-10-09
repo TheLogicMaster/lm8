@@ -2,7 +2,7 @@
 #include <cstring>
 #include <bitset>
 #include <ctime>
-#include <math.h>
+#include <cmath>
 
 #include "Emulator.h"
 
@@ -10,11 +10,13 @@ Emulator::Emulator() {
     srand(time(nullptr));
     renderingBuffer = displayBuffers[0];
     drawingBuffer = displayBuffers[1];
+    rom = memory;
+    ram = memory + 0x8000;
 }
 
 void Emulator::load(uint8_t *romData, long size) {
-    memset(&rom, 0, 0x8000);
-    memcpy(&rom, romData, size);
+    memset(rom, 0, 0x8000);
+    memcpy(rom, romData, size);
 }
 
 void Emulator::run() {
@@ -306,6 +308,10 @@ void Emulator::updateTimers(int delta) {
 }
 
 uint8_t *Emulator::getMemory() {
+    return memory;
+}
+
+uint8_t *Emulator::getRAM() {
     return ram;
 }
 
@@ -595,7 +601,7 @@ void Emulator::drawPixel(uint8_t x, uint8_t y, RGB888 color) {
 void Emulator::drawSprite(uint8_t id) {
     for (int y = 0; y < 8; y++)
         for (int x = 0; x < 8; x++) {
-            auto color = readUint8(64 * id + 8 * y + x);
+            auto color = readUint8(regHL.hl + 8 * y + x);
             if (color != 0)
                 drawPixel(graphicsX + x, graphicsY + y, rgb332To888(color));
         }

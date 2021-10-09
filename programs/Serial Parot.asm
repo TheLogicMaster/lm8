@@ -19,5 +19,3 @@ loop:
     out {serial_available},A
     out {serial},A
     jr loop
-
-    halt ; Halt execution
