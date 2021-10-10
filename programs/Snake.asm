@@ -140,8 +140,12 @@ draw_apple:
     out {graphics_x},a
     ldr [apple_y],a
     out {graphics_y},a
-    ldr #15,a
+    push H
+    push L
+    lda apple_sprite
     out {draw_sprite},a
+    pop L
+    pop H
     pop a
     ret
 
