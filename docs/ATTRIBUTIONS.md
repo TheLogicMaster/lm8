@@ -3,6 +3,8 @@
 - [jdh-8](https://github.com/jdah/jdh-8) (The inspiration for this project)
 - [Logisim-evolution](https://github.com/logisim-evolution/logisim-evolution) 
   (Computer simulation and circuit design)
+- [Digital](https://github.com/hneemann/Digital) (Simulation software)
+- [VBCC](http://www.compilers.de/vbcc.html) (Retargetable C compiler)
 - [Jetbrains IDEs](https://www.jetbrains.com/) (IDEs for assembly program development)
 - [Quartus Prime](https://www.intel.com/content/www/us/en/software/programmable/quartus-prime/overview.html)
   (FPGA development IDE)
@@ -27,3 +29,4 @@
 - [CMake](https://cmake.org/) (C++ build system)
 ## Assembly Programs
 - [arduino-songs](https://github.com/robsoncouto/arduino-songs) (Source of buzzer music)
+- [Adafruit](https://github.com/adafruit) (Reference material for library implementation)

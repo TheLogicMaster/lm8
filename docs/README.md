@@ -11,8 +11,9 @@ $$$$$$$$/ $$/      $$/          $$$$$$/
 ```
 
 # LM-8
-This project is a custom 8-bit computer architecture comprised of an Assembler, an Emulator, a
-Jetbrains IDE language support plugin, a Logisim-Evolution simulation, and an FPGA implementation.
+This project is a custom 8-bit computer architecture comprised of an Assembler, an Emulator, a C compiler,
+a Jetbrains IDE language support plugin, a Logisim-Evolution simulation, a Digital simulation, and a 
+VHDL FPGA implementation.
 
 ![Snake Title Screen](media/snake_title.png)
 ![Snake Game](media/snake_game.png)
@@ -31,7 +32,7 @@ Jetbrains IDE language support plugin, a Logisim-Evolution simulation, and an FP
 - [Hardware Interfaces](HARDWARE.md)
 - [Simulation](SIMULATION.md)
 - [FPGA](FPGA.md)
-- [FPGA Bootloader](BOOTLOADER.md)
+- [Computer Bootloader](BOOTLOADER.md)
 - [Jetbrains Plugin](PLUGIN.md)
 - [Assembly Libraries](LIBRARIES.md)
 - [C Compiler](COMPILER.md)
